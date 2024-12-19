@@ -1,0 +1,119 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/settings/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{'dark_mode' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding-top">
+  <ion-row class="ion-padding">
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'on'" class="color-selector color-dark" (click)="toggleTheme('on')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'on' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" color="primary" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'off'" class="color-selector color-light" (click)="toggleTheme('off')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'off' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" color="primary" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'default'" [class]="'color-selector ' + (isDark ? 'color-dark' : 'color-light')" (click)="toggleTheme('default')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'system_default_string' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" color="primary" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+  </ion-row>
+</ion-content>
+<!-- 
+<ion-content class="ion-padding-top">
+  <ion-list>
+    <ion-radio-group (ionChange)="toggleTheme($event)" [value]="defaultValue">
+    <ion-item button="false">
+      <ion-radio slot="start" color="primary" mode="md" value="on"></ion-radio>
+      <ion-label>On</ion-label>
+    </ion-item>
+
+    <ion-item button="false">
+      <ion-radio slot="start" color="primary" mode="md" value="off"></ion-radio>
+      <ion-label>Off</ion-label>
+    </ion-item>
+
+    <ion-item button="false">
+      <ion-radio slot="start" color="primary" mode="md" value="default"></ion-radio>
+      <ion-label>
+        System
+        <p>We'll adjust your appearance based on your device's system settings.</p>
+      </ion-label>
+    </ion-item>
+  </ion-radio-group>
+  </ion-list>
+</ion-content> -->

@@ -1,0 +1,909 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate"
+      *ngIf="type !== 'modal'"
+        color="dark"
+        defaultHref="/admin/projects/list"
+      ></ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/projects/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_project' | translate}}</ion-title>
+
+    <ion-buttons
+      *ngIf="['project_tasks', 'project_milestones', 'project_invoices', 'project_estimates', 'project_expenses', 'project_credit_notes','project_discussions','project_subscriptions','project_tickets','project_proposals'].includes(selectedTab)"
+      slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()" *ngIf="['project_tasks', 'project_estimates'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi"
+        *ngIf="selectedTab == 'project_tasks'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'invoice')" [apiService]="invoiceApi"
+        *ngIf="selectedTab == 'project_invoices'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'estimate')" [apiService]="estimateApi"
+        *ngIf="selectedTab == 'project_estimates'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'expense')" [apiService]="expenseApi"
+        *ngIf="selectedTab == 'project_expenses'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'credit_note')" [apiService]="creditNoteApi"
+        *ngIf="selectedTab == 'project_credit_notes'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'subscription')" [apiService]="subscriptionApi"
+        *ngIf="selectedTab == 'project_subscriptions'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'ticket')" [apiService]="ticketApi"
+        *ngIf="selectedTab == 'project_tickets'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'proposal')" [apiService]="proposalApi"
+        *ngIf="selectedTab == 'project_proposals'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar
+    *ngIf="isSearching && ['project_tasks', 'project_milestones', 'project_invoices', 'project_estimates', 'project_expenses', 'project_credit_notes','project_discussions','project_subscriptions','project_tickets','project_proposals'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_tasks'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')"
+      debounce="500"></ion-searchbar>
+    <!-- <ion-searchbar *ngIf="['project_timesheets'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')" debounce="500"></ion-searchbar> -->
+    <!-- <ion-searchbar *ngIf="['project_files'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')" debounce="500"></ion-searchbar> -->
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_discussions'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'discussion')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_invoices'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'invoice')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_milestones'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'milestone')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_estimates'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'estimate')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_subscriptions'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'subscription')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_expenses'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'expense')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_credit_notes'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'credit_note')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['project_tickets'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'ticket')"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="isSearching && ['project_proposals'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'proposal')" debounce="500"></ion-searchbar>
+    <!-- <ion-searchbar *ngIf="['project_notes'].includes(selectedTab)"  mode="ios" (ionInput)="searchTasks($event)" debounce="500"></ion-searchbar> -->
+    <!-- <ion-searchbar *ngIf="['project_activity'].includes(selectedTab)" mode="ios" (ionInput)="searchTasks($event)" debounce="500"></ion-searchbar> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab"
+    mode="md">
+    <!-- *ngIf="tab != 'project_gantt'" -->
+      <ion-segment-button *ngFor="let tab of available_features" [value]="tab" >
+        <ion-label>{{ projectHelper.get_project_tab_by_slug(tab).name  | translate}}</ion-label>
+      </ion-segment-button>
+      
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'project_overview'">
+    <ion-refresher slot="fixed" (ionRefresh)="doProjectRefresh($event, 'project_overview')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <!-- <div *ngIf="dayDuration && project?.status == '2'" class="ion-margin-vertical ion-padding" style="
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 10px;
+        box-shadow: unset;
+        border: 1px solid var(--ion-item-border-color);
+        background: rgb(var(--ion-color-warning-rgb), 10%);
+      ">
+     
+    </div> -->
+    <div *ngIf="dayDuration && project?.status == '2'" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);">
+      <!-- This project is overdue {{dayDuration}} -->
+      {{'project_due_notice' | translate:{day:dayDuration} }}
+    </div>
+    <div *ngIf="project?.project_customer_permission_warning === true" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);">
+      <!-- This project is overdue {{dayDuration}} -->
+      {{'project_customer_permission_warning' | translate }}
+    </div>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col><span style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 500;
+              font-size: 16px;
+              line-height: 19px;
+            ">{{'status' | translate}}</span></ion-col>
+        <ion-col><span [style.color]="projectHelper.get_project_status_by_id(project?.status).color">{{
+            projectHelper.get_project_status_by_id(project?.status).name | translate
+            }}</span></ion-col>
+      </ion-row>
+      <ion-row style="border: 0">
+        <ion-col>
+          <!-- [routerLink]="'/admin/projects/edit/' + project_id" -->
+          <ion-button color="primary" (click)="editProject(project_id)" expand="block" fill="outline" mode="ios">{{'edit_project' | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button color="default" expand="block" mode="ios" (click)="addTask()">{{'new_task' | translate}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" color="dark" mode="ios"
+            class="action_button" (click)="openUpdateStatus()">
+            <ion-label style="width: 100%">{{'status' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" color="dark" mode="ios"
+            class="action_button" (click)="openMore()">
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-card mode="ios" class="ion-padding" style="margin: 16px 0;">
+      <div class="overview">
+        <div>
+          <div>{{'project_progress_text' | translate}}</div>
+          <div>{{ project?.percent }}%</div>
+        </div>
+        <ion-progress-bar color="primary" [value]="project?.percent_circle"></ion-progress-bar>
+      </div>
+    </ion-card>
+
+    <ion-row class="basic_stats">
+      <ion-col [size]="project?.deadline ? 6 : 12" [class.single]="!project?.deadline"
+        style="padding-right: 10px; padding-left: 0;">
+        <ion-card mode="ios" class="ion-padding">
+          <circle-progress [percent]="project?.tasks_not_completed_progress" [backgroundColor]="primaryColor"
+            [backgroundOpacity]="0.2" [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0"
+            [backgroundPadding]="0" [radius]="54" [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor"
+            [outerStrokeLinecap]="'butt'" innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+            [imageSrc]="'/assets/icon/chart-success' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48"
+            [imageWidth]="48" [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+            [animationDuration]="800"></circle-progress>
+
+          <div class="stats">
+            <div class="counts">
+              <ion-text class="total_count">{{ project?.tasks_not_completed }}</ion-text>
+              <ion-text class="count_out_of">of {{ project?.total_tasks }}</ion-text>
+            </div>
+            <div class="title">{{'project_open_tasks' | translate}}</div>
+          </div>
+
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="6" *ngIf="project?.deadline" style="padding-left: 10px; padding-right: 0;">
+        <ion-card mode="ios" class="ion-padding">
+          <circle-progress [percent]="project?.project_time_left_percent" [backgroundColor]="primaryColor"
+            [backgroundOpacity]="0.2" [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0"
+            [backgroundPadding]="0" [radius]="54" [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor"
+            [outerStrokeLinecap]="'butt'" innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+            [imageSrc]="'/assets/icon/stickynote' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48"
+            [imageWidth]="48" [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+            [animationDuration]="800"></circle-progress>
+
+          <ion-text class="total_count">{{ project?.project_days_left }}</ion-text>
+          <ion-text class="count_out_of">
+            {{'of' | translate}} {{ project?.project_total_days }}</ion-text>
+
+          <div class="title">{{'project_days_left' | translate}}</div>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-grid *ngIf="project?.billing_type == 3 || project?.billing_type == 2" mode="ios"
+      class="ion-margin-top ion-padding expense-stats">
+      <ion-row style="border: 0;margin: 0;">
+        <ion-col class="heading p-title">{{'hours' | translate}}</ion-col>
+      </ion-row>
+      <swiper-container  class="project-summary">
+        <swiper-slide class="ion-padding">
+          <div class="title draft">{{'logged' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.hours?.logged"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title info">{{'expenses_list_billable' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.hours?.billable"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title success">{{'expense_billed' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.hours?.billed"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title danger">{{'unbilled' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.hours?.unbilled"></div>
+        </swiper-slide>
+      </swiper-container>
+    </ion-grid>
+
+    <ion-grid mode="ios" class="ion-margin-top ion-padding expense-stats">
+      <ion-row style="border: 0;margin: 0;">
+        <ion-col class="heading p-title">{{'expenses' | translate}}</ion-col>
+      </ion-row>
+      <swiper-container  class="project-summary">
+        <swiper-slide class="ion-padding">
+          <div class="title draft">{{'total' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.expenses?.total"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title info">{{'expenses_list_billable' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.expenses?.billable"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title success">{{'expense_billed' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.expenses?.billed"></div>
+        </swiper-slide>
+
+        <swiper-slide class="ion-padding">
+          <div class="title danger">{{'unbilled' | translate}}</div>
+          <div class="amount" [innerHTML]="project?.expenses?.unbilled"></div>
+        </swiper-slide>
+      </swiper-container>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ project?.name }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'project_id' | translate}}</h6>
+          <h3>{{ project?.id }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'project_customer' | translate}}</h6>
+          <h3>{{ project?.client_data?.company ?? project?.company }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'project_billing_type' | translate}}</h6>
+          <h3>{{ projectBillingType(project?.billing_type) | translate}}</h3>
+        </ion-col>
+        <ion-col *ngIf="project?.billing_type == '1'">
+          <h6>{{'project_total_cost' | translate}}</h6>
+          <h3>{{ project?.project_cost | appFormatMoney: project?.currency }}</h3>
+        </ion-col>
+        <ion-col *ngIf="project?.billing_type == '2'">
+          <h6>{{'project_rate_per_hour' | translate}}</h6>
+          <h3>{{ project?.project_rate_per_hour | appFormatMoney: project?.currency }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'project_datecreated' | translate}}</h6>
+          <h3>{{ project?.project_created | dateTimeFormat }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'project_start_date' | translate}}</h6>
+          <h3>{{ project?.start_date | dateTimeFormat }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col *ngIf="project?.formatted_deadline">
+          <h6>{{'project_deadline' | translate}}</h6>
+          <h3>
+            {{ (project?.deadline !== null ? project?.deadline : '') |
+            dateTimeFormat }}
+          </h3>
+        </ion-col>
+        <ion-col *ngIf="project?.estimated_hours">
+          <h6>{{'estimated_hours' | translate}}</h6>
+          <h3>{{ project?.estimated_hours }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'project_overview_total_logged_hours' | translate}}</h6>
+          <h3>{{ project?.project_total_logged_time }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid class="ion-no-padding">
+      <ion-row class="ion-padding-top ion-padding-bottom ion-margin">
+        <ion-col>{{'project_members_overview' | translate}}</ion-col>
+        <ion-col>
+          <ion-text color="primary" (click)="assigneeComponent.clear();assigneeComponent.open();">{{'_add' | translate}}</ion-text>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="staffs" [shouldStoreItemValue]="true" itemValueField="staffid"
+            itemTextField="full_name" [canSearch]="true" (onChange)="addProjectMember($event)" (onSearch)="searchStaffs($event)" #assigneeComponent
+            [isMultiple]="true" [canClear]="true" [(ngModel)]="project_member_ids" style="width: 0; height: 0;display: none;">
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="assigneeComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title>{{'add_assignees' | translate}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+
+            <ng-template ionicSelectableFooterTemplate>
+              <ion-button (click)="assigneeComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin"
+                fill="outline">{{'clear_all' | translate}}</ion-button>
+              <ion-button (click)="assigneeComponent.confirm();assigneeComponent.close();" mode="ios" expand="block"
+                class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+            </ng-template>
+          </ionic-selectable>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let member of project?.project_members" class="ion-margin">
+        <ion-col>
+          <ion-item-sliding #slidingItem style="width: calc(100% + 32px); margin-left: -16px">
+            <!--  <ion-item-options side="start" *ngIf="authService.hasPermission('projects', ['delete'])">
+              <ion-item-option color="default-danger" class="_delete" (click)="deleteAssignee(member.staffid, i)">Delete
+              </ion-item-option>
+            </ion-item-options> -->
+
+            <ion-item lines="none" style="border-radius: 0">
+              <ion-avatar slot="start">
+                <img [src]="member.profile_url" />
+              </ion-avatar>
+              <ion-label>
+                <h3>{{ member.full_name }}</h3>
+                <span> {{ member.email }}</span>
+              </ion-label>
+              <!-- <ion-label slot="end" (click)="openSlide(slidingItem)">
+                <ion-text color="danger">Delete</ion-text>
+              </ion-label> -->
+            </ion-item>
+          </ion-item-sliding>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{'project_timeSheet_stats' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row class="ion-margin-vertical ion-padding-vertical"
+        style="flex-wrap: nowrap; overflow-x: scroll; border: 0">
+        <ion-chip [color]="selectedStatFilter == 'this_week' ? 'default' : 'medium'" mode="ios"
+          (click)="applyStatsFilter('this_week')">{{'this_week' | translate}}</ion-chip>
+
+        <ion-chip [color]="selectedStatFilter == 'last_week' ? 'default' : 'medium'" mode="ios"
+          (click)="applyStatsFilter('last_week')">{{'last_week' | translate}}</ion-chip>
+
+        <ion-chip [color]="selectedStatFilter == 'this_month' ? 'default' : 'medium'" mode="ios"
+          (click)="applyStatsFilter('this_month')">{{'this_month' | translate}}</ion-chip>
+
+        <ion-chip [color]="selectedStatFilter == 'last_month' ? 'default' : 'medium'" mode="ios"
+          (click)="applyStatsFilter('last_month')">{{'last_month' | translate}}</ion-chip>
+      </ion-row>
+
+      <div id="chart1" echarts [options]="options" [merge]="mergeOptions" theme="macarons" class="demo-chart"></div>
+    </ion-grid>
+
+    <ion-grid *ngIf="project?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of project?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="project?.description">
+      <ion-row>
+        <ion-col>
+          <h6>{{'project_description' | translate}}</h6>
+          <div [innerHTML]="project?.description"></div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_timesheets'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <span *ngFor="let task of tasks;let i = index;trackBy: trackByFn;">
+        <ion-item-sliding *ngFor="let timesheet of task.timesheets;let f = index;trackBy: trackByFn;"
+          class="ion-margin-bottom">
+          <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+            <ion-item-option color="default-danger" class="_delete"
+              (click)="deleteTimeSheet(timesheet.id, f, task)">{{'_delete' | translate}}
+            </ion-item-option>
+          </ion-item-options>
+
+          <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="viewTask(task.id, task)">
+            <ion-label>
+              <h3>{{ task.name }}</h3>
+              <h6 class="time-sheet-h6">{{'project_timesheet_start_time' | translate}}: {{ timesheet.start_time }}</h6>
+              <h6 class="time-sheet-h6"> {{'project_timesheet_end_time' | translate}}: {{ timesheet.end_time }}</h6>
+            </ion-label>
+
+            <ion-note slot="end">
+              <span>{{'project_timesheet_time_spend' | translate}}:</span>
+              <h3 class="ion-text-end ion-no-margin">
+                <ion-text color="primary">{{ timesheet.time_h }} h</ion-text>
+              </h3>
+            </ion-note>
+          </ion-item>
+
+          <ion-item-options side="end" *ngIf="authService.hasPermission('tasks', ['edit'])">
+            <ion-item-option color="default" class="_action"
+              (click)="addEditTimeSheet(timesheet, task)">{{'_edit' | translate}}</ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </span>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditTimeSheet()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_files'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'file')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ngx-dropzone (change)="onSelect($event)" class="ion-margin" accept='image/*, application/*'>
+      <ngx-dropzone-label>{{'expense_add_edit_attach_receipt' | translate}}</ngx-dropzone-label>
+      <ngx-dropzone-preview *ngIf="!file && project?.attachment" [removable]="true">
+        <ngx-dropzone-label>{{ project.attachment }} ({{ project.filetype }})</ngx-dropzone-label>
+      </ngx-dropzone-preview>
+
+      <ngx-dropzone-preview *ngIf="file" [removable]="true" (removed)="onRemove(file)">
+        <ngx-dropzone-label>{{ file.name }} ({{ file.type }})</ngx-dropzone-label>
+      </ngx-dropzone-preview>
+    </ngx-dropzone>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <span *ngFor="let file of files;let i = index;trackBy: trackByFn;">
+        <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+          <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+            <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id, i)">{{'_delete' | translate}}
+            </ion-item-option>
+          </ion-item-options>
+
+          <!-- (click)="viewTask(file.id, file)" -->
+          <ion-item class="ion-no-padding ion-margin-start ion-margin-end" (click)="downloadAttachment(file?.id, file?.filetype, file?.file_name)">
+            <ion-thumbnail slot="start" style="text-align: center;margin-right: 0px;">
+              <img [src]="commonHelper.getMimeIcon(file.filetype)" style="width: 24px;height: 100%;object-fit: contain;"/>
+            </ion-thumbnail>
+            <ion-row class="ion-justify-content-between ion-align-items-center" style="width: 100%;">
+              <ion-col size="8">
+                <ion-label>
+                  <h6>{{ file.dateadded }}</h6>
+                  <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+                  <span> {{ file.filetype }} </span>
+                </ion-label>
+              </ion-col>
+              <ion-col size="4">
+                <ion-label>
+                  <h6 style="font-size: 12px;">{{'project_discussion_last_activity' | translate}}:</h6>
+                  <h3 class="ion-no-margin" style="font-size: 14px !important;">
+                    <ion-text color="primary">{{ file.last_activity == null ? 'No Activity' :
+                      file.last_activity }}</ion-text>
+                  </h3>
+                </ion-label>
+              </ion-col>
+              </ion-row>
+          </ion-item>
+
+          <!-- <ion-item-options side="end" *ngIf="authService.hasPermission('tasks', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditTimeSheet(file.id, file)">Edit</ion-item-option>
+        </ion-item-options> -->
+        </ion-item-sliding>
+      </span>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'file')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="files?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_discussions'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'discussion')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let discussion of discussions;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom" #slidingItem>
+        <ion-item-options side="start" *ngIf="authService.hasPermission('projects', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteDiscussion(discussion.id, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+        <!-- (click)="viewInvoice(discussion.id, discussion)" -->
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-label>
+            <h6>{{ discussion.last_activity }}</h6>
+            <h3>{{ discussion.subject }}</h3>
+            <span >{{ (!discussion.totalComments || discussion.totalComments == 0) ? '' : discussion.totalComments}}</span>
+          </ion-label>
+          <ion-note slot="end">
+           {{'visible_to_customer' | translate}}:
+            <h3 class="ion-text-end ion-no-margin">
+              {{ (discussion.show_to_customer == 1 ? 'project_discussion_visible_to_customer_yes' : 'project_discussion_visible_to_customer_no') | translate}}
+            </h3>
+          </ion-note>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('projects', ['edit'])">
+          <ion-item-option color="default" class="_action"
+            (click)="addEditDiscussion(discussion);">{{'_edit' | translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('projects', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditDiscussion()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'discussion')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="discussions?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_invoices'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'invoice')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <invoice-list-card [invoices]="invoices" [isModal]="true"></invoice-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'invoice')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="invoices?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_milestones'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'milestone')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let milestone of milestones;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('milestones', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="delete(milestone.id, i, 'milestone')">{{'_delete' | translate }}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-label>
+            <h6>{{ milestone.due_date | dateTimeFormat }}</h6>
+            <h3>{{ milestone.name }}</h3>
+            <span [innerHTML]="milestone.description"></span>
+          </ion-label>
+
+          <ion-label slot="end" *ngIf="milestone?.duedate_passed">
+            <span class="list_status invoice_danger">{{'project_milestone_duedate_passed' | translate}}</span>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('milestones', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditMilestone(milestone)">{{'_edit' | translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'milestone')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('expenses', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditMilestone()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="milestones?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_estimates'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'estimate')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-estimate-list-card [estimates]="estimates" [isModal]="true"></app-estimate-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'estimate')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="estimates?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_subscriptions'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'subscription')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <subscription-list-card [subscriptions]="subscriptions" [isModal]="true"></subscription-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'estimate')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="subscriptions.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_expenses'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'expense')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-expense-list-card [expenses]="expenses" [isModal]="true"></app-expense-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'expense')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="expenses?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('expenses', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" class="ion-margin" (click)="addExpense()">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_credit_notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'creditNote')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-credit-note-list-card [credit_notes]="credit_notes" [isModal]="true"></app-credit-note-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'credit_note')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="credit_notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_tickets'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'ticket')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-ticket-list-card [tickets]="tickets" [isModal]="true"></app-ticket-list-card>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'ticket')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="tickets?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_notes'">
+    <form [formGroup]="formGroup" class="ion-margin">
+      <ion-item lines="none" class="ion-margin-vertical ion-no-padding __text-editor item-inner-padding-end" mode="md">
+        <ion-label position="floating" mode="md" class="ion-padding-horizontal">{{'project_note_private' | translate}}</ion-label>
+        <editor [init]="editorOption" formControlName="content" style="width: 100%;"></editor>
+      </ion-item>
+
+      <ion-button *ngIf="authService.hasPermission('notes', ['create'])" (click)="saveNotes()" color="default"
+        mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+        <ion-spinner [hidden]="!submitting"></ion-spinner>
+        <ion-text style="width: 100%;">{{'save_notes' | translate}}</ion-text>
+      </ion-button>
+    </form>
+
+    <div class="ion-padding" *ngIf="isLoading">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_activity'">
+    <ion-refresher slot="fixed" (ionRefresh)="doActivityRefresh($event, 'activity')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let activity of activities;let i = index;trackBy: trackByFn;let last = last">
+        <ion-item class="item-activity ion-margin-start ion-margin-end r-item"  [class.last-item]="last">
+          <ion-label>
+            <h6 >
+              {{ activity.time_ago | uppercase }}
+            </h6>
+            <ion-avatar *ngIf="activity?.profile_url" style="
+                float: left;
+                height: 30px;
+                width: 30px;
+                object-fit: cover;
+                margin-right: 5px;
+              ">
+              <img [src]="activity.profile_url" />
+            </ion-avatar>
+            <h3>{{ activity.full_name }}</h3>
+            <span [innerHTML]="activity.description" style="white-space: initial"></span>
+          </ion-label>
+          <ion-note slot="end" style="display: flex; flex-direction: row; align-items: center;margin: 0;">
+            <div class="ion-text-right">
+              <span style="display: block;font-size: 10px;">{{ (activity.visible_to_customer == '1' ? 'hide_from_customer'
+                : 'show_to_customer') | translate }}</span>
+              <ion-toggle class="m-t-2" [checked]="activity.visible_to_customer == '1' ? true : false"
+                (click)="visibleToCustomer($event, i, activity);" mode="ios" color="default"></ion-toggle>
+            </div>
+          </ion-note>
+        </ion-item>
+      </ion-item-sliding>
+    </ion-list>
+
+    <div class="ion-padding" *ngIf="activities?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_proposals'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'proposal')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-proposal-list-card [proposals]="proposals" [isModal]="true"></app-proposal-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'proposal')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <!-- <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('proposals', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addProposal()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div> -->
+    <div class="ion-padding" *ngIf="proposals?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'project_contracts'">
+    <!-- <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'contract')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let contract of contracts;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('contracts', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="delete(contract.id, i, 'contact')">Delete</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="addEditContract(contract)">
+          <ion-avatar slot="start">
+            <img [src]="contract.profile_url" />
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ contact.firstname }} {{ contact.lastname }}</h3>
+            <span>{{contact?.email}}</span>
+          </ion-label>
+          <ion-label slot="end">
+            <ion-toggle  [checked]="contract.active == '1' ? true : false" (click)="stopPropagation($event);contactChangeStatus(i, contact);" mode="ios" color="default" ></ion-toggle>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('contracts', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditContract(contract)">Edit</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'contract')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll> -->
+    <!-- <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('contacts', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditContract()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div> -->
+
+    <div class="ion-padding" *ngIf="contracts?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

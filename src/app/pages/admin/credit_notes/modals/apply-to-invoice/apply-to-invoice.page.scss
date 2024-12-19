@@ -1,0 +1,49 @@
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 10px;
+    table.items {
+        background: var(--ion-item-background);
+        width: 100%;
+        tr {
+            th {
+                background: #7EE2BE;
+                color: #000;
+            }
+            th, td {
+                padding: 8px 10px;
+                white-space: nowrap;
+                text-align: left;
+            } 
+            td {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 16px;
+                ion-input {
+                    border: 1px solid var(--ion-item-border-color);
+                    border-radius: 10px;
+                    background: var(--ion-item-background);
+                    --padding-start: 10px;
+                    --padding-end: 10px;
+                }
+            }
+            td span {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 11px;
+                line-height: 13px;
+
+                color: #747889;
+            }
+        }
+    }
+}
+
+ion-row {
+    ion-col:nth-child(2) {
+        text-align: right;
+    }
+}

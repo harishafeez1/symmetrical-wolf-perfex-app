@@ -1,0 +1,71 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/payments/list"></ion-back-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ (!payment_id ? 'new_payment' : 'edit_payment') | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <div>
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'payment_edit_amount_received' | translate}}</ion-label>
+        <ion-input type="number" formControlName="amount"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDateModalOpen = true" id="open-date-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'payment_edit_date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="date" [value]="formGroup.value.date"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isDateModalOpen" trigger="open-date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.date)" (ionChange)="formGroup.value.date = formatDate(date.value);isDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'payment_mode' | translate}}</ion-label> -->
+        <ion-select label="{{'payment_mode' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="paymentmode" mode="ios" style="width: 100%;">
+          <ion-select-option *ngFor="let payment_mode of payment_modes" [value]="payment_mode.id">{{ payment_mode.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'payment_method' | translate}}</ion-label>
+        <ion-input type="text" formControlName="paymentmethod"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'payment_transaction_id' | translate}}</ion-label>
+        <ion-input type="text" formControlName="transactionid"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'note' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="note"></ion-textarea>
+      </ion-item>
+
+    </div>
+
+    <ion-button *ngIf="!payment_id" (click)="createPayment()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+
+    <ion-button *ngIf="payment_id" (click)="updatePayment()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && payment_id"></app-mpc-loader>
+</ion-content>

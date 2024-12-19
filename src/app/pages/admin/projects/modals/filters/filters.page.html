@@ -1,0 +1,40 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'filters' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetFilters()">
+        <ion-label color="dark">{{'reset' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;">
+      
+      <ion-grid>
+        <ion-row lines="none" class="ion-margin-vertical"  style="border:0">
+          <ion-col>
+            <h5>{{'status' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <ion-row style="flex-wrap: nowrap;overflow-x: scroll;">
+          <ion-button
+            [color]="isAppliedStatus(status.id) ? 'default' : 'medium'"
+            mode="ios"
+            *ngFor="let status of projectsHelper.get_project_statuses()"
+            [fill]="isAppliedStatus(status.id) ? 'solid' : 'outline'"
+            (click)="applyStatusFilter(status.id)"
+          >{{ status.name | translate }}</ion-button>
+        </ion-row>
+      </ion-grid>
+   
+    <ion-button (click)="applyFilters()" color="default" mode="ios" type="submit" expand="block">{{'show_results' | translate}}</ion-button>
+  
+  </div>
+</ion-content>

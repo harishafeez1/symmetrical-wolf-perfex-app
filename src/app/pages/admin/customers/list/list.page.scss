@@ -1,0 +1,121 @@
+ion-content {
+
+    ion-list {
+        background: transparent;
+        margin-top: 0px;
+
+        ion-item-option._delete {
+            border-radius: 0 10px 10px 0;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+
+        ion-item-option._action {
+            border-radius: 10px 0 0 10px;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+
+        ion-item {
+
+            h6 {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 14px;
+                /* identical to box height */
+                color: #747889;
+            }
+
+            ._due {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 14px;
+                /* identical to box height */
+
+                text-align: right;
+
+                color: #FF3939;
+            }
+
+            ._unpaid {
+                background: #FFD9D9;
+                border-radius: 3px;
+                width: 54px;
+                height: 22px;
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 20px;
+                /* identical to box height */
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            ._paid {
+                background: #d9ffdc;
+                border-radius: 3px;
+                width: 54px;
+                height: 22px;
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 20px;
+                /* identical to box height */
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            ion-avatar,
+            .avatar {
+                width: 48px;
+                height: 48px;
+                background: var(--ion-color-default);
+                border-radius: 34.5px;
+                font-family: "Roboto";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 0;
+                color: var(--ion-color-default-contrast);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .p-r-4 {
+                padding-right: 4px;
+            }
+            ion-label {
+                span {
+                    font-size: 12px !important;
+                }
+            }
+            ion-toggle{
+                padding: 0px;
+            }
+            ion-toggle::part(track) {
+                overflow: initial;
+              }
+        }
+    }
+
+
+}

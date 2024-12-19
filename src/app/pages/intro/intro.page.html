@@ -1,0 +1,43 @@
+<ion-content class="ion-padding" style="--background: var(--ion-background-color)">
+  <div style="
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: 100%;
+    ">
+    <div style="
+        height: calc(100% - 60px);
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: space-evenly;
+      ">
+      <ion-img [src]="'/assets/intro' + (isDark ? '-dark' : '') + '.svg'"></ion-img>
+      <h2 style="
+          font-family: Poppins;
+          font-style: normal;
+          font-weight: 600;
+          font-size: 32px;
+          line-height: 48px;
+          letter-spacing: -0.28px;
+        ">
+        Your Perfex CRM <br />
+        journey Starts with <br />
+        us
+      </h2>
+
+      <p style="
+          font-family: 'Roboto';
+          font-style: normal;
+          font-weight: 400;
+          font-size: 16px;
+          line-height: 27px;
+          color: #747889;
+        ">
+        Managing clients or assigning tasks <br />
+        everything is possible with My Perfex CRM
+      </p>
+    </div>
+    <ion-button (click)="start()" expand="block" color="default" mode="ios">Get Started</ion-button>
+  </div>
+</ion-content>

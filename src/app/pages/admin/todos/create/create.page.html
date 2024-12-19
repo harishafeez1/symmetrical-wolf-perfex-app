@@ -1,0 +1,29 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <!-- <ion-title>New todo</ion-title> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'description' | translate}}</ion-label>
+          <ion-textarea rows="4" formControlName="description"></ion-textarea>
+        </ion-item>
+    </form>
+    <ion-button *ngIf="!todo" (click)="createTodo()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="todo" (click)="updateTodo()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

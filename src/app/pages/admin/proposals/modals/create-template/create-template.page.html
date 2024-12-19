@@ -1,0 +1,36 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">{{(!template ? 'add_template' : 'edit_template') | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'title' | translate}}</ion-label>
+          <ion-input type="text" formControlName="name"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="ion-margin-vertical ion-no-padding __text-editor item-inner-padding-end" mode="md">
+          <ion-label position="floating" mode="md" class="ion-padding-horizontal">{{'content' | translate}}</ion-label>
+          <editor
+            [init]="editorOption"
+            formControlName="content"
+            style="width: 100%;"
+          ></editor>
+        </ion-item>
+    </form>
+    <ion-button *ngIf="!template" (click)="createTemplate()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || isLoading">
+      <ion-spinner [hidden]="!isLoading"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="template" (click)="updateTemplate()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || isLoading">
+      <ion-spinner [hidden]="!isLoading"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

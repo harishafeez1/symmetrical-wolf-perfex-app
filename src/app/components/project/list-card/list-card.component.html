@@ -1,0 +1,81 @@
+<ion-item-sliding
+      #slidingItem
+      *ngFor="let project of projects;let i = index;trackBy: trackByFn;"
+      class="ion-margin-top ion-margin-bottom"
+    >
+      <ion-item-options
+        side="start"
+        *ngIf="authService.hasPermission('projects', ['delete'])"
+      >
+        <ion-item-option
+          color="default-danger"
+          class="_delete"
+          (click)="delete(project.id, i, slidingItem)"
+          >{{'_delete' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+
+      <ion-item
+        class="ion-margin-start ion-margin-end r-m-16"
+        (click)="view(project.id, project)"
+      >
+        <div slot="start" class="date_created">
+          <div class="date">{{ project.project_created | date : "dd" }}</div>
+          <div class="month">{{ project.project_created | date : "MMM" }}</div>
+        </div>
+        <ion-label>
+          <h6>{{'starting' | translate}} {{ project.start_date | dateTimeFormat}}</h6>
+          <h3>{{'#' + project?.id +' - '+ project.name }}</h3>
+          <span>{{ project.company }}</span>
+        </ion-label>
+        <ion-note slot="end">
+          <h3>{{ project.project_cost | appFormatMoney: project?.currency}}</h3>
+          <span
+            class="list_status"
+            style="margin-top: 0;"
+            [style.backgroundColor]="getStatusColorByStatusId(project.status)"
+            >{{ getStatusNameByStatusId(project.status) | translate }}</span
+          >
+
+          <div style="display: flex;flex-wrap: nowrap;align-items: center;justify-content: space-around;margin-right: 10px;" 
+          >
+            <ion-avatar *ngFor="let assignee of project?.project_members?.slice(0,3)" style="
+              width: 25px;
+              height: 25px;
+              margin-top: 5px;
+              margin-right: -10px;
+              z-index: 2;
+              border: 1px solid var(--ion-item-background);">
+              <img [alt]="assignee?.full_name" [src]="assignee?.profile_url" />
+            </ion-avatar>
+
+            <ion-avatar *ngIf="project.project_members?.length > 3" style="
+                width: 25px;
+                height: 25px;
+                margin-top: 5px;
+                margin-right: -10px;
+                z-index: 2;
+                border: 1px solid var(--ion-item-background);
+                background: var(--ion-background-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;">
+              +{{ (project?.project_members?.length - 3) }}
+            </ion-avatar>
+          </div>
+        </ion-note>
+      </ion-item>
+
+      <ion-item-options
+        side="end"
+        *ngIf="authService.hasPermission('projects', ['edit'])"
+      >
+        <ion-item-option
+          color="default"
+          class="_action"
+          (click)="edit(project.id)"
+          >{{'_edit' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+    </ion-item-sliding>

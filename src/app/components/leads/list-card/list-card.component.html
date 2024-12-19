@@ -1,0 +1,28 @@
+<ion-item-sliding #slidingItem *ngFor="let lead of leads;let i = index;trackBy: trackByFn;" class="ion-margin-top ion-margin-bottom">
+  <ion-item-options side="start" *ngIf="authService.hasPermission('leads', ['delete'])">
+    <ion-item-option color="default-danger" class="_delete" (click)="delete(lead.id, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+  </ion-item-options>
+  
+  <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(lead.id, lead)">
+    <div slot="start" class="date_created">
+      <div class="date">{{ lead.dateadded | date : "dd" }}</div>
+      <div class="month">{{ lead.dateadded | date : "MMM" }}</div>
+    </div>
+    <ion-label>
+      <h6>{{ lead.email }}</h6>
+      <h3>{{ lead.name }}</h3>
+      <span>{{ lead.company }}</span>
+    </ion-label>
+    <ion-note slot="end">
+      <h3>{{ lead.source_name }}</h3>
+      <span class="list_status"
+      [style.color]="getContrastYIQ(lead.color)" 
+      [style.backgroundColor]="!lead?.status_name ? '' : (lead.lost == 1 ? 'var(--ion-color-danger)' : (lead.junk == 1 ? 'var(--ion-color-warning)' : adjustHexBrightness(lead.color, 0.25)))" 
+      [style.borderColor]="(lead.lost == 1 ? 'var(--ion-color-danger)' : (lead.junk == 1 ? 'var(--ion-color-warning)' : lead.color))">{{ (lead.lost == 1 ? 'Lost' : (lead.junk == 1 ? 'Junk' : lead.status_name)) }}</span>
+    </ion-note>
+  </ion-item>
+
+  <ion-item-options side="end"  *ngIf="authService.hasPermission('leads', ['edit'])">
+    <ion-item-option color="default" class="_action" (click)="edit(lead.id)">{{'_edit' | translate}}</ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>

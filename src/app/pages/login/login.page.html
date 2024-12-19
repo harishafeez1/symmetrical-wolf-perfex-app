@@ -1,0 +1,53 @@
+<ion-content>
+  <div class="login-section">
+    <div>
+      <h1 >{{'login_title' | translate}}</h1>
+      <p style="margin-bottom: 50px;">{{'use_credentials_use_to_login' | translate}} <b style="color: var(--color);">{{'web_portal' | translate}}</b>.</p>
+      <form [formGroup]="credentials">
+        <div *ngIf="error" class="errors">
+          <span>{{ error }}</span>
+        </div>
+        <div *ngIf="(email.dirty || email.touched) && email.errors" class="errors">
+          <span *ngIf="email.errors?.required">{{'email_is_required' | translate}}</span>
+          <span *ngIf="email.errors?.email">{{'email_is_invalid' | translate}}</span>
+        </div>
+        <ion-item lines="none">
+          <ion-label position="floating">{{'client_email' | translate}}</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+       
+        
+        <div *ngIf="(password.dirty || password.touched) && password.errors" class="errors">
+          <span *ngIf="password.errors?.required">{{'password_is_required' | translate}}</span>
+          <span *ngIf="password.errors?.minlength">{{'password_needs_to_be_6_characters' | translate}}</span>
+        </div>
+        <ion-item lines="none">
+          <ion-label position="floating">{{'client_password' | translate}}</ion-label>
+          <ion-input
+            [type]="!showPassword ? 'password' : 'text'"
+            formControlName="password"
+          ></ion-input>
+          <ion-icon (click)="showPassword = !showPassword" slot="end" [name]="showPassword ? 'eye-off-outline':'eye-outline'" style="margin-top: 15px;"></ion-icon>
+        </ion-item>
+       
+        <p routerLink="/forgot-password" style="
+          font-family: 'Roboto';
+          font-style: normal;
+          font-weight: 700;
+          font-size: 16px;
+          line-height: 19px;
+          text-align: right;" >{{'forgot_password' | translate}}</p>
+      </form>
+    </div>
+  
+    
+    <div>
+      <ion-button (click)="login()" color="default" mode="ios" type="submit" expand="block" [disabled]="!credentials.valid" >{{'btn' | translate}}</ion-button>
+      <hr>
+      <div class="ion-text-center">OR</div>
+      <hr>
+      <ion-button  routerLink="/settings/account" color="default" fill="outline" mode="ios" type="submit" expand="block" >{{'manage_account' | translate}}</ion-button>
+  
+    </div>
+  </div>
+  </ion-content>

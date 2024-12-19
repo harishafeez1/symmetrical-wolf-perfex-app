@@ -1,0 +1,130 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate"
+      *ngIf="type !== 'modal'"
+        color="dark"
+        defaultHref="/admin/payments/list"
+      ></ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/payments/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_payment' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doPaymentRefresh($event, 'payment')">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <ion-button
+            color="primary"
+            (click)="edit(payment_id)"
+            expand="block"
+            fill="outline"
+            mode="ios"
+            >{{'edit_payment' | translate}}</ion-button
+          >
+        </ion-col>
+        <ion-col>
+          <ion-button color="default" expand="block" mode="ios" (click)="getPDF('download')"
+            >{{'download' | translate}}</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{'payment_receipt' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row style="border: 0">
+        <ion-col size="12"></ion-col>
+        <ion-col size="12">
+          <!-- <h6>Company:</h6> -->
+          <!-- <h3>{{ payment?.company }}</h3> -->
+          <div [innerHTML]="payment?.format_customer_info"></div>
+        </ion-col>
+        
+        <ion-col size="6">
+          <h6>{{'invoice_no' | translate}}</h6>
+          <h3>{{ payment?.invoice_number}}</h3>
+        </ion-col>
+
+        <ion-col size="6">
+          <h6>{{'payment_date' | translate}}</h6>
+          <h3>{{ payment?.daterecorded | dateTimeFormat:'datetime' }}</h3>
+        </ion-col>
+
+        <ion-col size="6">
+          <h6>{{'payment_mode' | translate}}</h6>
+          <h3>{{ payment?.payment_mode_name }}</h3>
+        </ion-col>
+
+        <ion-col size="6" *ngIf="payment?.transactionid">
+          <h6>{{'payment_transaction_id' | translate}}:</h6>
+          <h3>{{ payment?.transactionid }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row
+        style="
+          background: var(--ion-color-default);
+          color: var(--ion-color-default-contrast);
+          border-radius: 10px;
+          text-align: center;
+        "
+      >
+        <ion-col>
+          <h6 style="color: rgba(var(--ion-color-default-contrast-rgb), .7)">{{'payment_total_amount' | translate}}</h6>
+          <h3 style="font-size: 20px">{{ payment?.amount | appFormatMoney: payment?.currency }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'payment_for_string' | translate}}</h6>
+          <div class="table-responsive">
+            <table class="items">
+              <tr>
+                <th>{{'payment_table_invoice_number' | translate}}</th>
+                <th>{{'payment_table_invoice_date' | translate}}</th>
+                <th>{{'payment_table_invoice_amount_total' | translate}}</th>
+                <th>{{'payment_table_payment_amount_total' | translate}}</th>
+                <th
+                  *ngIf="payment?.invoice_status != STATUS_PAID && payment?.invoice_status != STATUS_CANCELLED"
+                >
+                  {{'invoice_amount_due' | translate}}
+                </th>
+              </tr>
+              <tr>
+                <td>{{ payment?.invoice_number }}</td>
+                <td>{{ payment?.invoice_date | dateTimeFormat}}</td>
+                <td>{{ payment?.invoice_total | appFormatMoney: payment?.currency }}</td>
+                <td>{{ payment?.amount | appFormatMoney: payment?.currency }}</td>
+
+                <td
+                  *ngIf="payment?.invoice_status != STATUS_PAID && payment?.invoice_status != STATUS_CANCELLED"
+                >
+                  {{ payment?.invoice_amount_due }}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

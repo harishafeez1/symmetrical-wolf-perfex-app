@@ -1,0 +1,128 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'reply_to' | translate}} {{ ticket?.subject }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content mode="md" class="ion-padding">
+  <div>
+  <!-- style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;" -->
+    <form [formGroup]="formGroup">
+      <div>
+        <ion-item lines="none" class="ion-margin-vertical">
+          <ion-label position="floating">{{'ticket_pipe_email_to' | translate}}</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical">
+          <ion-label position="floating">{{'cc' | translate}}</ion-label>
+          <ion-input type="email" formControlName="cc"></ion-input>
+        </ion-item>
+
+       <!--  <ion-item lines="none" class="ion-margin-vertical">
+          <ion-label position="floating">{{'ticket_single_insert_predefined_reply' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="insert_predefined_reply" itemValueField="staffid" itemTextField="full_name"
+            [canSearch]="true" [shouldFocusSearchbar]="true" mode="ios" #replyComponent>
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="replyComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{replyComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item> -->
+    
+        <!-- <ion-item lines="none" class="ion-margin-vertical">
+          <ion-label position="floating">{{'ticket_single_insert_knowledge_base_link' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="insert_knowledge_base_link" itemValueField="staffid" itemTextField="full_name"
+            [canSearch]="true" [shouldFocusSearchbar]="true" mode="ios" #knowledgeComponent>
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="knowledgeComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{knowledgeComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item> -->
+    
+        <!-- <ion-tags-input [(ngModel)]="emails" [type]="'email'"></ion-tags-input> -->
+
+        <ion-item lines="none" class="ion-margin-vertical ion-no-padding __text-editor item-inner-padding-end">
+          <ion-label position="floating" mode="md" class="ion-padding-horizontal">{{'ticket_pipe_message' | translate}}</ion-label>
+          <editor
+            [init]="editorOption"
+            formControlName="message"
+            style="width: 100%;"
+          ></editor>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical">
+          <ion-label position="floating">{{'ticket_dt_status' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="statuses" [shouldStoreItemValue]="true" itemValueField="ticketstatusid"
+            itemTextField="name" [canSearch]="true" [shouldFocusSearchbar]="true" formControlName="status" mode="ios"
+            #statusComponent>
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="statusComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{statusComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item>
+
+        <ngx-dropzone (change)="onSelect($event)" class="ion-margin-vertical" accept='image/*, application/*'>
+          <ngx-dropzone-label>{{'ticket_add_attachments' | translate}}</ngx-dropzone-label>
+          <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" *ngFor="let f of files" [file]="f" [removable]="true" (removed)="onRemove(f)">
+            <ngx-dropzone-label>{{ f.name }}</ngx-dropzone-label>
+          </ngx-dropzone-image-preview>
+        </ngx-dropzone>
+      </div>
+    </form>
+    <ion-button (click)="sendReply()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate }}</ion-text>
+    </ion-button>
+  
+  </div>
+</ion-content>

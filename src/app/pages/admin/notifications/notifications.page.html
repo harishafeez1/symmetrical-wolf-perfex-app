@@ -1,0 +1,64 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'notifications' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="notifications?.length" (click)="markAllRead()">
+        <ion-label>{{'mark_all_as_read' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list lines="none" *ngIf="!isLoading && notifications?.length">
+    <ion-item-sliding class="ion-margin-top ion-margin-bottom"
+      *ngFor="let notification of notifications;trackBy: trackByFn;let i = index;">
+      <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(notification.link)">
+        <ion-avatar slot="start">
+          <img *ngIf="notification.profile_image != ''" [src]="notification.profile_image" />
+          <ion-icon *ngIf="notification.profile_image == ''" [src]="notificationImg(notification)"></ion-icon>
+        </ion-avatar>
+        <ion-label style="position: relative">
+          <h3>
+            <ion-icon [color]="notification.isread == 0 ? 'success' : 'medium'" src="assets/icon/ellipse.svg"
+              style="width: 10px; margin-bottom: -2px"></ion-icon> {{ notificationName(notification) }}
+          </h3>
+          <span [innerHTML]="notification?.formatted_description"></span>
+          <ion-text color="medium" class="r-notification-time" style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 400;
+              font-size: 10px;
+              line-height: 8px;
+              position: absolute;
+              top: 8px;
+              right: 0;
+            ">{{ notification.date }}</ion-text>
+        </ion-label>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="default" class="_action" (click)="markAsReadUnread(notification, i)">{{
+          (notification.isread == 0 ? 'read' : 'unread') | translate }}</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <app-skeleton *ngIf="isLoading && !notifications?.length" [isAvatar]="true"></app-skeleton>
+
+  <div class="ion-padding" *ngIf="notifications?.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreNotifications($event)">
+    <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

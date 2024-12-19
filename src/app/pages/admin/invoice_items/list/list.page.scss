@@ -1,0 +1,101 @@
+
+ion-content {
+    
+    ion-list {
+        background: transparent;
+        ion-item-option._delete {
+            border-radius: 0 10px 10px 0;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+        ion-item-option._action {
+            border-radius: 10px 0 0 10px;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+        ion-item {
+            
+            h6 {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 14px;
+                /* identical to box height */
+                color: #747889;
+            }
+            ._due {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 14px;
+                /* identical to box height */
+
+                text-align: right;
+
+                color: #FF3939;
+            }
+            ._unpaid {
+                background: #FFD9D9;
+                border-radius: 3px;
+                width: 54px;
+                height: 22px;
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 20px;
+                /* identical to box height */
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+            }
+            ._paid {
+                background: #d9ffdc;
+                border-radius: 3px;
+                width: 54px;
+                height: 22px;
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 12px;
+                line-height: 20px;
+                /* identical to box height */
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+            }
+            ion-avatar, .avatar {
+                width: 48px;
+                height: 48px;
+                background: var(--ion-color-default);
+                border-radius: 34.5px;
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 50px;
+                text-align: center;
+                color: #000000;
+            }
+            ion-toggle {
+                height: 24px;
+                width: 42px;
+                margin-left: 10px;
+                margin-right: 10px;
+                --handle-width: 20px;
+            }
+        }
+    }
+}

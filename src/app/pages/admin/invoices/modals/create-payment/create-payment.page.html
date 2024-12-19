@@ -1,0 +1,112 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'record_payment_for_invoice' | translate}} {{ invoice?.invoice_number }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- <div style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;"> -->
+    <form [formGroup]="formGroup" class="ion-margin-vertical">
+      <div>
+        <ion-item lines="none" class="ion-margin-vertical"  mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'payment_edit_amount_received' | translate}}</ion-label>
+          <ion-input type="number" formControlName="amount"></ion-input>
+          <ion-input type="hidden" formControlName="invoiceid"></ion-input>
+        </ion-item>
+    
+        <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDateModalOpen = true" id="open-date-modal"  mode="md">
+          <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'payment_edit_date' | translate}}</ion-label>
+          <ion-input type="text" formControlName="date" [value]="formGroup.value.date"></ion-input>
+          <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+          <ion-modal [isOpen]="isDateModalOpen" trigger="open-date-modal">
+            <ng-template>
+              <ion-content>
+                <ion-datetime mode="md" #date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.date)" (ionChange)="formGroup.value.date = formatDate(date.value);isDateModalOpen = false;" size="cover">
+                </ion-datetime>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <!-- <ion-label position="floating">{{'payment_mode' | translate}}</ion-label> -->
+          <ion-select  label-placement="floating" okText="{{'ok' | translate}}" 
+          cancelText="{{'cancel' | translate}}" formControlName="paymentmode" mode="ios" style="width: 100%;">
+          <div slot="label"><small class="text-danger">* </small>{{'payment_mode' | translate}}</div>
+            <ion-select-option *ngFor="let payment_mode of payment_modes" [value]="payment_mode.id">{{ payment_mode.name }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+       <!--  <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>Payment Mode</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+            [items]="payment_modes"
+            [shouldStoreItemValue]="true"
+            itemValueField="id"
+            itemTextField="name"
+            [canClear]="true"
+            formControlName="paymentmode"
+            #paymentModeComponent
+          >
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="paymentModeComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{paymentModeComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item> -->
+  
+        <ion-grid *ngIf="payment_modes && payment_modes?.length == 0" style="background: rgba(var(--ion-color-primary-rgb), 35%);border-radius: 10px;padding: 10px;">
+          <ion-row>
+            <ion-col>
+              {{'payment_edit_payment_modes_enable' | translate}}
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+       <!--  <ion-item lines="none" class="ion-margin-vertical"  mode="md" 
+        style="background: rgba(var(--ion-color-primary-rgb), 35%);border-radius: 10px;padding: 10px; --background: transparent;">
+          <ion-label class="ion-text-wrap">
+            Allowed payment modes not found for this invoice. edit the invoice and allow payment modes.
+          </ion-label>
+        </ion-item> -->
+        <ion-item lines="none" class="ion-margin-vertical"  mode="md">
+          <ion-label position="floating">{{'payment_transaction_id' | translate}}</ion-label>
+          <ion-input type="text" formControlName="transactionid"></ion-input>
+        </ion-item>
+  
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'record_payment_leave_note' | translate}}</ion-label>
+          <ion-textarea rows="4" formControlName="note"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="do_not_send_email_template" labelPlacement="end" justify="start">{{'do_not_send_invoice_payment_email_template_contact' | translate}}</ion-checkbox>
+          <!-- <ion-label class="ion-text-wrap">{{'do_not_send_invoice_payment_email_template_contact' | translate}}</ion-label> -->
+        </ion-item>
+
+      </div>
+    </form>
+    <ion-button (click)="createPayment()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+  
+  <!-- </div> -->
+</ion-content>

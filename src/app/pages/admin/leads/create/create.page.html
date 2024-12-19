@@ -1,0 +1,266 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/leads/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ (lead_id === null ? 'new_lead' : 'edit_lead') | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-segment mode="ios" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+      <ion-segment-button value="lead_details">
+        <ion-label>{{'lead_details' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="billing_shipping">
+        <ion-label>{{'lead_address' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div *ngIf="selectedTab == 'lead_details'">
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'acs_leads_statuses_submenu' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="statuses"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          formControlName="status"
+          mode="ios"
+          #statusComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="statusComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{statusComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-status="item" let-isStatusSelected="isItemSelected">
+          <ion-checkbox [checked]="isStatusSelected" slot="start"></ion-checkbox>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'acs_leads_sources_submenu' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="sources"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          formControlName="source"
+          mode="ios"
+          #sourceComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="sourceComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{sourceComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-source="item" let-isSourceSelected="isItemSelected">
+          <ion-checkbox [checked]="isSourceSelected" slot="start"></ion-checkbox>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_add_edit_assigned' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="staffs"
+          [shouldStoreItemValue]="true"
+          itemValueField="staffid"
+          itemTextField="full_name"
+          [canSearch]="true"
+          (onSearch)="searchStaffs($event)"
+          formControlName="assigned"
+          mode="ios"
+          #assignedComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="assignedComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{assignedComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-assigned="item" let-isAssignedSelected="isItemSelected">
+          <ion-checkbox [checked]="isAssignedSelected" slot="start"></ion-checkbox>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="stacked">{{'tags' | translate}}</ion-label>
+        <div class="ion-margin-vertical">
+          <ion-chip *ngFor="let tag of tags" >
+            {{ tag }}
+            <ion-icon name="close-circle-outline" (click)="removeTag(tag)"></ion-icon>
+          </ion-chip>
+          <ion-input placeholder="{{'add_to_tag' | translate}}" #myInput (ionInput)="addTag(myInput)" [debounce]="1000"></ion-input>
+        </div>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_add_edit_name' | translate}}</ion-label>
+        <ion-input type="text" formControlName="name"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_title' | translate}}</ion-label>
+        <ion-input type="text" formControlName="title"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_add_edit_email' | translate}}</ion-label>
+        <ion-input type="text" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_website' | translate}}</ion-label>
+        <ion-input type="text" formControlName="website"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_add_edit_phonenumber' | translate}}</ion-label>
+        <ion-input type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_add_edit_lead_value' | translate}}</ion-label>
+        <ion-input type="number" formControlName="lead_value"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_company' | translate}}</ion-label>
+        <ion-input type="text" formControlName="company"></ion-input>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'languages' | translate}}</ion-label> -->
+        <ion-select label="{{'languages' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="default_language" mode="ios">
+          <ion-select-option value="">{{'system_default_string' | translate}}</ion-select-option>
+          <ion-select-option *ngFor="let language of languages" [value]="language">{{ language | titlecase }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'leads'" [typeid]="lead_id"></app-custom-fields>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_description' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="description"></ion-textarea>
+      </ion-item>
+      
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none" style="border: 0;--padding-start: 0;--background: transparent;">
+            <ion-checkbox color="default" mode="md" formControlName="is_public" labelPlacement="end" justify="start">{{'lead_public' | translate}}</ion-checkbox>
+            <!-- <ion-label>{{'lead_public' | translate}}</ion-label> -->
+          </ion-item>
+        </ion-col>
+        <ion-col *ngIf="!lead">
+          <ion-item lines="none" style="border: 0;--padding-start: 0;--background: transparent;">
+            <ion-checkbox color="default" mode="md" formControlName="contacted_today" labelPlacement="end" justify="start">{{'lead_add_edit_contacted_today' | translate}}</ion-checkbox>
+            <!-- <ion-label>{{'lead_add_edit_contacted_today' | translate}}</ion-label> -->
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div *ngIf="selectedTab == 'billing_shipping'">
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_address' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="address"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_city' | translate}}</ion-label>
+        <ion-input type="text" formControlName="city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_state' | translate}}</ion-label>
+        <ion-input type="text" formControlName="state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_zip' | translate}}</ion-label>
+        <ion-input type="text" formControlName="zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="country"
+          mode="ios"
+          #countryComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="countryComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{countryComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+          </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+    </div>
+    <ion-button *ngIf="lead_id === null" (click)="createLead()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate }}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="lead_id !== null" (click)="updateLead()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && lead_id !== null"></app-mpc-loader>
+</ion-content>

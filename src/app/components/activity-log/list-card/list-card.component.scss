@@ -1,0 +1,26 @@
+.item {
+    position: revert;
+    padding-bottom: 20px;
+    padding-left: 15px;
+    border-left: 2px solid var(--ion-color-primary);
+    border-radius: 0px !important;
+    --background: transparent;
+    ion-label{
+        margin-top: 0px;
+    }
+}
+.item::after{
+    content: "";
+    display: block;
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #4b5158;
+}
+.last-item {
+    border-left: none !important;
+  }

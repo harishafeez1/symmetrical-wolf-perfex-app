@@ -1,0 +1,37 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+}
+ion-modal {
+    --width: 290px;
+    --height: 395px;
+    --border-radius: 8px;
+}
+
+
+ion-item.checkbox {
+    border: 0;
+    --background: transparent;
+    --padding-start: 0;
+
+    ion-label {
+        white-space: inherit;
+    }
+
+    ion-checkbox {
+        margin-right: 10px;
+        --border-color-checked: transparent;
+        --border-radius: 5px;
+        --border-width: 2px;
+        --border-color: #C6C6C6;
+        --checkmark-width: 3px;
+        --size: 26px;
+    }
+}
+
+ion-list{
+    background: transparent;
+    ion-item{
+        --background: transparent;
+        border: none;
+    }
+}

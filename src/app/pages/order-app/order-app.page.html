@@ -1,0 +1,54 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-label>{{'close' | translate }}</ion-label> -->
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'order_your_app' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+      
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'name' | translate}}</ion-label>
+        <ion-input type="text" formControlName="name"></ion-input>
+      </ion-item>
+
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'client_email' | translate}}</ion-label>
+        <ion-input type="text" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'client_website' | translate}}</ion-label>
+        <ion-input type="text" formControlName="website"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'clients_phone' | translate}}</ion-label>
+        <ion-input type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'description' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="description"></ion-textarea>
+      </ion-item>
+      
+
+
+    <ion-button  (click)="order()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+
+  </form>
+
+  <!-- <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader> -->
+
+</ion-content>

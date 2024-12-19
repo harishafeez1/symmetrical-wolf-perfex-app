@@ -1,0 +1,341 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/customers/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title *ngIf="customer_id !== null">{{'edit_customer_id' | translate}} {{ customer_id }}</ion-title>
+    <ion-title *ngIf="customer_id === null">{{'new_client' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-segment mode="ios" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+      <ion-segment-button value="customer_details">
+        <ion-label>{{'customer_profile_details' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="billing_shipping">
+        <ion-label>{{'billing_shipping' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div *ngIf="selectedTab == 'customer_details'">
+      <ion-item lines="none" button="false" class="ion-margin-vertical f-14 checkbox" *ngIf="customer_id">
+        <ion-checkbox color="default" mode="md" formControlName="show_primary_contact" labelPlacement="end" justify="start"><div class="ion-text-wrap">{{'primary_contact_full_name' | translate}}</div></ion-checkbox>
+        <!-- <ion-label class="ion-text-wrap">{{'primary_contact_full_name' | translate}}</ion-label> -->
+      </ion-item>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating"><small class="text-danger">* </small> {{'client_company' | translate}}</ion-label> -->
+        <ion-input labelPlacement="floating" type="text" formControlName="company">
+          <div slot="label"><ion-text color="danger">* </ion-text>{{'client_company' | translate}} </div>
+        </ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_vat_number' | translate}}</ion-label> -->
+        <ion-input label="{{'client_vat_number' | translate}}" labelPlacement="floating" type="text" formControlName="vat"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_phonenumber' | translate}}</ion-label> -->
+        <ion-input label="{{'client_phonenumber' | translate}}" labelPlacement="floating" type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_website' | translate}}</ion-label> -->
+        <ion-input label="{{'client_website' | translate}}" labelPlacement="floating" type="text" formControlName="website"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'customer_groups' | translate}}</ion-label>
+        <ionic-selectable 
+          [searchPlaceholder]="'kb_search' | translate"
+          [items]="groups"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="groups_in"
+          mode="ios"
+          #groupsComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="groupsComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{groupsComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-group="item" let-isGroupsSelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isGroupsSelected"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="groupsComponent.confirm();groupsComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" [disabled]="customer?.invoices_available || customer?.estimates_available || customer?.creditnotes_available  ? 'true' : 'false'">
+        <ion-label position="floating">{{'currency' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="currencies"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="default_currency"
+          mode="ios"
+          #currencyComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="currencyComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{currencyComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-currency="item">
+            {{currency.name}} 
+            <!-- <sub class="sub-margin-right">{{currency.symbol}}</sub> -->
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-currency="item" let-isCurrencySelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isCurrencySelected"></ion-checkbox>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'languages' | translate}}</ion-label> -->
+        <ion-select label="{{'languages' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="default_language" mode="ios" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}">
+          <ion-select-option value="">{{'system_default_string' | translate}}</ion-select-option>
+          <ion-select-option *ngFor="let language of languages"   [value]="language">{{ language | titlecase }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_address' | translate}}</ion-label> -->
+        <ion-textarea label="{{'client_address' | translate}}" labelPlacement="floating" rows="4" formControlName="address"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_city' | translate}}</ion-label> -->
+        <ion-input label="{{'client_city' | translate}}" labelPlacement="floating" type="text" formControlName="city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_state' | translate}}</ion-label> -->
+        <ion-input label="{{'client_state' | translate}}"  type="text" formControlName="state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'client_postal_code' | translate}}</ion-label> -->
+        <ion-input label="{{'client_postal_code' | translate}}" labelPlacement="floating" type="text" formControlName="zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'clients_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="country"
+          mode="ios"
+          #countryComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="countryComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{countryComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+          </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+     <!-- custom fields -->
+      <app-custom-fields [form]="formGroup"  [type]="'customers'" [typeid]="customer_id"></app-custom-fields>
+       
+    </div>
+
+    <div *ngIf="selectedTab == 'billing_shipping'">
+      <ion-item-divider>
+        <ion-label>{{'billing_address' | translate}}</ion-label>
+      </ion-item-divider>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'billing_street' | translate}}</ion-label> -->
+        <ion-textarea label="{{'billing_street' | translate}}" labelPlacement="floating" rows="4" formControlName="billing_street"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'billing_city' | translate}}</ion-label> -->
+        <ion-input label="{{'billing_city' | translate}}" labelPlacement="floating" type="text" formControlName="billing_city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'billing_state' | translate}}</ion-label> -->
+        <ion-input label="{{'billing_state' | translate}}" labelPlacement="floating" type="text" formControlName="billing_state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'billing_zip' | translate}}</ion-label> -->
+        <ion-input label="{{'billing_zip' | translate}}" labelPlacement="floating" type="text" formControlName="billing_zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'billing_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="billing_country"
+          mode="ios"
+          #billingCountryComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="billingCountryComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{billingCountryComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+        </ng-template> 
+      </ionic-selectable>
+
+      </ion-item>
+      <ion-item-divider>
+        <ion-label>{{'shipping_address' | translate}}</ion-label>
+      </ion-item-divider>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'shipping_street' | translate}}</ion-label> -->
+        <ion-textarea label="{{'shipping_street' | translate}}" labelPlacement="floating" rows="4" formControlName="shipping_street"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'shipping_city' | translate}}</ion-label> -->
+        <ion-input label="{{'shipping_city' | translate}}" labelPlacement="floating" type="text" formControlName="shipping_city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'shipping_state' | translate}}</ion-label> -->
+        <ion-input label="{{'shipping_state' | translate}}" labelPlacement="floating" type="text" formControlName="shipping_state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'shipping_zip' | translate}}</ion-label> -->
+        <ion-input label="{{'shipping_zip' | translate}}" labelPlacement="floating" type="text" formControlName="shipping_zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'shipping_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="shipping_country"
+          mode="ios"
+          #shippingCountryComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="shippingCountryComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{shippingCountryComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+        </ng-template>
+      </ionic-selectable>
+      </ion-item>
+
+      <div
+        *ngIf="customer_id"
+        class="ion-margin-vertical ion-padding" 
+        style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);"
+      >
+        <ion-item lines="none" button="false" class="checkbox" *ngIf="customer_id">
+          <ion-checkbox color="default" mode="md" formControlName="update_all_other_transactions" labelPlacement="end" justify="start">
+            <div class="ion-text-wrap">{{'customer_update_address_info_on_invoices' | translate}}</div>
+          </ion-checkbox>
+          <!-- <ion-label class="ion-text-wrap">{{'customer_update_address_info_on_invoices' | translate}}</ion-label> -->
+        </ion-item>
+        <b>{{'customer_update_address_info_on_invoices_help' | translate}}</b>
+        <ion-item lines="none" button="false" class="checkbox" *ngIf="customer_id">
+          <ion-checkbox color="default" mode="md" formControlName="update_credit_notes" labelPlacement="end" justify="start">
+            <div class="ion-text-wrap">{{'customer_profile_update_credit_notes' | translate}}</div>
+          </ion-checkbox>
+          <!-- <ion-label class="ion-text-wrap">{{'customer_profile_update_credit_notes' | translate}}</ion-label> -->
+        </ion-item>
+      </div>
+
+      
+    </div>
+
+    <ion-button *ngIf="!customer_id" (click)="createCustomer()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+
+    <ion-button *ngIf="customer_id" (click)="updateCustomer()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'clients_edit_profile_update_btn' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && customer_id !== null"></app-mpc-loader>
+</ion-content>

@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'apply_credits_from' | translate:{number: credit_note?.credit_note_number} }} </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formGroup" *ngIf="!isLoading && message == ''">
+    <div class="table-responsive">
+      <table class="items">
+        <tr>
+          <th>{{'invoice_number_id' | translate}}</th>
+          <th>{{'invoice_add_edit_date' | translate}}</th>
+          <th>{{'payment_table_invoice_amount_total' | translate}}</th>
+          <th>{{'batch_payments_table_invoice_balance_due' | translate}}</th>
+          <th>{{'amount_to_credit' | translate}}</th>
+        </tr>
+        <tr *ngFor="let invoice of available_invoices">
+          <td>{{ invoice.invoice_number }}</td>
+          <td>{{ invoice.date }}</td>
+          <td>{{ invoice.invoice_amount }}</td>
+          <td>{{ invoice.invoice_balance_due }}</td>
+          <td>
+            <ion-input min="0" type="number" (change)="invoiceCalculations()" [formControlName]="invoice?.id"></ion-input>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'amount_to_credit' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.symbol }}{{ total.toFixed(2) }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'credit_note_remaining_credits' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.formatted_remaining_credits }}</ion-col>
+    </ion-row>
+
+
+    <ion-button (click)="applyCreditsToInvoices()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup?.valid || submitting" class="ion-margin-vertical">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'apply' | translate}}</ion-text>
+    </ion-button>
+  </form>
+  <div *ngIf="message != ''">{{'credit_note_no_invoices_available' | translate}}</div>
+</ion-content>

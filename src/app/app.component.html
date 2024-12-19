@@ -1,0 +1,171 @@
+<ion-app [dir]="(defaultLang === 'ar' || defaultLang === 'fa') ? 'rtl' : 'ltr'"
+  [ngClass]="(defaultLang === 'ar' || defaultLang === 'fa') ? 'right-to-left' : ''">
+  <ion-split-pane contentId="main-content">
+    <ion-menu contentId="main-content" type="overlay">
+      <ion-content [scrollY]="false" [scrollX]="false">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-menu-button>
+                <ion-icon color="dark" src="/assets/icon/menu.svg"></ion-icon>
+              </ion-menu-button>
+            </ion-buttons>
+
+            <ion-buttons *ngIf="authUser?.firstname" slot="end">
+              <ion-button (click)="openNotifications()">
+                <ion-icon color="dark" src="/assets/icon/bell.svg"></ion-icon>
+              </ion-button>
+              <span (click)="openNotifications()" *ngIf="authUser?.total_unread_notifications > 0" style="
+                  position: absolute;
+                  background: var(--ion-color-default);
+                  color: var(--ion-color-default-contrast);
+                  border-radius: 50%;
+                  width: 18px;
+                  height: 18px;
+                  font-size: 8px;
+                  padding: 0;
+                  left: 22px;
+                  top: 4px;
+                  text-align: center;
+                  line-height: 18px;
+                ">{{ authUser?.total_unread_notifications }}</span>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-row style="height: 92%">
+          <ion-col size="2" class="accounts_section">
+            <!-- <ion-avatar class="ion-margin-top">
+              <img [src]="authUser?.profile_image">
+            </ion-avatar>
+            <ion-avatar class="ion-margin-top active">
+              <img [src]="authUser?.profile_image">
+            </ion-avatar>
+           -->
+            <div style="
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: flex-start;
+                flex-wrap: nowrap;
+                height: 100%;
+                width: 100%;
+              ">
+              <div>
+                <ion-avatar *ngFor="let account of accounts; let i = index" (click)="switchAccount(account)"
+                  [class.active]="account.active" [style.color]="account.color" [style.background]="account.background"
+                  class="ion-margin-top">
+                  <ion-text *ngIf="
+                      account?.company_logo == '' ||
+                      account?.company_logo == undefined
+                    ">{{ account.domain.substring(0, 1) | titlecase }}</ion-text>
+                  <ion-img *ngIf="
+                      account?.company_logo != '' &&
+                      account?.company_logo != undefined
+                    " [src]="account.company_logo"></ion-img>
+                </ion-avatar>
+
+                <!-- <ion-avatar
+                  class="ion-margin-top add_btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 0;
+                  "
+                  (click)="baseUrl()"
+                >
+                  <ion-icon name="add"></ion-icon>
+                </ion-avatar> -->
+              </div>
+
+              <div class="left-bottom-icons">
+                <ion-avatar (click)="orderApp()" class="ion-margin-top add_btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 0;
+                  ">
+                  <ion-icon name="cart-outline"></ion-icon>
+                </ion-avatar>
+                <ion-avatar (click)="openSetting()" class="ion-margin-top add_btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 0;
+                  ">
+                  <ion-icon name="settings-outline"></ion-icon>
+                </ion-avatar>
+                <ion-avatar (click)="openStaff()" *ngIf="authUser?.firstname" class="ion-margin-top add_btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 0;
+                  ">
+                  <ion-icon name="person-outline"></ion-icon>
+                </ion-avatar>
+                <ion-avatar *ngIf="authUser?.firstname" (click)="logout()" class="ion-margin-top add_btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 0;
+                  ">
+                  <ion-icon name="log-out-outline"></ion-icon>
+                </ion-avatar>
+              </div>
+            </div>
+          </ion-col>
+          <ion-col size="10" style="height: 100%">
+            <ion-item class="menu-profile-item" (click)="openStaff()" lines="none">
+              <ion-avatar slot="start">
+                <img *ngIf="authUser?.firstname" [src]="authUser?.profile_image" />
+                <ion-icon *ngIf="!authUser?.firstname" name="person-outline"></ion-icon>
+              </ion-avatar>
+              <ion-label>
+                <h3 *ngIf="authUser?.firstname">
+                  {{ authUser?.firstname }} {{ authUser?.lastname }}
+                </h3>
+                <h3 *ngIf="!authUser?.firstname" routerLink="/login">
+                  {{ "login_account" | translate }}
+                </h3>
+                <span *ngIf="authUser?.firstname">{{ authUser?.email }}</span>
+              </ion-label>
+            </ion-item>
+            <!-- <ion-chip *ngIf="is_subscription_active" color="primary" style="width: 100%;border-radius: 0;margin: 0;">
+              <ion-label>{{  subscription_expires_at }}</ion-label>
+            </ion-chip>
+
+            <ion-chip *ngIf="!is_subscription_active" color="danger" style="width: 100%;border-radius: 0;margin: 0;">
+              <ion-label>{{  subscription_expires_at }}</ion-label>
+            </ion-chip> -->
+
+            <ion-list id="inbox-list" style="height: calc(100% - 98px); overflow-x: scroll">
+              <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages">
+
+                <ion-item *ngIf="p" routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
+                  routerLinkActive="selected">
+                  <ion-icon slot="start" [src]="'/assets/icon/' + p.icon + '.svg'" color="dark"></ion-icon>
+                  <ion-label>{{ p.title | translate}}</ion-label>
+
+                </ion-item>
+              </ion-menu-toggle>
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-content>
+    </ion-menu>
+
+    <ion-header class="orderApp" mode="ios">
+      <ion-toolbar color="default" (click)="orderApp()">
+        <div>
+          <ion-icon name="cart"></ion-icon> <ion-text>{{ 'Get It For Your CRM' | uppercase }}</ion-text>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+
+
+    <ion-router-outlet id="main-content" class="main-router">
+
+    </ion-router-outlet>
+  </ion-split-pane>
+
+</ion-app>

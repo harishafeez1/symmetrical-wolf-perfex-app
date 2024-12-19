@@ -1,0 +1,123 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'contracts' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon
+          [color]="isSearching ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/search.svg"
+        ></ion-icon>
+      </ion-button>
+      <!-- <ion-button (click)="openFilters()">
+        <ion-icon
+          [color]="isFiltered ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/funnel.svg"
+        ></ion-icon>
+      </ion-button> -->
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="contractApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar
+    [placeholder]="'kb_search' | translate"
+    mode="ios"
+    (ionInput)="searchContracts($event)"
+    debounce="500"
+  ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list lines="none" *ngIf="contracts.length && !isLoading">
+    <ion-item-sliding
+      #slidingItem
+      *ngFor="let contract of contracts;let i = index;trackBy: trackByFn;"
+      class="ion-margin-top ion-margin-bottom"
+    >
+      <ion-item-options
+        side="start"
+        *ngIf="authService.hasPermission('contracts', ['delete'])"
+      >
+        <ion-item-option
+          color="default-danger"
+          class="_delete"
+          (click)="delete(contract.id, i, slidingItem)"
+          
+          >{{'_delete' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+
+      <ion-item
+        class="ion-margin-start ion-margin-end r-m-16"
+        (click)="view(contract.id, contract)"
+      >
+        <div slot="start" class="date_created">
+          <div class="date">{{ contract.dateadded | date : "dd" }}</div>
+          <div class="month">{{ contract.dateadded | date : "MMM" }}</div>
+        </div>
+        <ion-label> 
+          <h6>{{'starting' | translate}} {{ contract.datestart | dateTimeFormat}}</h6>
+          <h3>{{'#' + contract?.id +' - '+ contract.subject }}</h3>
+          <span>{{ contract?.client?.company }}</span>
+        </ion-label>
+        <ion-note slot="end">
+          <h3>{{ contract.contract_value | appFormatMoney: contract }}</h3>
+
+          <span [class]="contractHelper.format_contract_status(contract?.marked_as_signed == '1' ? 3 : (contract?.signed == '1' ? 2 : 1))"
+            >{{ contractHelper.format_contract_status(contract?.marked_as_signed == '1' ? 3 : (contract?.signed == '1' ? 2 : 1), '',
+            false) | translate}}</span>
+            
+
+        </ion-note>
+      </ion-item>
+
+      <ion-item-options
+        side="end"
+        *ngIf="authService.hasPermission('contracts', ['edit'])"
+      >
+        <ion-item-option
+          color="default"
+          class="_action"
+          (click)="edit(contract.id)"
+          >{{'_edit' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  <app-skeleton *ngIf="!contracts.length && isLoading"></app-skeleton>
+
+  <ion-infinite-scroll
+   *ngIf="!isLoading"
+    threshold="100px"
+    (ionInfinite)="loadMoreContracts($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab
+    *ngIf="authService.hasPermission('contracts', ['create'])"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
+    <ion-fab-button color="default" (click)="addContract()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="!contracts.length && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

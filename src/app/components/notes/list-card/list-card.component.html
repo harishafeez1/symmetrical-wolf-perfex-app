@@ -1,0 +1,73 @@
+<ion-item-sliding #slidingItem *ngFor="let note of notes;let i = index;trackBy: trackByFn;"
+class="ion-margin-top ion-margin-bottom">
+<ion-item-options side="start" *ngIf="authService.hasPermission('notes', ['delete'])">
+  <ion-item-option color="default-danger" class="_delete"
+    (click)="delete(note.id, i, slidingItem)">Delete</ion-item-option>
+</ion-item-options>
+
+<ion-item class="ion-margin-start ion-margin-end r-m-16">
+  <!-- <ion-avatar slot="start">
+    <img [src]="note.profile_url" />
+  </ion-avatar> -->
+  <ion-label>
+    <h4 class="ion-text-wrap" [innerHTML]="note?.description"></h4>
+    <ion-row class="ion-justify-content-start ion-align-items-center">
+      <ion-col size="1.5">
+        <ion-avatar>
+          <img [src]="note.profile_url" />
+        </ion-avatar>
+      </ion-col>
+      <ion-col>
+        <h3>{{ note.firstname }} {{ note.lastname }}</h3>
+      </ion-col>
+      <ion-col>
+        
+        <h6 style="direction: ltr;"><ion-icon [id]="'click-trigger' + i" name="call-outline" color="success" *ngIf="note.date_contacted" style="
+        border: 1px solid;
+        border-radius: 3px;
+        padding: 2px;
+        font-size: 11px;
+        margin-bottom: -3px;
+        margin-right: 3px;
+      "></ion-icon> {{ note.dateadded | dateTimeFormat: 'datetime' }}</h6>
+    <ion-popover [trigger]="'click-trigger' + i" triggerAction="click" mode="ios">
+      <ng-template>
+        {{ note.date_contacted | dateTimeFormat: 'datetime' }}
+      </ng-template>
+    </ion-popover>
+      </ion-col>
+    </ion-row>
+   <!--  <h6>
+      <span><ion-avatar>
+        <img [src]="note.profile_url" />
+      </ion-avatar> </span>
+    <h3>{{ note.firstname }} {{ note.lastname }}</h3>
+    
+    <ion-icon [id]="'click-trigger' + i" name="call-outline" color="success" *ngIf="note.date_contacted" style="
+        border: 1px solid;
+        border-radius: 3px;
+        padding: 2px;
+        font-size: 11px;
+        margin-bottom: -3px;
+        margin-right: 3px;
+      "></ion-icon> {{ note.dateadded | dateTimeFormat: 'datetime' }}</h6>
+    <ion-popover [trigger]="'click-trigger' + i" triggerAction="click" mode="ios">
+      <ng-template>
+        {{ note.date_contacted | dateTimeFormat: 'datetime' }}
+      </ng-template>
+    </ion-popover> -->
+  </ion-label>
+  <!-- <ion-row>
+    <ion-col>
+      <ion-avatar>
+        <img [src]="note.profile_url" />
+      </ion-avatar> 
+    </ion-col>
+    <ion-col></ion-col>
+  </ion-row> -->
+</ion-item>
+
+<ion-item-options side="end" *ngIf="authService.hasPermission('notes', ['edit'])">
+  <ion-item-option color="default" class="_action" (click)="edit(note)">Edit</ion-item-option>
+</ion-item-options>
+</ion-item-sliding>

@@ -1,0 +1,634 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" *ngIf="!taskId" color="dark" defaultHref="/admin/tasks/list"></ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/tasks/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ task?.name }}</ion-title>
+    <ion-buttons slot="end" *ngIf="['reminders'].includes(selectedTab)">
+      <ion-button (click)="isSearching = !isSearching">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching && ['reminders'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['reminders'].includes(selectedTab)" mode="ios"
+      (ionInput)="searchReminders($event)" debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- <ion-refresher slot="fixed" (ionRefresh)="doTaskRefresh($event, 'task')">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher> -->
+  <ion-segment scrollable class="ion-margin-bottom" mode="md" (ionChange)="segmentChanged($event)"
+    [value]="selectedTab">
+    <ion-segment-button value="task_info">
+      <ion-label>{{'task_info' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="timesheets">
+      <ion-label>{{'record_timesheet' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="checklist">
+      <ion-label>{{'task_checklist_items' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="task_files">
+      <ion-label>{{'media_files' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="comments">
+      <ion-label>{{'task_view_comments' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'estimate_reminders' | translate}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'task_info'">
+    <ion-refresher slot="fixed" (ionRefresh)="doTaskRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <div style="
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+      ">
+      <b>{{'task_relation' | translate}}: </b>
+      <ion-text color="primary">{{ task?.rel_name }}</ion-text>
+      <p style="
+          color: #747889;
+          font-family: 'Roboto';
+          font-style: normal;
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 14px;
+        ">
+        {{'task_created_at' | translate }} {{ task?.dateadded | dateTimeFormat:'datetime' }}
+      </p>
+    </div>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col>
+          <!-- goToPage('/admin/tasks/edit/' + task_id) -->
+          <ion-button color="primary" (click)="editTask(task_id)" expand="block" fill="outline" mode="ios">{{'edit_task'
+            | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button
+            [color]="!timerStart ? (!task?.current_user_is_assigned || task?.status == STATUS_COMPLETE ? 'secondary' : 'default') : 'default-danger'"
+            expand="block" mode="ios" (click)="!timerStart ? timerTask() : showNoteAlert()"
+            [disabled]="!task?.current_user_is_assigned || task?.status == STATUS_COMPLETE || submitting">
+            <ion-icon [hidden]="submitting" name="time-outline"></ion-icon>
+            <ion-spinner [hidden]="!submitting"></ion-spinner>
+            <ion-text style="width: 100%">{{ (!timerStart ? 'task_start_timer' : 'task_stop_timer') |
+              translate}}</ion-text>
+
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" color="dark" mode="ios"
+            class="action_button" (click)="openUpdateStatus()">
+            <ion-label style="width: 100%">{{'task_status' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" color="dark" mode="ios"
+            class="action_button" (click)="openUpdatePriority()">
+            <ion-label style="width: 100%">{{'task_single_priority' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" color="dark" mode="ios"
+            class="action_button" (click)="openMore()">
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid *ngIf="task?.tags">
+      <ion-row>
+        <ion-col>
+          <h6>{{'tags' | translate}}</h6>
+          <div class="ion-margin-vertical">
+            <ion-chip *ngFor="let tag of task?.tags?.split(',')">
+              {{ tag }}
+            </ion-chip>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h6>{{'task_status' | translate}}</h6>
+          <h3>
+            <ion-text color="primary">{{ task_status?.name | translate }}</ion-text>
+          </h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'task_single_priority' | translate}}</h6>
+          <h3>
+            <ion-text color="primary">{{ task_priority | translate }}</ion-text>
+          </h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'task_single_start_date' | translate}}</h6>
+          <h3>{{ task?.startdate | dateTimeFormat}}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'task_single_due_date' | translate}}</h6>
+          <h3>{{ task?.duedate | dateTimeFormat }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'task_hourly_rate' | translate}}</h6>
+          <h3>{{ task?.hourly_rate }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'task_billable' | translate}}</h6>
+          <h3 *ngIf="task?.billable == 0">
+            <ion-text *ngIf="task?.billable == 0">{{'task_billable_no' | translate}} <small>({{'project_fixed_rate' |
+                translate}})</small></ion-text>
+            <ion-text *ngIf="task?.billable == 1">{{'task_billable' | translate}}</ion-text>
+          </h3>
+          <h3 *ngIf="task?.billable == 1">
+            {{'task_billable' | translate}}
+            <small>({{ task?.billed == 0 ? 'Not Billed' : 'Billed' }})</small>
+          </h3>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="task?.billable_amount">
+        <ion-col>
+          <h6>{{'billable_amount' | translate}}</h6>
+          <h3>{{ task?.billable_amount }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'your_logged_time' | translate}}</h6>
+          <h3>{{ task?.user_logged_time }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'total_logged_hours_by_staff' | translate}}</h6>
+          <h3>{{ task?.total_logged_time }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'task_view_description' | translate}}</h6>
+          <h3 [innerHTML]="task?.description"></h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid class="ion-no-padding">
+      <ion-row class="ion-padding-top ion-padding-bottom ion-margin">
+        <ion-col>{{'task_single_assignees' | translate}}</ion-col>
+        <ion-col>
+          <ion-text *ngIf="isAddButton" color="primary"
+            (click)="assigneeComponent.clear();assigneeComponent.open();">{{'_add' | translate}}</ion-text>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="assignees"
+            [shouldStoreItemValue]="true" itemValueField="staffid" itemTextField="full_name" [canSearch]="true"
+            (onChange)="addAssignee($event)" (onSearch)="searchStaff($event)" #assigneeComponent style="display: none">
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="assigneeComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{'add_assignees' | translate}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let assignee of task?.assignees; let i = index" class="ion-margin">
+        <ion-col>
+          <ion-item-sliding #slidingItem style="width: calc(100% + 32px); margin-left: -16px">
+            <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+              <ion-item-option color="default-danger" class="_delete" (click)="deleteAssignee(assignee.id, i)"
+                style="border-radius: 0;">{{'_delete' | translate}}
+              </ion-item-option>
+            </ion-item-options>
+
+            <ion-item lines="none" style="border-radius: 0;--border-radius: 0;">
+              <ion-avatar slot="start">
+                <img [src]="assignee.profile_url" />
+              </ion-avatar>
+              <ion-label>
+                <h3>{{ assignee.full_name }}</h3>
+                <span> {{ assignee.staff.email }}</span>
+              </ion-label>
+              <ion-note slot="end" (click)="openSlide(slidingItem)">
+                <ion-text color="danger">{{'_delete' | translate}}</ion-text>
+              </ion-note>
+            </ion-item>
+          </ion-item-sliding>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid class="ion-no-padding">
+      <ion-row class="ion-padding-top ion-padding-bottom ion-margin">
+        <ion-col>{{'task_single_followers' | translate}}</ion-col>
+        <ion-col>
+          <ion-text *ngIf="isAddButton" (click)="followerComponent.clear();followerComponent.open()"
+            color="primary">{{'_add' | translate}}</ion-text>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="followers"
+            [shouldStoreItemValue]="true" itemValueField="staffid" itemTextField="full_name" [canSearch]="true"
+            (onChange)="addFollower($event)" (onSearch)="searchStaff($event)" #followerComponent style="display: none">
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="followerComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{'task_single_followers_select_title' | translate}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let follower of task?.followers; let i = index" class="ion-margin">
+        <ion-col>
+          <ion-item-sliding #slidingItem style="width: calc(100% + 32px); margin-left: -16px">
+            <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+              <ion-item-option color="default-danger" class="_delete" (click)="deleteFollower(follower.id, i)"
+                style="border-radius: 0;">Delete
+              </ion-item-option>
+            </ion-item-options>
+
+            <ion-item lines="none" style="border-radius: 0;--border-radius: 0;">
+              <ion-avatar slot="start">
+                <img [src]="follower.profile_url" />
+              </ion-avatar>
+              <ion-label>
+                <h3>{{ follower.full_name }}</h3>
+                <span> {{ follower.staff.email }}</span>
+              </ion-label>
+              <ion-note slot="end" (click)="openSlide(slidingItem)">
+                <ion-text color="danger">{{'_delete' | translate}}</ion-text>
+              </ion-note>
+            </ion-item>
+          </ion-item-sliding>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid *ngIf="task?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of task?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'timesheets'">
+    <!-- <ion-refresher slot="fixed" (ionRefresh)="doTaskRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher> -->
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let timesheet of task.timesheets;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom" #slidingItem>
+        <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete" (click)="deleteTimeSheet(timesheet.id, i, slidingItem)">{{'_delete'
+            | translate}}
+          </ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-label>
+            <h3>{{ timesheet?.full_name }}</h3>
+            <h6 class="time-sheet-h6">{{'timesheet_start_time' | translate}}:{{ timesheet?.start_time }}</h6>
+            <h6 class="time-sheet-h6"> {{'timesheet_end_time' | translate}}:{{ timesheet?.end_time }}</h6>
+          </ion-label>
+
+          <ion-note slot="end">
+            <span>{{'timesheet_time_spend' | translate}}:</span>
+            <h3 class="ion-text-end ion-no-margin">
+              <ion-text color="primary">{{ timesheet.time_h }} h</ion-text>
+            </h3>
+          </ion-note>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('tasks', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditTimeSheet(timesheet)">{{'_edit' |
+            translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <div class="ion-padding" *ngIf="task.timesheets?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditTimeSheet()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'checklist'">
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col>{{'add_checklist_item' | translate}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <div class="progress-outer">
+            <div class="progress-inner" [ngClass]="taskProgressBar() > 0 ? 'bg-progress-bar' : 'progress-inner-color'"
+              [style.width]="taskProgressBar() + '%'">
+              {{ taskProgressBar() + '%' }}
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="ion-no-padding">
+      <ion-row *ngFor="let checklist of task?.checklist_items;let i = index;trackBy: trackByFn;" class="ion-margin">
+        <ion-col>
+          <ion-item-sliding #slidingItem style="width: calc(100% + 32px); margin-left: -16px" class="r_checklist_item">
+            <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+              <ion-item-option color="default-danger" class="_delete"
+                (click)="deleteChecklist(checklist.id, slidingItem)"
+                style="width: 105px; font-weight: 400; text-transform: inherit;border-radius: 0;">{{'_delete' |
+                translate}}
+              </ion-item-option>
+            </ion-item-options>
+
+            <ion-item lines="none" style="border-radius: 0; background-color: var(--background)">
+              <ion-checkbox (ionChange)="updateItemCheckbox(checklist?.id, $event)" slot="start" class="ion-checkbox"
+                style="margin: 0 10px 0 0" [checked]="checklist?.finished_from_fullname"></ion-checkbox>
+              <ion-input mode="md" type="text" (ionBlur)="updateChecklist(checklist?.id, checklist.description)"
+                [(ngModel)]="checklist.description"></ion-input>
+              <label slot="helper" style="
+                  color: #bfbfbf;
+                  padding-bottom: 10px;
+                  padding-top: 0;
+                  width: 100%;
+                  font-size: 10px;
+                ">
+                <ion-row style="margin: 0">
+                  <ion-col size="6">
+                    <span *ngIf="checklist?.addedfrom_fullname && !checklist?.assigned_fullname">{{'created_by' |
+                      translate}}:
+                      <ion-text color="primary">{{ checklist?.addedfrom_fullname }}</ion-text></span>
+                    <span *ngIf="checklist?.assigned_fullname">{{'task_assigned' | translate}}:
+                      <ion-text color="primary">{{ checklist?.assigned_fullname }}</ion-text></span>
+                  </ion-col>
+                  <ion-col size="6">
+                    <span *ngIf="checklist?.finished_from_fullname">{{'completed_by' | translate}}:
+                      <ion-text color="primary">{{ checklist?.finished_from_fullname }}</ion-text></span>
+                  </ion-col>
+                </ion-row>
+              </label>
+            </ion-item>
+
+            <ion-item-options side="end" *ngIf="authService.hasPermission('tasks', ['delete'])">
+
+              <ion-item-option *ngIf="settings?.perfex_current_version >= '291'" color="primary" class="_action"
+                (click)="addAssignStaffComponent.clear();addAssignStaffComponent.open();" style="
+                  width: 105px;
+                  text-align: center;
+                  font-weight: 400;
+                  text-transform: inherit;
+                  border-radius: 0;
+              ">
+                {{'assign' | translate}}<br />{{'staff' | translate}}
+                <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="staffs"
+                  [shouldStoreItemValue]="true" itemValueField="staffid" itemTextField="full_name" [canSearch]="true"
+                  (onChange)="addAssignStaff($event,checklist.id)" (onSearch)="searchStaff($event)"
+                  #addAssignStaffComponent style="display: none">
+                  <ng-template ionicSelectableSearchFailTemplate>
+                    <div padding>
+                      <app-empty></app-empty>
+                    </div>
+                  </ng-template>
+
+                  <ng-template ionicSelectableHeaderTemplate>
+                    <ion-toolbar mode="ios">
+                      <ion-buttons slot="start">
+                        <ion-button (click)="addAssignStaffComponent.close()">
+                          <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg"
+                            class="btn-rotate"></ion-icon>
+                        </ion-button>
+                      </ion-buttons>
+                      <ion-title> {{'add_assign_staff' | translate}}</ion-title>
+                    </ion-toolbar>
+                  </ng-template>
+
+                  <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+                    <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+                  </ng-template>
+                </ionic-selectable>
+              </ion-item-option>
+
+              <ion-item-option *ngIf="checklist?.can_be_template" color="medium" class="_action"
+                (click)="addTemplateChecklist(checklist.description, i)" style="
+                  width: 105px;
+                  text-align: center;
+                  color: #fff;
+                  font-weight: 400;
+                  text-transform: inherit;
+                  border-radius: 0;
+                ">
+                {{'add_to' | translate}}<br />{{'template' | translate}}
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-item lines="none" button (click)="addChecklist()">
+      <ion-icon color="primary" slot="start" src="/assets/icon/add.svg"
+        style="width: 11.21px; height: 11.9px"></ion-icon>
+      <ion-label color="primary">{{'_add_checklist_item' | translate}}</ion-label>
+    </ion-item>
+
+    <ion-item (click)="checklistTemplatesComponent.clear();checklistTemplatesComponent.open();" class="ion-margin-top"
+      lines="none" button>
+      <ion-icon color="primary" slot="start" src="/assets/icon/add.svg"
+        style="width: 11.21px; height: 11.9px"></ion-icon>
+      <ion-label color="primary">{{'add_checklist_template' | translate}}</ion-label>
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="checklistTemplates"
+        [shouldStoreItemValue]="true" itemValueField="description" itemTextField="description" [canSearch]="true"
+        (onChange)="addChecklist($event.value)" #checklistTemplatesComponent style="display: none">
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="checklistTemplatesComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{'_checklist_templates' | translate}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isPortSelected"></ion-checkbox>
+        </ng-template>
+      </ionic-selectable>
+    </ion-item>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'task_files'">
+    <!-- <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher> -->
+    <ngx-dropzone (change)="onSelect($event)" class="ion-margin" accept='image/*, application/*'>
+      <ngx-dropzone-label>{{'expense_add_edit_attach_receipt' | translate}}</ngx-dropzone-label>
+      <ngx-dropzone-preview *ngIf="!file && task?.attachment" [removable]="true">
+        <ngx-dropzone-label>{{ task.attachment }} ({{ task.filetype }})</ngx-dropzone-label>
+      </ngx-dropzone-preview>
+
+      <ngx-dropzone-preview *ngIf="file" [removable]="true" (removed)="onRemove(file)">
+        <ngx-dropzone-label>{{ file.name }} ({{ file.type }})</ngx-dropzone-label>
+      </ngx-dropzone-preview>
+    </ngx-dropzone>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <span *ngFor="let file of task?.attachments;let i = index;trackBy: trackByFn;">
+        <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+          <ion-item-options side="start" *ngIf="authService.hasPermission('tasks', ['delete'])">
+            <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id)">{{'_delete' |
+              translate}}
+            </ion-item-option>
+          </ion-item-options>
+
+          <ion-item class="ion-margin-start ion-margin-end r-file-item"
+            (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)"
+            style="--padding-start: 0;">
+            <ion-thumbnail slot="start" style="width: 100px;height: 100px;margin: 0 10px 0px 0px;">
+              <img *ngIf="file?.is_image" [src]="file.src" />
+              <span *ngIf="!file?.is_image" [class]="file.src"
+                style="background-position: center;display: block;width: 100%;height: 100%;"></span>
+            </ion-thumbnail>
+
+            <ion-label>
+              <h6>{{ file.time_ago }}</h6>
+              <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+              <span>{{ file.addedby }}</span>
+            </ion-label>
+          </ion-item>
+        </ion-item-sliding>
+      </span>
+    </ion-list>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'comments'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'comment')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding #slidingItem *ngFor="let comment of comments;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('comments', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteComment(comment.id, i, slidingItem)">{{'_delete' | translate}}
+          </ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-item">
+          <ion-avatar slot="start">
+            <img [src]="comment.profile_url" />
+          </ion-avatar>
+          <ion-label>
+            <h6>{{ comment.time_ago }}</h6>
+            <h3>{{ comment.full_name }} {{ comment.lastname }}</h3>
+            <span>{{ comment.content }}</span>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('comments', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditComment(comment)">{{'_edit' |
+            translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('comments', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditComment()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="comments?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders"
+        (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+  <!--  -->
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

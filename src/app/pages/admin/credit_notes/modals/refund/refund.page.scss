@@ -1,0 +1,12 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+    // --min-height: 16px;
+    ion-select {
+        width: 100%;
+    }
+}
+ion-modal {
+    --width: 290px;
+    --height: 395px;
+    --border-radius: 8px;
+}

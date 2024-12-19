@@ -1,0 +1,33 @@
+<ion-item-sliding #slidingItem *ngFor="let ticket of tickets;let i = index;trackBy: trackByFn;"
+      class="ion-margin-top ion-margin-bottom">
+      <ion-item-options side="start" *ngIf="authService.hasPermission('tickets', ['delete'])">
+        <ion-item-option color="default-danger" class="_delete" (click)="delete(ticket.ticketid, i, slidingItem)">{{'_delete' | translate}}
+        </ion-item-option>
+      </ion-item-options>
+
+      <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(ticket.ticketid, ticket)">
+        <div slot="start" class="date_created">
+          <div class="date">{{ ticket.date | date : "dd" }}</div>
+          <div class="month">{{ ticket.date | date : "MMM" }}</div>
+        </div>
+
+        <ion-label>
+          <h6 *ngIf="ticket.lastreply != null">{{'ticket_dt_last_reply' | translate}} {{ ticket.lastreply_time_ago }}</h6>
+          <h6 *ngIf="ticket.lastreply == null">{{'ticket_no_reply_yet' | translate}}</h6>
+          <h3>#{{ ticket.ticketid }} - {{ ticket.subject }}</h3>
+          <span *ngIf="ticket?.company != null || ticket?.firstname">{{ ticket?.firstname }} {{ ticket?.lastname }} <span *ngIf="ticket?.firstname && ticket?.company">- </span>{{ ticket?.company }}</span>
+        </ion-label>
+        <ion-note slot="end">
+          <h6>
+            {{ ticket.priority_name }}
+          </h6>
+          <span *ngIf="ticket?.status_name" class="ticket_status" [style.backgroundColor]="adjustHexBrightness(ticket?.statuscolor, 0.25)"
+            >{{ ticket.status_name }}</span
+          >
+        </ion-note>
+      </ion-item>
+
+      <ion-item-options side="end" *ngIf="authService.hasPermission('tickets', ['edit'])">
+        <ion-item-option color="default" class="_action" (click)="edit(ticket.ticketid)">{{'_edit' | translate}}</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>

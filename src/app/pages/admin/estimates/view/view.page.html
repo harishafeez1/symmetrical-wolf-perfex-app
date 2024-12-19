@@ -1,0 +1,395 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/estimates/list" >
+      </ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/estimates/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_estimate' | translate}}</ion-title>
+    <ion-buttons slot="end"  *ngIf="['reminders','tasks'].includes(selectedTab)">
+      <ion-button  (click)="isSearching = !isSearching">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="['tasks'].includes(selectedTab)" (click)="openFilters()">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi" *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar  *ngIf="isSearching && ['reminders','tasks'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf=" ['reminders'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'reminder')" debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['tasks'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')" debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab" mode="md">
+    <ion-segment-button value="estimate">
+      <ion-label>{{'estimate' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="activity_log">
+      <ion-label>{{'estimate_view_activity_tooltip' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'estimate_reminders' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <!-- <ion-segment-button value="emails_tracking">
+      <ion-label>Emails Tracking</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="views_tracking">
+      <ion-label>Views Tracking</ion-label>
+    </ion-segment-button> -->
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'estimate'">
+    <ion-refresher slot="fixed" (ionRefresh)="doEstimateRefresh($event, 'estimate')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col><span style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 500;
+              font-size: 16px;
+              line-height: 19px;
+            ">{{'estimate_dt_table_heading_status' | translate}}</span></ion-col>
+        <ion-col><span [class]="estimateHelper.format_estimate_status(estimate?.status, '', true)">{{
+            estimateHelper.format_estimate_status(estimate?.status, '',
+            false) | translate}}</span></ion-col>
+      </ion-row>
+      <ion-row style="border: 0">
+        <ion-col>
+          <!-- [routerLink]="'/admin/estimates/edit/' + estimate_id" -->
+          <ion-button color="primary"  expand="block" (click)="editEstimate(estimate_id)"
+            fill="outline" mode="ios">{{'edit_estimate_tooltip' | translate}}</ion-button>
+        </ion-col>
+          <ion-col>
+            <ion-button
+              color="medium"
+              id="popover-pdf-button"
+              expand="block"
+              fill="outline"
+              mode="ios"
+              color="dark"
+              class="action_button"
+              (click)="openPdf()"
+            >
+              <ion-icon color="dark" style="width: 100%" src="/assets/icon/pdf.svg"></ion-icon>
+              <ion-icon slot="end" name="chevron-down"></ion-icon>
+            </ion-button>
+            </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-button *ngIf="estimate?.invoiceid != null" color="default" expand="block" [routerLink]="'/admin/invoices/view/' + estimate?.invoiceid" mode="ios">{{ estimate?.invoice_number }}</ion-button>
+          <ion-button
+            *ngIf="estimate?.invoiceid == null && authService.hasPermission('invoices', ['create'])"
+            id="popover-button"
+            color="default"
+            expand="block"
+            mode="ios"
+            class="action_button"
+            (click)="openConvertTo()"
+          >
+            <ion-label style="width: 100%">{{'_create' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+
+         <ion-col>
+          <ion-button
+            id="popover-more"
+            color="medium"
+            expand="block"
+            fill="outline"
+            mode="ios"
+            color="dark"
+            class="action_button"
+            (click)="openMore()"
+          >
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ estimate?.estimate_number }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'estimate_to' | translate}}</h6>
+          <h3>{{ estimate?.company ?? estimate?.client?.company }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'estimate_data_date' | translate}}</h6>
+          <h3>{{ estimate?.date | dateTimeFormat }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'estimate_data_expiry_date' | translate}}</h6>
+          <h3>{{ estimate?.expirydate | dateTimeFormat }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row *ngIf="estimate?.reference_no">
+        <ion-col>
+          <h6>{{'reference_no' | translate}}</h6>
+          <h3>{{ estimate?.reference_no }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <!-- <ion-row *ngIf="estimate?.sale_agent">
+          <ion-col>
+            <h6>Sale Agent</h6>
+            <h3>{{ estimate?.sale_agent }}</h3>
+          </ion-col>
+        </ion-row> -->
+
+      <ion-row *ngIf="estimate?.project_data">
+        <ion-col>
+          <h6>{{'project' | translate}}</h6>
+          <h3>{{ estimate?.project_data?.name }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="estimate?.tags">
+      <ion-row>
+        <ion-col>
+          <h6>{{'tags' | translate}}</h6>
+          <div class="ion-margin-vertical">
+              <ion-chip *ngFor="let tag of estimate?.tags?.split(',')">
+                {{ tag }}
+              </ion-chip>
+            </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    
+
+    <ion-grid *ngIf="estimate?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of estimate?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="table-responsive">
+      <table class="items">
+        <tr>
+          <th>#</th>
+          <th>{{'estimate_table_item_heading' | translate}}</th>
+          <th>{{'estimate_table_quantity_heading' | translate}}</th>
+          <th>{{'estimate_table_rate_heading' | translate}}</th>
+          <th>{{'estimate_table_tax_heading' | translate}}</th>
+          <th>{{'estimate_table_amount_heading' | translate}}</th>
+        </tr>
+        <tr *ngFor="let item of estimate?.items; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            {{ item.description }}<br />
+            <span>{{ item.long_description }}</span>
+          </td>
+          <td>{{ item.qty }}</td>
+          <td>{{ item.rate }}</td>
+          <td>
+            <div *ngFor="let tax of item?.taxrate">
+              {{ tax.name }} {{ tax.taxrate }}%
+            </div>
+          </td>
+          <td>{{ (item.rate * item.qty).toFixed(2) }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'estimate_subtotal' | translate}}:</ion-col>
+      <ion-col>{{ estimate?.subtotal | appFormatMoney: estimate }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngIf="estimate?.discount_total != 0">
+      <ion-col>{{'estimate_discount' | translate}}{{ showDiscount(estimate) }}:</ion-col>
+      <ion-col>-{{ estimate?.discount_total | appFormatMoney: estimate }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngFor="let tax of totalTaxes | keyvalue;">
+      <ion-col>{{ tax.value.name }}({{ tax.value.taxrate }}%)</ion-col>
+      <ion-col>{{ tax.value.subTotal | appFormatMoney: estimate }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngIf="estimate?.adjustment != 0">
+      <ion-col>{{'estimate_adjustment' | translate}}:</ion-col>
+      <ion-col>{{ estimate?.adjustment | appFormatMoney: estimate }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'estimate_total' | translate}}:</ion-col>
+      <ion-col>{{ estimate?.total | appFormatMoney: estimate }}</ion-col>
+    </ion-row>
+
+    <!-- <ion-row style="margin: 16px 0;">
+        <ion-col>Total Paid:</ion-col>
+        <ion-col>$99.00</ion-col>
+      </ion-row> -->
+
+    <!-- <ion-row style="margin: 16px 0;">
+        <ion-col>Amount Due:</ion-col>
+        <ion-col>$0.00</ion-col>
+      </ion-row> -->
+      <ion-grid>
+        <ion-row *ngIf="estimate?.clientnote">
+          <ion-col>
+            <h6>{{'note' | translate}}</h6>
+            <h3 [innerHTML]="estimate?.clientnote"></h3>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row *ngIf="estimate?.terms">
+          <ion-col>
+            <h6>{{'terms_and_conditions' | translate}}</h6>
+            <h3 [innerHTML]="estimate?.terms"></h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-list lines="none" *ngIf="estimate?.attachments?.length">
+        <ion-row>
+          <ion-col>
+            <h5 style="margin-bottom: 0;">{{'estimate_files' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <span *ngFor="let file of estimate?.attachments;let i = index;trackBy: trackByFn;">
+          <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+            <ion-item-options side="start" >
+              <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id)">{{'_delete' | translate}}
+              </ion-item-option>
+            </ion-item-options>
+            <ion-item class="ion-no-padding">
+              <ion-thumbnail slot="start" style="text-align: center;" (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+                <img [src]="commonHelper.getMimeIcon(file.filetype)" style="width: 24px;height: 100%;object-fit: contain;"/>
+              </ion-thumbnail>
+              <ion-label (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+                <h6>{{ file.dateadded | dateTimeFormat:'datetime' }}</h6>
+                <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+                <span> {{ file.filetype }} </span>
+              </ion-label>
+              <ion-note slot="end" style="display: flex; flex-direction: row; align-items: center;margin: 0;">
+                <div class="ion-text-right">
+                  <span style="display: block;font-size: 10px;">{{ file.visible_to_customer == '1' ? 'Hide to customer' : 'Show to customer' }}</span>
+                  <ion-toggle  class="m-t-2" [checked]="file.visible_to_customer == '1' ? true : false" (click)="visibleToCustomer($event, i, file);" mode="ios" color="default"></ion-toggle>
+                </div>
+              </ion-note>
+            </ion-item>
+          </ion-item-sliding>
+        </span>
+      </ion-list>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'activity_log'">
+    
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-activity-list-card [activities]="activities" [isType]="'estimate'"></app-activity-list-card>
+    </ion-list>
+    <div class="ion-padding" *ngIf="activities?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders" (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'reminder')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-searchbar *ngIf="isSearching" mode="ios" (ionInput)="doSearch($event, 'note')" debounce="500"></ion-searchbar>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

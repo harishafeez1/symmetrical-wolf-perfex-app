@@ -1,0 +1,22 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">{{'attach_file' | translate}}</ion-title>
+    <ion-progress-bar *ngIf="isProgressBar" color="default" type="indeterminate"></ion-progress-bar>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+
+  <ngx-dropzone (change)="onSelect($event)" class="ion-margin-vertical" accept='image/*, application/*'>
+    <ngx-dropzone-label>{{'drop_files_here_to_upload' | translate}}</ngx-dropzone-label>
+    <ngx-dropzone-preview *ngIf="file" [removable]="true" (removed)="onRemove(file)">
+      <ngx-dropzone-label>{{ file.name }} ({{ file.type }})</ngx-dropzone-label>
+    </ngx-dropzone-preview>
+  </ngx-dropzone>
+
+
+</ion-content>

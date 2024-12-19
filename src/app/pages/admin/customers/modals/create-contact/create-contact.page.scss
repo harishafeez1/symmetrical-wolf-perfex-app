@@ -1,0 +1,10 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+
+    ion-toggle {
+        height: 24px;
+        width: 42px;
+        margin-right: 16px;
+        --handle-width: 20px;
+    }
+}

@@ -1,0 +1,60 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <!-- <ion-title>New Note</ion-title> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'write_a_note' | translate}}</ion-label>
+          <ion-textarea   rows="4" formControlName="description"></ion-textarea>
+        </ion-item>
+       
+
+        <ion-list class="ion-margin-bottom" lines="none" mode="md" *ngIf="rel_type === 'lead' && !note">
+
+          <ion-item *ngIf="indicator.value == 'yes'" lines="none" details="false" class="ion-margin-vertical" mode="md" button="true" (click)="isDateModalOpen = true" id="open-date-modal">
+            <ion-label position="floating" mode="md">{{'lead_add_edit_datecontacted' | translate}}</ion-label>
+            <ion-input type="text" formControlName="custom_contact_date" [value]="formGroup.value.custom_contact_date"></ion-input>
+            <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+            <ion-modal [isOpen]="isDateModalOpen" trigger="open-date-modal">
+              <ng-template>
+                <ion-content>
+                  <ion-datetime mode="md" #datetime presentation="date-time" showDefaultButtons [value]="parseDate(formGroup.value.custom_contact_date,'datetime')" (ionChange)="formGroup.value.custom_contact_date = formatDate(datetime.value);isDateModalOpen = false;" size="cover">
+                  </ion-datetime>
+                </ion-content>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+
+          <ion-radio-group #indicator formControlName="contacted_indicator">
+            <ion-item class="item-no-border">
+              <ion-label>{{'lead_add_edit_contacted_this_lead' | translate}}</ion-label>
+              <ion-radio slot="start" mode="md" value="yes"></ion-radio>
+            </ion-item>
+        
+            <ion-item class="item-no-border">
+              <ion-label>{{'lead_not_contacted' | translate}}</ion-label>
+              <ion-radio slot="start" mode="md" value="no"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+        
+    </form>
+    <ion-button *ngIf="!note" (click)="createNote()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="note" (click)="updateNote()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

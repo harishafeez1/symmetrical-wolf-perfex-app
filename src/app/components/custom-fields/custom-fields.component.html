@@ -1,0 +1,112 @@
+<div [formGroup]="form">
+  <div formGroupName="custom_fields">
+    <div [formGroupName]="type">
+      <div *ngFor="let custom_field of custom_fields;">
+      <ion-item *ngIf="custom_field?.type == 'textarea'" lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-textarea labelPlacement="floating" [formControlName]="custom_field?.custom_field_id" rows="4">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-textarea>
+      </ion-item>
+
+      <ion-item *ngIf="custom_field?.type == 'input'" lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-input labelPlacement="floating" [formControlName]="custom_field?.custom_field_id" type="text">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-input>
+      </ion-item>
+
+      <ion-item *ngIf="custom_field?.type == 'number'" lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-input labelPlacement="floating" [formControlName]="custom_field?.custom_field_id" type="number">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-input>
+      </ion-item>
+
+      <ion-item *ngIf="custom_field?.type == 'select'" lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-select label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" [formControlName]="custom_field?.custom_field_id" mode="ios">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+          <ion-select-option *ngFor="let option of custom_field?.options">{{ option }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item *ngIf="custom_field?.type == 'multiselect'" lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-select label-placement="floating"  okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" [formControlName]="custom_field?.custom_field_id" mode="ios" multiple>
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+          <ion-select-option *ngFor="let option of custom_field?.options">{{ option }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div *ngIf="custom_field?.type == 'checkbox'" [formArrayName]="custom_field?.custom_field_id">
+        <ion-label><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label>
+        <ion-item lines="none" *ngFor="let option of custom_field?.options; let i = index" class="checkbox" mode="md">
+          <ion-checkbox [formControlName]="i" (ionChange)="
+              changeCheckbox(custom_field?.custom_field_id, i, option, $event)
+            " mode="ios" labelPlacement="end">
+          <div class="ion-text-wrap">{{option}}</div>  
+          </ion-checkbox>
+          <!-- <ion-label>{{ option }}</ion-label> -->
+        </ion-item>
+      </div>
+
+      <ion-item *ngIf="custom_field?.type == 'date_picker'" lines="none" class="ion-margin-vertical" button="true" mode="md"
+        (click)="openModal(custom_field?.custom_field_id)" [id]="'open-' + custom_field?.custom_field_id + '-modal'" mode="md">
+        <!-- <ion-label position="floating" mode="md"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-input labelPlacement="floating" type="text" [formControlName]="custom_field?.custom_field_id">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px; margin-top: 19px"></ion-icon>
+        <ion-modal class="date" [isOpen]="isModalOpen(custom_field?.custom_field_id)" [trigger]="'open-' + custom_field?.custom_field_id + '-modal'">
+          <ng-template>
+            <ion-content>
+              <!-- [value]="fieldTo.get(custom_field?.custom_field_id).value" -->
+              <ion-datetime mode="md"
+                [value]="parseDate(fieldTo.get(custom_field?.custom_field_id).value)"
+                presentation="date"
+                showDefaultButtons
+                (ionChange)="openModal(custom_field?.custom_field_id, $event)"
+                size="cover"
+              >
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item *ngIf="custom_field?.type == 'date_picker_time'" lines="none" class="ion-margin-vertical" button="true" mode="md"
+        (click)="openModal(custom_field?.custom_field_id)" [id]="'open-' + custom_field?.custom_field_id + '-modal'">
+        <!-- <ion-label position="floating" mode="md"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-input labelPlacement="floating" type="text" [formControlName]="custom_field?.custom_field_id">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px; margin-top: 19px"></ion-icon>
+        <ion-modal class="datetime" [isOpen]="isModalOpen(custom_field?.custom_field_id)"
+          [trigger]="'open-' + custom_field?.custom_field_id + '-modal'">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md"
+                [value]="parseDate(fieldTo.get(custom_field?.custom_field_id).value,'datetime')"
+                presentation="date-time"
+                showDefaultButtons
+                (ionChange)="openModal(custom_field?.custom_field_id, $event, true)"
+                size="cover"
+              >
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <!-- [value]="fieldTo.get(custom_field?.custom_field_id).value" -->
+      <ion-item *ngIf="custom_field?.type == 'colorpicker'" lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="stacked" mode="md"><small *ngIf="custom_field?.required == 1" class="text-danger">* </small>{{ custom_field?.label }}</ion-label> -->
+        <ion-input labelPlacement="stacked" type="color" [formControlName]="custom_field?.custom_field_id">
+          <div slot="label"><ion-text color="danger" *ngIf="custom_field?.required == 1">* </ion-text>{{ custom_field?.label }}</div>
+        </ion-input>
+      </ion-item>
+    </div>
+    </div>
+  </div>
+</div>

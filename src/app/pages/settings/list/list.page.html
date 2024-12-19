@@ -1,0 +1,44 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'settings' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding-top">
+  <ion-list>
+    <ion-item detail="true" class="item-icon-rotate" routerLink="/settings/notification">
+      <ion-icon slot="start"  color="dark" src="/assets/icon/bell.svg"></ion-icon>
+      <ion-label>{{'notification_settings' | translate}}</ion-label>
+    </ion-item>
+
+    <ion-item detail="true" class="item-icon-rotate" routerLink="/settings/account">
+      <ion-icon slot="start"  color="dark" name="person-outline"></ion-icon>
+      <ion-label>{{'account_Settings' | translate}}</ion-label>
+    </ion-item>
+
+    <ion-item detail="true" class="item-icon-rotate" routerLink="/settings/dark-mode">
+      <ion-icon slot="start"  color="dark" name="moon-outline"></ion-icon>
+      <ion-label>{{'dark_mode' | translate}}</ion-label>
+    </ion-item>
+
+    <ion-item detail="true" class="item-icon-rotate" routerLink="/settings/themes">
+      <ion-icon slot="start"  color="dark" name="color-palette-outline"></ion-icon>
+      <ion-label>{{'themes' | translate}}</ion-label>
+    </ion-item>
+    <ion-item detail="true" class="item-icon-rotate" (click)="changeLanguage()">
+      <ion-icon slot="start"  color="dark" name="language-outline"></ion-icon>
+      <ion-label>
+        <h2>{{'language' | translate}}</h2>
+        <span>{{selectedLanguage?.label}}</span>
+      </ion-label>
+    </ion-item>
+
+    <ion-item detail="true" class="item-icon-rotate">
+      <ion-icon slot="start"  color="dark" name="alert-circle-outline"></ion-icon>
+      <ion-label>{{'about' | translate}}</ion-label>
+      <ion-text slot="end">v {{ app_version }}</ion-text>
+    </ion-item>
+  </ion-list>
+</ion-content>

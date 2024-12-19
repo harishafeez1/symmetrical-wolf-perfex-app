@@ -1,0 +1,163 @@
+ion-title{
+  text-align: left !important;
+}
+
+.dashboard .invoice-stats swiper-container swiper-slide .title{
+  text-align: left !important;
+}
+.dashboard .invoice-stats swiper-container swiper-slide .title.danger:before{
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.dashboard .invoice-stats swiper-container swiper-slide .title.success:before{
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.dashboard .invoice-stats swiper-container swiper-slide .title.warning:before{
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.dashboard .basic_stats ion-col{
+  padding-right: 10px !important;
+  padding-left: 0px !important;
+}
+.dashboard .heading{
+  text-align: left !important;
+}
+.dashboard ion-grid ion-row ion-col:nth-child(2){
+  text-align: right !important;
+}
+.dashboard .todo_box ion-row ion-col ion-text{
+  float: none !important;
+}
+.summary swiper-container swiper-slide .title{
+  text-align: left !important;
+}
+.summary swiper-container swiper-slide .title.draft:before,
+.summary swiper-container swiper-slide .title.success:before,
+.summary swiper-container swiper-slide .title.danger:before,
+.summary swiper-container swiper-slide .title.info:before,
+.summary swiper-container swiper-slide .title.warning:before,
+.summary swiper-container swiper-slide .title.default:before {
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.project-summary swiper-slide .title{
+  text-align: left !important;
+}
+ .project-summary swiper-slide .title.draft:before,
+ .project-summary swiper-slide .title.success:before,
+ .project-summary swiper-slide .title.danger:before,
+ .project-summary swiper-slide .title.info:before,
+ .project-summary swiper-slide .title.warning:before,
+ .project-summary swiper-slide .title.default:before {
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.summary swiper-container swiper-slide .title .p-s  {
+  margin-left: 0px !important;
+  margin-right: 7px !important;
+}
+.summary swiper-container swiper-slide .amount {
+  text-align: left !important;
+}
+.project-summary  swiper-slide .amount {
+  text-align: left !important;
+}
+ion-grid ion-row ion-col:nth-child(2) {
+  text-align: right !important;
+}
+ion-row ion-col:nth-child(2){
+  text-align: right !important;
+}
+.label-floating.sc-ion-label-md-h{
+  align-self: start !important;
+  transform-origin: top right !important;
+}
+.label-stacked.sc-ion-label-md-h{
+  align-self: static !important;
+  transform-origin: top left !important;
+}
+.item-label-floating .sc-ion-input-md-h{
+  --padding-start: 8px !important;
+}
+ion-item.checkbox ion-checkbox {
+  margin-left: 0px !important;
+  margin-right: 10px !important;
+}
+ion-item.checkbox ion-toggle {
+  margin-left: 0px !important;
+  margin-right: 10px !important;
+}
+.r-p-16{
+  padding-right: 0px !important;
+  padding-left: 16px !important;
+}
+.r-item{
+  padding-right: 0px !important;
+  padding-left: 20px !important;
+}
+.r-item ion-label ion-avatar{
+  float: left !important;
+  margin-left: 0px !important;
+  margin-right: 5px !important;
+}
+.r-item ion-label h6{
+  direction: ltr;
+  text-align: left;
+}
+.r-item::after{
+  left: 10px !important;
+  right: 0px !important;
+}
+.r-infinity-row{
+  right: 0px !important;
+  left: unset !important;
+}
+.r-unit-col{
+  padding-left: 16px !important;
+  padding-right: 0px !important;
+}
+.basic_stats .single ion-card .stats {
+  margin-right: 0px !important;
+  margin-left: 16px !important;
+}
+.p-title{
+  text-align: left !important;
+}
+ion-range{
+  direction: ltr !important;
+}
+.r_checklist_item{
+  margin-right: 0px !important;
+  margin-left: -16px !important;
+}
+.r_checklist_item ion-item ion-checkbox{
+  margin: 0 10px 0 0px !important;
+}
+.r-file-item{
+  margin-left: 16px !important;
+}
+.r-file-item ion-thumbnail{
+  margin: 0 10px 0 0 !important;
+}
+ion-checkbox {
+  margin-left: 0px !important;
+  margin-right: 10px !important;
+}
+.r-ticket-btn{
+left: 0;
+}
+.fixed-perfex-fab{
+right: 0;
+}
+.r-m-16{
+margin-right: 16px !important;
+}
+.r-notification-time{
+right: 0;
+direction: ltr;
+}
+.r-swiper{
+direction: ltr !important;
+}

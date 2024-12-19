@@ -1,0 +1,82 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title style="font-size: 14px;" class="ion-text-center">
+      <!-- <ion-icon name="help-circle-outline"></ion-icon> -->
+      {{'set' | translate}} {{rel_type === 'credit_note' ? 'Credit Note' : rel_type | capitalizeFirstLetter }} {{'reminder' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" details="false" class="ion-margin-vertical" mode="md" button="true" (click)="isDateModalOpen = true" id="open-date-modal">
+          <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'set_reminder_date' | translate}}</ion-label>
+          <ion-input type="text" formControlName="date" [value]="formGroup.value.date"></ion-input>
+          <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+          <ion-modal [isOpen]="isDateModalOpen" trigger="open-date-modal">
+            <ng-template>
+              <ion-content>
+                <ion-datetime mode="md" #datetime presentation="date-time" showDefaultButtons [value]="parseDate(formGroup.value.date, 'datetime')" (ionChange)="formGroup.value.date = formatDate(datetime.value);isDateModalOpen = false;" size="cover">
+                </ion-datetime>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small> {{'reminder_set_to' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+            [items]="staffs"
+            [shouldStoreItemValue]="true"
+            itemValueField="staffid"
+            itemTextField="full_name"
+            [canSearch]="true"
+            formControlName="staff"
+            #staffComponent
+          >
+            <ng-template ionicSelectableSearchFailTemplate>
+              <div padding>
+                <app-empty></app-empty>
+              </div>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="staffComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{staffComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+              <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item>
+        
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small> {{'reminder_description' | translate}}</ion-label>
+          <ion-textarea rows="4" formControlName="description"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox">
+          <ion-checkbox color="default" mode="md" formControlName="notify_by_email" value="1" labelPlacement="end" justify="start">{{'reminder_notify_me_by_email' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'reminder_notify_me_by_email' | translate}}</ion-label> -->
+        </ion-item>
+    </form>
+    <ion-button *ngIf="!reminder" (click)="createReminder()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="reminder" (click)="updateReminder()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

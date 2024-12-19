@@ -1,0 +1,162 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'filters' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetFilters()">
+        <ion-label color="dark">{{'reset' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;">
+    <form [formGroup]="filters">
+      <ion-grid>
+        <ion-row lines="none" class="ion-margin-top"  style="border:0">
+          <ion-col>
+            <h5>{{'expense' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <ion-row style="flex-wrap: nowrap;overflow-x: scroll;">
+          <ion-button 
+            mode="ios"
+            *ngFor="let expense of expense_status"
+            [color]="isAppliedStatus(expense) ? 'default' : 'medium'"
+            [fill]="isAppliedStatus(expense) ? 'solid' : 'outline'"
+            (click)="applyStatusFilter(expense)"
+           
+          >{{ expense?.name | translate }}</ion-button>
+        </ion-row>
+      </ion-grid>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'expense_category' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="expense_categories"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="expense_categories"
+          mode="ios"
+          #portComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="portComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{portComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="portComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+            <ion-button (click)="portComponent.confirm();portComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'months' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="expense_months"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="expense_months"
+          mode="ios"
+          #monthsComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="monthsComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{monthsComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="monthsComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+            <ion-button (click)="monthsComponent.confirm();monthsComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'payment_mode' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="payments"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="paymentmode"
+          mode="ios"
+          #paymentComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="paymentComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{paymentComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+          
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="paymentComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+            <ion-button (click)="paymentComponent.confirm();paymentComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+    </form>
+    <ion-button (click)="applyFilters()" color="default" mode="ios" type="submit" expand="block">{{'show_results' | translate}}</ion-button>
+  
+  </div>
+</ion-content>

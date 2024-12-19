@@ -1,0 +1,198 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/contracts/list"></ion-back-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ (!contract_id ? 'new_contract' : 'edit_contract') | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <form [formGroup]="formGroup" class="ion-margin">
+
+    <ion-row>
+      <ion-col>
+        <ion-item lines="none" mode="md" [button]="false" style="border: 0;--padding-start: 0;--background: transparent;--background-hover: transparent;--background-activated: transparent;">
+          <ion-checkbox color="default" mode="ios" formControlName="trash" class="ion-checkbox" labelPlacement="end" justify="start">
+            {{'contract_trash' | translate}}
+          </ion-checkbox>
+          <!-- <ion-label> {{'contract_trash' | translate}}</ion-label> -->
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item lines="none" style="border: 0;--padding-start: 0;--background: transparent;">
+          <ion-checkbox color="default" mode="ios" formControlName="not_visible_to_client" class="ion-checkbox" labelPlacement="end" justify="start">
+            {{'contract_not_visible_to_client' | translate}}
+          </ion-checkbox>
+          <!-- <ion-label>{{'contract_not_visible_to_client' | translate}}</ion-label> -->
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+      <ion-item lines="none" class="ion-margin-vertical"  mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'contract_list_client' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="customers"
+          [shouldStoreItemValue]="true"
+          itemValueField="userid"
+          itemTextField="company"
+          [canSearch]="true"
+          (onChange)="customerSelect($event)"
+          (onSearch)="searchCustomers($event)"
+          formControlName="client"
+          mode="ios"
+          #customerComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="customerComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{customerComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemIconTemplate let-customer="item" let-isCustomerSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCustomerSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+
+      <ion-item lines="none" *ngIf="projects?.length > 0" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'projects' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="projects"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          (onSearch)="searchProjects($event)"
+          formControlName="project_id"
+          mode="ios"
+          #projectComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="projectComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{projectComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-project="item" let-isProjectSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isProjectSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'contract_subject' | translate}}</ion-label>
+        <ion-input type="text" formControlName="subject"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'contract_value' | translate}}</ion-label>
+        <ion-input type="number" formControlName="contract_value"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none"  class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'contract_type' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="contractTypes"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          formControlName="contract_type"
+          mode="ios"
+          #contractTypeComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="contractTypeComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{contractTypeComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-project="item" let-isContractTypeSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isContractTypeSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isStartDateModalOpen = true" id="open-start_date-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'contract_start_date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="datestart" [value]="formGroup.value.datestart"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isStartDateModalOpen" trigger="open-start_date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #datestart presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.datestart)" (ionChange)="formGroup.value.datestart = formatDate(datestart.value);isStartDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isEndDateModalOpen = true" id="open-end_date-modal" mode="md">
+        <ion-label position="floating" mode="md">{{'contract_end_date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="dateend" [value]="formGroup.value.dateend"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isEndDateModalOpen" trigger="open-end_date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #dateend presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.dateend)" (ionChange)="formGroup.value.dateend = formatDate(dateend.value);isEndDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+
+
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'contracts'" [typeid]="contract_id"></app-custom-fields>
+
+      <!-- <div class="page-divider"></div> -->
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'contract_description' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="description"></ion-textarea>
+      </ion-item>
+
+    
+    <ion-button (click)="!contract_id ? createContract() : updateContract()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid  || submitting" class="ion-margin-vertical">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{(!contract_id ? 'save' : 'update') | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && contract_id !== null"></app-mpc-loader>
+</ion-content>

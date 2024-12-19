@@ -1,0 +1,56 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/settings/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{'accounts' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list lines="none" *ngIf="!isLoading">
+    <ion-item-sliding class="ion-margin-top ion-margin-bottom" *ngFor="let account of accounts;trackBy: trackByFn;let i = index;">
+      <ion-item-options side="start">
+        <ion-item-option color="default-danger" class="_delete" (click)="delete(i, account)">{{'_delete' | translate}}</ion-item-option>
+      </ion-item-options>
+      
+      <ion-item class="ion-margin-start ion-margin-end r-m-16">
+        <ion-avatar
+          slot="start"
+          (click)="switchAccount(account)"
+          [class.active]="account.active"
+          [style.color]="account.color"
+          [style.background]="account?.background">
+          <ion-text *ngIf="!account?.user?.profile_image">{{ account.domain.substring(0, 1) | titlecase }}</ion-text>
+          <img *ngIf="account?.user?.profile_image" [src]="account?.user?.profile_image">
+        </ion-avatar>
+        <ion-label>
+          <h3>{{ (account?.user?.full_name ?? 'Sign In') }}</h3>
+          <span>{{ account?.url }}</span>
+
+          <!-- <ion-chip *ngIf="account?.is_subscription_active" color="success" style="width: 100%;margin-left: 0;">
+            <ion-icon name="hourglass-outline"></ion-icon>
+            <ion-label>{{  account?.subscription_expires_at }}</ion-label>
+          </ion-chip>
+
+          <ion-chip *ngIf="!account?.is_subscription_active" color="danger" style="width: 100%;margin-left: 0;">
+            <ion-icon name="warning-outline"></ion-icon>
+            <ion-label>{{  account?.subscription_expires_at }}</ion-label>
+          </ion-chip> -->
+        </ion-label>
+      </ion-item>
+    </ion-item-sliding>
+  </ion-list>
+
+  <app-skeleton *ngIf="isLoading" [isAvatar]="true"></app-skeleton>
+
+  <ion-fab
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
+    <ion-fab-button color="default" (click)="baseUrl()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

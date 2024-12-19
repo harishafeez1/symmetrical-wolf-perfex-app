@@ -1,0 +1,109 @@
+ion-grid {
+    border-radius: 10px;
+    background: var(--ion-item-background);
+    margin: 16px 0;
+    ion-row {
+        border-bottom: 1px solid var(--ion-item-border-color);
+        margin: 0px 16px;
+        
+        ion-col:nth-child(2) {
+            text-align: right;
+        }
+    }
+
+    ion-row:last-child {
+        border-bottom: 0;
+    }
+
+    h6 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+    }
+    
+    h3 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+        margin-top: 0;
+    }
+
+    .in-active {
+        color: #FF8686;
+    }
+    .active {
+        color: #63EDBB;
+    }
+}
+
+ion-grid.reply {
+    border-radius: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--ion-item-border-color);
+    ion-item {
+        --background: transparent;
+    }
+    ion-item::part(native) {
+        padding-left: 0;
+    }
+
+    .reply_name {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 24px;
+        color: #48BDFF;
+    }
+    
+    .reply_email {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 15px;
+        color: #747889;
+    }
+
+    .reply_date {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 10px;
+        line-height: 12px;
+        color: #747889;
+    }
+
+    ion-avatar {
+        background: var(--ion-color-default);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        ion-text {
+            color: #000;
+        }
+    }
+}
+
+ion-grid.client_reply {
+    background: #F2F2F2;
+    // background: var(--ion-item-background);
+}
+
+hr {
+    background: var(--ion-item-border-color);
+}
+
+.ion-fab-ion-margin-bottom {
+    margin-bottom: 10px;
+}
+
+.ion-fab-ion-margin-top {
+    margin-top: 10px;
+}

@@ -1,0 +1,132 @@
+ion-grid {
+    border-radius: 10px;
+    background: var(--ion-item-background);
+    margin: 16px 0;
+    ion-row {
+        border-bottom: 1px solid var(--ion-item-border-color);
+        margin: 0px 16px;
+    }
+
+    ion-row:last-child {
+        border-bottom: 0;
+    }
+
+    h5 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+    }
+
+    h6 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+    }
+    
+    h3 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+        margin-top: 0;
+    }
+}
+
+ion-row {
+    ion-col:nth-child(2) {
+        text-align: right;
+    }
+}
+
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 10px;
+    table.items {
+        background: var(--ion-item-background);
+        width: 100%;
+        tr {
+            th {
+                background: #7EE2BE;
+                color: #000;
+            }
+            th, td {
+                padding: 8px 10px;
+                white-space: nowrap;
+                text-align: left;
+            } 
+            td {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 16px;
+            }
+            td span {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 11px;
+                line-height: 13px;
+
+                color: #747889;
+            }
+        }
+    }
+}
+
+
+.proposal_danger {
+    color: #FF8686;
+    background: transparent;
+    padding: 0;
+    text-align: right;
+    margin:0;
+    font-size: unset;
+    justify-content: end;
+}
+.proposal_success {
+    color: #63EDBB;
+    background: transparent;
+    padding: 0;
+    text-align: right;
+    margin:0;
+    font-size: unset;
+    justify-content: end;
+}
+
+.proposal_default {
+    color: #acacac;
+    background: transparent;
+    padding: 0;
+    text-align: right;
+    margin: 0;
+    font-size: unset;
+    justify-content: end;
+}
+
+.proposal_warning {
+    color: #ffc067;
+    background: transparent;
+    padding: 0;
+    text-align: right;
+    margin:0;
+    font-size: unset;
+    justify-content: end;
+}
+
+.proposal_info {
+    color: rgb(3 169 244 / 60%);
+    background: transparent;
+    padding: 0;
+    text-align: right;
+    margin:0;
+    font-size: unset;
+    justify-content: end;
+}

@@ -1,0 +1,44 @@
+import { Customer } from "./customer";
+
+export interface Estimate {
+    clientid: number;
+    number: number;
+    date: Date;
+    expirydate?: Date;
+    currency: number;
+    newitems?: Array<any>;
+    items?: Array<any>;
+    subtotal: string;
+    total: string;
+    billing_street?: string;
+    billing_city?: string;
+    billing_state?: string;
+    billing_zip?: string;
+    billing_country?: string;
+    shipping_street?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_zip?: string;
+    shipping_country?: string;
+    tags?: string;
+    status?: string;
+    reference_no?: string;
+    sale_agent?: string;
+    adminnote?: string;
+    clientnote?: string;
+    terms?: string;
+    show_quantity_as?: string;
+    discount_type?: string;
+    discount_percent?: number;
+    discount_total?: number;
+    adjustment?: number;
+    project_data?: any;
+    project_name?: string;
+    project_id?: number;
+    client?: Customer;
+    include_shipping?: number;
+    symbol?: string;
+    decimal_separator?: string;
+    thousand_separator?: string;
+    show_shipping_on_estimate?: number;
+}

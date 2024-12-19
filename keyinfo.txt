@@ -1,0 +1,4 @@
+Alias: perfex_crm_app
+pass: Topgun1234!!
+firstname: Mubashir
+orgnization: K9 Technologies

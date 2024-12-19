@@ -1,0 +1,284 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" *ngIf=" type !== 'modal'" color="dark" defaultHref="/admin/subscriptions/list"></ion-back-button>
+      <ion-button *ngIf=" type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ (!subscription_id  ? 'new_subscription' : 'edit_subscription') | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <div
+      *ngIf="subscription_error !== false"
+      [innerHTML]="subscription_error" 
+      class="ion-margin-vertical ion-padding" 
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);"></div>
+    
+    <ion-card class="ion-margin-vertical ion-padding" style="margin-left: 0;margin-right: 0;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-primary-rgb), 10%);">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'billing_plan' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="plans"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="nickname"
+          [canSearch]="true"
+          formControlName="stripe_plan_id"
+          #plansComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="plansComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title>{{'select_stripe_plan' | translate}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-plan="item">
+            {{plan.nickname}} <sub style="margin-left: 2px;color: #777;font-size: 70%;white-space: nowrap;">{{plan.subtext}}</sub>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'item_quantity_placeholder' | translate}}</ion-label>
+        <ion-input type="number" formControlName="quantity"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDateModalOpen = true"
+      id="open-date-modal" mode="md">
+      <ion-label position="floating" mode="md">{{'first_billing_date' | translate}}</ion-label>
+      <ion-input type="text" formControlName="date" [value]="formGroup.value.date"></ion-input>
+      <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+      <ion-modal [isOpen]="isDateModalOpen" trigger="open-date-modal">
+        <ng-template>
+          <ion-content>
+            <ion-datetime mode="md" #date presentation="date" showDefaultButtons
+              [value]="parseDate(formGroup.value.date)"
+              (ionChange)="formGroup.value.date = formatDate(date.value);isDateModalOpen = false;"
+              size="cover">
+            </ion-datetime>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+    </ion-card>
+    
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating"><small class="text-danger">* </small>{{'subscription_name' | translate}}</ion-label>
+      <ion-input type="text" formControlName="name"></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating">{{'subscriptions_description' | translate}}</ion-label>
+      <ion-textarea rows="4" formControlName="description"></ion-textarea>
+    </ion-item>
+
+    <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+      <ion-checkbox color="default" mode="md" formControlName="description_in_item" value="1" labelPlacement="end" justify="start">{{'description_in_invoice_item' | translate}}</ion-checkbox>
+      <!-- <ion-label>{{'description_in_invoice_item' | translate}}</ion-label> -->
+    </ion-item>
+
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md" [disabled]="subscription?.next_billing_cycle ? 'true' : 'false'">
+      <ion-label position="floating"><small class="text-danger">* </small>{{'client' | translate}}</ion-label>
+      <!-- [shouldStoreItemValue]="true" -->
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+        [items]="customers"
+        itemValueField="userid"
+        itemTextField="company"
+        [canSearch]="true"
+        (onChange)="customerSelect($event)"
+        (onSearch)="searchCustomers($event)"
+        formControlName="clientid"
+        #customerComponent
+      >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="customerComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title>{{'customers' | translate}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+        </ng-template>
+      </ionic-selectable>
+    </ion-item>
+
+    <ion-item lines="none" *ngIf="projects?.length > 0" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating">{{'projects' | translate}}</ion-label>
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+        [items]="projects"
+        itemValueField="id"
+        itemTextField="name"
+        [canSearch]="true"
+        (onSearch)="searchProjects($event)"
+        formControlName="project_id"
+        mode="ios"
+        #projectComponent
+      >
+      <!-- [shouldStoreItemValue]="true" -->
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="projectComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title>{{'projects' | translate}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableItemTemplate let-project="item">
+          {{'#' + project.id + ' - ' + project.name}}
+        </ng-template>
+
+        <ng-template ionicSelectableValueTemplate let-project="value">
+          {{'#' + project.id + ' - ' + project.name}}
+        </ng-template>
+      </ionic-selectable>
+    </ion-item>
+
+    <ion-grid *ngIf="subscription_id && subscription?.next_billing_cycle && checkCustomerCurrency" style="background: rgba(var(--ion-color-warning-rgb), 35%);border-radius: 10px;padding: 10px;">
+      <ion-row>
+        <ion-col>
+          {{'subscription_plan_currency_does_not_match' | translate}}.
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <!-- <ion-label position="floating"><small class="text-danger">* </small>{{'currency' | translate}}</ion-label> -->
+      <ion-select label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="currency"  mode="ios" style="width: 100%;">
+        <div slot="label"><ion-text color="danger">* </ion-text>{{'currency' | translate}}</div>
+        <ion-select-option *ngFor="let currency of currencies" [value]="currency.id">{{ currency.name }} <small> {{ currency.symbol }} </small></ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating">{{'tax_1_stripe' | translate}}</ion-label>
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+        [items]="stripe_tax_rates"
+        itemValueField="id"
+        itemTextField="formated_dispaly_name"
+        [canSearch]="true"
+        formControlName="stripe_tax_id"
+        mode="ios"
+        #stripeTaxComponent
+      >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+        </ng-template>
+
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="stripeTaxComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title>{{'tax_1_stripe' | translate}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemTemplate let-tax="item">
+          {{tax.formated_dispaly_name}} <sub style="margin-left: 2px;color: #777;font-size: 70%;white-space: nowrap;">{{tax.subtext}}</sub>
+        </ng-template>
+      </ionic-selectable>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating">{{'tax_2_stripe' | translate}}</ion-label>
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+        [items]="stripe_tax_rates"
+        itemValueField="id"
+        itemTextField="formated_dispaly_name"
+        [canSearch]="true"
+        formControlName="stripe_tax_id_2"
+        mode="ios"
+        #stripeTax2Component
+      >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+        </ng-template>
+
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="stripeTax2Component.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title>{{'tax_2_stripe' | translate}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemTemplate let-tax="item">
+          {{tax.formated_dispaly_name}} <sub style="margin-left: 2px;color: #777;font-size: 70%;white-space: nowrap;">{{tax.subtext}}</sub>
+        </ng-template>
+      </ionic-selectable>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating">{{'terms_and_conditions' | translate}}</ion-label>
+      <ion-textarea rows="4" formControlName="terms" placeholder="Enter customer terms & conditions to be displayed to the customer before subscribe to the subscription."></ion-textarea>
+    </ion-item>
+
+    <ion-button *ngIf="!subscription_id" (click)="createSubscription()" color="default" mode="ios" type="submit"
+      expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+
+    <ion-button *ngIf="subscription_id" (click)="updateSubscription()" color="default" mode="ios" type="submit"
+      expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && subscription_id"></app-mpc-loader>
+</ion-content>

@@ -1,0 +1,45 @@
+::ng-deep .mycomponent-wider-popover
+{
+  --width: 95%;
+  --max-width: 400px;
+}
+
+ion-grid {
+  border-radius: 10px;
+  background: var(--ion-item-background);
+  margin: 16px 0;
+  ion-row {
+      border-bottom: 1px solid var(--ion-item-border-color);
+      margin: 0px 16px;
+  }
+
+  ion-row:last-child {
+      border-bottom: 0;
+  }
+
+  h5 {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+  }
+
+  h6 {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 16px;
+      color: #747889;
+  }
+  
+  h3 {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+      margin-top: 0;
+  }
+}

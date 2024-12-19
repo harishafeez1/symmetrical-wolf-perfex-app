@@ -1,0 +1,127 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'copy_project' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-item lines="none" button="false" class="checkbox" mode="md">
+      <ion-checkbox color="default" mode="md" formControlName="tasks" labelPlacement="end" justify="start">{{'task' | translate}}</ion-checkbox>
+      <!-- <ion-label>{{'task' | translate}}</ion-label> -->
+    </ion-item>
+    <div class="ion-margin-start" *ngIf="formGroup.get('tasks').value === true">
+      <ion-item lines="none" button="false" class="checkbox" mode="md">
+        <ion-checkbox color="default" mode="md" formControlName="tasks_include_checklist_items" labelPlacement="end" justify="start">{{'copy_project_task_include_check_list_items' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'copy_project_task_include_check_list_items' | translate}}</ion-label> -->
+      </ion-item>
+      <ion-item lines="none" button="false" class="checkbox" mode="md">
+        <ion-checkbox color="default" mode="md" formControlName="task_include_assignees" labelPlacement="end" justify="start">{{'copy_project_task_include_assignees' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'copy_project_task_include_assignees' | translate}}</ion-label> -->
+      </ion-item>
+      <ion-item lines="none" button="false" class="checkbox" mode="md">
+        <ion-checkbox color="default" mode="md" formControlName="task_include_followers" labelPlacement="end" justify="start">{{'copy_project_task_include_followers' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'copy_project_task_include_followers' | translate}}</ion-label> -->
+      </ion-item>
+    </div>
+    <ion-item lines="none" button="false" class="checkbox" mode="md">
+      <ion-checkbox color="default" mode="md" formControlName="milestones" labelPlacement="end" justify="start">{{'project_milestones' | translate}}</ion-checkbox>
+      <!-- <ion-label>{{'project_milestones' | translate}}</ion-label> -->
+    </ion-item>
+    <ion-item lines="none" button="false" class="checkbox" mode="md">
+      <ion-checkbox color="default" mode="md" formControlName="members" labelPlacement="end" justify="start">{{'project_members' | translate}}</ion-checkbox>
+      <!-- <ion-label>{{'project_members' | translate}}</ion-label> -->
+    </ion-item>
+
+    <ion-list  lines="none">
+      <ion-radio-group formControlName="copy_project_task_status">
+        <ion-list-header>
+          <ion-label>
+            {{'copy_project_tasks_status' | translate}}
+          </ion-label>
+        </ion-list-header>
+    
+        <ion-item *ngFor="let status of statuses">
+          <ion-label>{{ status.name | translate}}</ion-label>
+          <ion-radio slot="start" mode="md" [value]="status.id"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating"><small class="text-danger">* </small>{{'project_name' | translate}}</ion-label>
+      <ion-input type="text" formControlName="name"></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" mode="md">
+      <ion-label position="floating"><small class="text-danger">* </small>{{'customer' | translate}}</ion-label>
+      <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+        [items]="customers"
+        [shouldStoreItemValue]="true"
+        itemValueField="userid"
+        itemTextField="company"
+        [canSearch]="true"
+        formControlName="clientid_copy_project"
+        #customerComponent
+      >
+      <ng-template ionicSelectableSearchFailTemplate>
+        <div padding>
+          <app-empty></app-empty>
+        </div>
+      </ng-template>
+      <ng-template ionicSelectableHeaderTemplate>
+        <ion-toolbar mode="ios">
+          <ion-buttons slot="start">
+            <ion-button (click)="customerComponent.close()">
+              <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-title> {{customerComponent.label}}</ion-title>
+        </ion-toolbar>
+      </ng-template>
+      <ng-template ionicSelectableItemIconTemplate let-customer="item" let-isCustomerSelected="isItemSelected">
+        <ion-checkbox slot="start" [checked]="isCustomerSelected"></ion-checkbox>
+      </ng-template>
+      </ionic-selectable>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDateModalOpen = true" id="open-start_date-modal" mode="md">
+      <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'project_start_date' | translate}}</ion-label>
+      <ion-input type="text" formControlName="start_date" [value]="formGroup.value.start_date"></ion-input>
+      <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+      <ion-modal [isOpen]="isDateModalOpen" trigger="open-start_date-modal">
+        <ng-template>
+          <ion-content>
+            <ion-datetime mode="md" #start_date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.start_date)" (ionChange)="formGroup.value.start_date = formatDate(start_date.value);isDateModalOpen = false;" size="cover">
+            </ion-datetime>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDeadlineModalOpen = true" id="open-deadline-modal" mode="md">
+      <ion-label position="floating" mode="md">{{'project_deadline' | translate}}</ion-label>
+      <ion-input type="text" formControlName="deadline" [value]="formGroup.value.deadline"></ion-input>
+      <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+      <ion-modal [isOpen]="isDeadlineModalOpen" trigger="open-deadline-modal">
+        <ng-template>
+          <ion-content>
+            <ion-datetime mode="md" #deadline presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.deadline)" (ionChange)="formGroup.value.deadline = formatDate(deadline.value);isDeadlineModalOpen = false;" size="cover">
+            </ion-datetime>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-button  (click)="copyProject()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'copy_project' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+</ion-content>

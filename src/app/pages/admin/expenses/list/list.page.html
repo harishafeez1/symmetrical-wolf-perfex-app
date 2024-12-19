@@ -1,0 +1,109 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'expenses' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon
+          [color]="isSearching ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/search.svg"
+        ></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()">
+        <ion-icon
+          [color]="isFiltered ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/funnel.svg"
+        ></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="expenseApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar [hidden]="!summary ? 'none' : ''">
+    <div style="border-top: 1px solid var(--ion-item-border-color);margin-left: 16px;margin-right: 16px;"></div>
+    <ion-accordion-group (ionChange)="onAccordionChange()">
+      <ion-accordion value="first" style="background: transparent;">
+        <ion-item slot="header" style="--background-hover: transparent;font-family: Poppins;font-size: 14px;font-style: normal;font-weight: 400;line-height: normal;letter-spacing: -0.28px;--min-height: 25px;padding: 0;margin: 0;">
+          <ion-label>{{'summary' | translate}}</ion-label>
+        </ion-item>
+        <div class="summary ion-padding" slot="content" style="padding-top: 6px;">
+          <swiper-container  #slides>
+            <swiper-slide class="ion-padding">
+                <div class="title warning">{{'expenses_total' | translate}}</div>
+                <div class="amount" [innerHTML]="summary?.all?.total"></div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title success">{{'expenses_list_billable' | translate}}</div>
+              <div class="amount" [innerHTML]="summary?.billable?.total"></div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title warning">{{'expenses_list_non_billable' | translate}}</div>
+              <div class="amount" [innerHTML]="summary?.non_billable?.total"></div>
+            </swiper-slide>
+  
+            <swiper-slide class="ion-padding">
+              <div class="title danger">{{'expenses_list_unbilled' | translate}}</div>
+              <div class="amount" [innerHTML]="summary?.unbilled?.total"></div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title success">{{'expense_billed' | translate}}</div>
+              <div class="amount" [innerHTML]="summary?.billed?.total"></div>
+            </swiper-slide>
+          </swiper-container>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </ion-toolbar>
+  
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar
+    [placeholder]="'kb_search' | translate"
+      mode="ios"
+      (ionInput)="searchExpenses($event)"
+      debounce="500"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list lines="none" *ngIf="!isLoading">
+    <app-expense-list-card [expenses]="expenses"></app-expense-list-card>
+  </ion-list>
+
+  <app-skeleton *ngIf="expenses?.length == 0 && isLoading"></app-skeleton>
+
+  <ion-infinite-scroll
+   *ngIf="!isLoading"
+    threshold="100px"
+    (ionInfinite)="loadMoreExpenses($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab
+    *ngIf="authService.hasPermission('expenses', ['create'])"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
+    <ion-fab-button color="default" (click)="addExpense()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="expenses?.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

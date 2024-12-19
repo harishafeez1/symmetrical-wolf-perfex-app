@@ -1,0 +1,82 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'filters' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetFilters()">
+        <ion-label color="dark">{{'reset' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;">
+    <form [formGroup]="filters">
+      
+      <ion-grid>
+        <ion-row lines="none" class="ion-margin-vertical"  style="border:0">
+          <ion-col>
+            <h5>{{'status' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <ion-row style="flex-wrap: nowrap;overflow-x: scroll;">
+          <ion-button
+            [color]="isAppliedStatus(status_id) ? 'default' : 'medium'"
+            mode="ios"
+            *ngFor="let status_id of proposalHelper.get_statuses()"
+            [fill]="isAppliedStatus(status_id) ? 'solid' : 'outline'"
+            (click)="applyStatusFilter(status_id)"
+          >{{ proposalHelper.format_proposal_status(status_id, '', false) | translate}}</ion-button>
+        </ion-row>
+      </ion-grid>
+      
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'sale_agent_string' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="staffs"
+          itemValueField="staffid"
+          [shouldStoreItemValue]="true"
+          itemTextField="full_name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="sale_agent"
+          mode="ios"
+          #portComponent
+        >
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="portComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{portComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemTemplate let-staff="item">
+          {{staff.firstname}} {{staff.lastname}} <sub class="sub-margin-right">{{staff.email}}</sub>
+        </ng-template>
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="portComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+          <ion-button (click)="portComponent.confirm();portComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+    </form>
+    <ion-button (click)="applyFilters()" color="default" mode="ios" type="submit" expand="block">{{'show_results' | translate}}</ion-button>
+  
+  </div>
+</ion-content>

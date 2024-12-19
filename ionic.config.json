@@ -1,0 +1,7 @@
+{
+  "name": "Perfex-CRM-App",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

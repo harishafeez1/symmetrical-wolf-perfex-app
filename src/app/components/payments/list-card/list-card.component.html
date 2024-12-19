@@ -1,0 +1,28 @@
+<ion-item-sliding #slidingItem  *ngFor="let payment of payments;let i = index;trackBy: trackByFn;"
+  class="ion-margin-top ion-margin-bottom">
+  <ion-item-options side="start" *ngIf="authService.hasPermission('payments', ['delete'])">
+    <ion-item-option color="default-danger" class="_delete"
+      (click)="delete(payment.id, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+  </ion-item-options>
+
+  <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(payment.id, payment)">
+    <div slot="start" class="date_created">
+      <div class="date">{{ payment.daterecorded | date : "dd" }}</div>
+      <div class="month">{{ payment.daterecorded | date : "MMM" }}</div>
+    </div>
+    <ion-label>
+      <h6 *ngIf="payment?.transactionid"> <strong >{{'trans_id' | translate}}</strong> {{ payment?.transactionid.length > 14 ? payment?.transactionid.slice(0, 13) + '..' : payment?.transactionid.slice(0, 10) }}</h6>
+      <h3>#{{ payment.id }} - {{ payment.invoice_number }}</h3>
+      <span>{{ payment.company }}</span> <br>
+    </ion-label>
+    <ion-note slot="end">
+      <h3 style="text-align: right;">{{ payment.amount | appFormatMoney: payment?.currency }}</h3>
+
+      <span class="payment_mode">{{ payment.payment_mode_name }}</span>
+    </ion-note>
+  </ion-item>
+
+  <!-- <ion-item-options side="end" *ngIf="authService.hasPermission('payments', ['edit'])">
+    <ion-item-option color="default" class="_action" (click)="edit(payment.id)">Edit</ion-item-option>
+  </ion-item-options> -->
+</ion-item-sliding>

@@ -1,0 +1,54 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+}
+ion-modal {
+    --width: 290px;
+    --height: 395px;
+    --border-radius: 8px;
+}
+
+.range-item {
+    border: 0;
+    --background: transparent;
+    --padding-start: 0;
+    ion-range {
+        --bar-height: 18px;
+        --bar-border-radius: 10px;
+        --knob-background: var(--ion-color-default);
+    }  
+}
+
+.__text-editor {
+    --inner-padding-end: 0px;
+}
+
+ion-item.checkbox {
+    border: 0;
+    --background: transparent;
+    --padding-start: 0;
+
+    ion-label {
+        white-space: inherit;
+    }
+
+    ion-checkbox {
+        margin-right: 10px;
+        --border-color-checked: transparent;
+        --border-radius: 5px;
+        --border-width: 2px;
+        --border-color: #C6C6C6;
+        --checkmark-width: 3px;
+        --size: 26px;
+    }
+}
+
+.settings ion-item.checkbox {
+    height: 47px;
+    padding: 0px 0px 54px 0px;
+    --ion-padding-top: 0;
+    --ion-padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--ion-item-border-color) !important;
+    border-radius: 0;
+}

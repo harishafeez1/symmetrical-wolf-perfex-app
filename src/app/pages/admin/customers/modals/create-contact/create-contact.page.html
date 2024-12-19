@@ -1,0 +1,281 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon
+          color="dark"
+          slot="icon-only"
+          src="/assets/icon/left.svg" class="btn-rotate"
+        ></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title *ngIf="contact">{{'edit_contact' | translate }}</ion-title>
+    <ion-title *ngIf="!contact">{{'new_contact' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formGroup">
+    <div>
+      <div style="display: flex;flex-direction: row;justify-content: center;align-items: center;">
+        <ion-avatar *ngIf="contact?.profile_image" style="position: relative;width: 100px;height: 100px;border: 2px solid var(--ion-item-border-color);">
+          <img [src]="contact?.profile_url">
+          <ion-icon name="trash" (click)="deleteContactAttachment(contact.id)" style="position: absolute;right: 2px;color: var(--ion-color-danger);background: var(--ion-item-background);border-radius: 100%;padding: 2px;top: 2px;border: 2px solid var(--ion-item-border-color);"></ion-icon>
+        </ion-avatar>
+      </div>
+     
+      <ngx-dropzone (change)="onSelect($event)" class="ion-margin-vertical" *ngIf="!contact?.profile_image" accept='image/*, application/*'>
+        <ngx-dropzone-label>{{'expense_add_edit_attach_receipt' | translate}}</ngx-dropzone-label>
+        <ngx-dropzone-preview *ngIf="!file && contact?.attachment" [removable]="true" (removed)="deleteContactAttachment(contact.id)">
+          <ngx-dropzone-label>{{ contact.attachment }} ({{ contact.filetype }})</ngx-dropzone-label>
+        </ngx-dropzone-preview>
+
+        <ngx-dropzone-preview *ngIf="file" [removable]="true" (removed)="onRemove(file)">
+          <ngx-dropzone-label>{{ file.name }} ({{ file.type }})</ngx-dropzone-label>
+        </ngx-dropzone-preview>
+      </ngx-dropzone>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'client_firstname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="firstname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'client_lastname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="lastname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'contact_position' | translate}}</ion-label>
+        <ion-input type="text" formControlName="title"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'client_email' | translate}}</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'clients_phone' | translate}}</ion-label>
+        <ion-input type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'document_direction' | translate}}</ion-label> -->
+        <ion-select label="{{'document_direction' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="direction" mode="ios">
+          <!-- <ion-select-option value=""></ion-select-option> -->
+          <ion-select-option value="ltr">LTR</ion-select-option>
+          <ion-select-option value="rtl">RTL</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'contacts'" [typeid]="contact?.id"></app-custom-fields>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'client_password' | translate}}</ion-label>
+        <ion-input
+          [type]="!showPassword ? 'password' : 'text'"
+          formControlName="password"
+        ></ion-input>
+        <ion-icon
+          (click)="showPassword = !showPassword"
+          slot="end"
+          [name]="showPassword ? 'eye-off-outline':'eye-outline'"
+          style="margin-top: 15px;"
+        ></ion-icon>
+      </ion-item>
+
+      <div style="border-top: 1px solid var(--ion-item-border-color)">
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="is_primary"
+            labelPlacement="end" justify="start"
+          >
+          {{'contact_primary' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'contact_primary' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox" *ngIf="!contact">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="donotsendwelcomeemail"
+            labelPlacement="end" justify="start"
+          >
+          {{'client_do_not_send_welcome_email' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'client_do_not_send_welcome_email' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="send_set_password_email"
+            labelPlacement="end" justify="start"
+          >
+          {{'client_send_set_password_email' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'client_send_set_password_email' | translate}}</ion-label> -->
+        </ion-item>
+      </div>
+
+      <div formArrayName="permissions" style="border-top: 1px solid var(--ion-item-border-color);">
+        <h6 class="ion-margin-top" style="margin-bottom: 0;">{{'permissions' | translate}}</h6>
+        <small>
+          <ion-text color="danger"
+            >{{'contact_permissions_info' | translate}}</ion-text
+          >
+        </small>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="1"
+            value="1"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'invoices' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="2"
+            value="2"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'estimates' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="3"
+            value="3"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'contracts' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="4"
+            value="4"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'proposals' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="5"
+            value="5"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'support' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="6"
+            value="6"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'projects' | translate}}</ion-label>
+        </ion-item>
+      </div>
+
+      <div style="border-top: 1px solid var(--ion-item-border-color);">
+        <h6 class="ion-margin-top" style="margin-bottom: 0;">Email Notifications</h6>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="invoice_emails"
+            value="invoice_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'invoice' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="estimate_emails"
+            value="estimate_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'estimate' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="credit_note_emails"
+            value="credit_note_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'credit_note' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="project_emails"
+            value="project_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'project' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="ticket_emails"
+            value="ticket_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'tickets' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="task_emails"
+            value="task_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'task' | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-toggle
+            formControlName="contract_emails"
+            value="contract_emails"
+            mode="ios"
+            color="default"
+          ></ion-toggle>
+          <ion-label>{{'contract' | translate}}</ion-label>
+        </ion-item>
+      </div>
+    </div>
+  </form>
+  
+  <ion-button *ngIf="!contact" (click)="createContact()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+    <ion-spinner [hidden]="!submitting"></ion-spinner>
+    <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+  </ion-button>
+  <ion-button *ngIf="contact" (click)="updateContact()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+    <ion-spinner [hidden]="!submitting"></ion-spinner>
+    <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+  </ion-button>
+
+</ion-content>

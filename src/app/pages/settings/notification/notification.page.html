@@ -1,0 +1,90 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/settings/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{'notifications_setting' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-top">
+  <form [formGroup]="formGroup">
+    <ion-list>
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="ticket_notification"
+        ></ion-toggle>
+        <ion-label>{{'ticket_notifications' | translate}}</ion-label>
+      </ion-item>
+  
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="invoice_notification"
+        ></ion-toggle>
+        <ion-label>{{'invoice_notifications' | translate}}</ion-label>
+      </ion-item>
+  
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="task_notification"
+        ></ion-toggle>
+        <ion-label>{{'task_notifications' | translate}}</ion-label>
+      </ion-item>
+  
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="lead_notification"
+        ></ion-toggle>
+        <ion-label>{{'lead_notifications' | translate}}</ion-label>
+      </ion-item>
+  
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="proposal_notification"
+        ></ion-toggle>
+        <ion-label>{{'proposal_notifications' | translate}}</ion-label>
+      </ion-item>
+  
+      <ion-item button="false">
+        <ion-toggle
+          (ionBlur)="updateSetting()"
+          (ionFocus)="updateSetting()"
+          slot="end"
+          color="default"
+          mode="ios"
+          formControlName="project_notification"
+        ></ion-toggle>
+        <ion-label>{{'project_notifications' | translate}}</ion-label>
+      </ion-item>
+    </ion-list>
+    
+    
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

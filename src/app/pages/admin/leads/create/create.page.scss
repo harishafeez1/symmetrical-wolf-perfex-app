@@ -1,0 +1,16 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+}
+ion-modal {
+    --width: 290px;
+    --height: 395px;
+    --border-radius: 8px;
+}
+
+ion-checkbox {
+    --border-color: #C6C6C6;
+    --border-color-checked: var(--ion-color-primary);
+    --border-radius: 5px;
+    --size: 26px;
+    margin-right: 10px;
+}

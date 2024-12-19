@@ -1,0 +1,408 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/projects/list"></ion-back-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{(estimate ? 'estimate_convert_to_project' : (!project_id  ? 'new_project' : 'edit_project')) | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-segment mode="ios" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+      <ion-segment-button value="project_details">
+        <ion-label>{{'project_details' | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="billing_shipping">
+        <ion-label>{{'project_settings' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div *ngIf="selectedTab == 'project_details'">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'project_name' | translate}}</ion-label>
+        <ion-input type="text" formControlName="name"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'project_customer' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="customers"
+          [shouldStoreItemValue]="true"
+          itemValueField="userid"
+          itemTextField="company"
+          [canSearch]="true"
+          (onChange)="customerSelect($event)"
+          (onSearch)="searchCustomers($event)"
+          formControlName="clientid"
+          #customerComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="customerComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{customerComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-customer="item" let-isCustomerSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCustomerSelected"></ion-checkbox>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+        <ion-checkbox (ionChange)="progressFromTasks($event)" color="default" mode="md" formControlName="progress_from_tasks" value="1" labelPlacement="end" justify="start">{{'calculate_progress_through_tasks' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'calculate_progress_through_tasks' | translate}}</ion-label> -->
+      </ion-item>
+
+      <ion-label position="stacked" mode="md">{{'project_progress' | translate}} {{ progress }}%</ion-label>
+      <ion-item class="range-item" lines="none" mode="md">
+        <ion-range mode="ios" min="0" max="100" formControlName="progress" (ionChange)="changeProgress($event)"></ion-range>
+      </ion-item>
+   
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'project_status' | translate}}</ion-label> -->
+        <ion-select label="{{'project_status' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="status" mode="ios">
+          <ion-select-option *ngFor="let status of statuses" [value]="status.id">{{ status.name | translate }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small class="text-danger">* </small>{{'project_billing_type' | translate}}</ion-label> -->
+        <ion-select label-placement="floating"  okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="billing_type" mode="ios">
+          <div slot="label"><ion-text color="danger">* </ion-text>{{'project_billing_type' | translate}}</div>
+          <ion-select-option value=""></ion-select-option>
+          <ion-select-option value="1">{{'project_billing_type_fixed_cost' | translate}}</ion-select-option>
+          <ion-select-option value="2">{{'project_billing_type_project_hours' | translate}}</ion-select-option>
+          <ion-select-option value="3">{{'project_billing_type_project_task_hours' | translate}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" [hidden]="billing_type.value != 1" mode="md">
+        <ion-label position="floating">{{'project_total_cost' | translate}}</ion-label>
+        <ion-input type="text" formControlName="project_cost"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" [hidden]="billing_type.value != 2" mode="md">
+        <ion-label position="floating">{{'project_rate_per_hour' | translate}}</ion-label>
+        <ion-input type="text" formControlName="project_rate_per_hour"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'estimated_hours' | translate}}</ion-label>
+        <ion-input type="text" formControlName="estimated_hours"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'project_members' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="staffs"
+          [shouldStoreItemValue]="true"
+          itemValueField="staffid"
+          itemTextField="full_name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          (onSearch)="searchStaffs($event)"
+          formControlName="project_members"
+          #memberComponent
+          >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-member="item" let-isMemberSelected="isItemSelected">
+            <ion-checkbox [checked]="isMemberSelected" slot="start"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="memberComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{memberComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="memberComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}} All</ion-button>
+            <ion-button (click)="memberComponent.confirm();memberComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDateModalOpen = true" id="open-start_date-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'project_start_date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="start_date" [value]="formGroup.value.start_date"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isDateModalOpen" trigger="open-start_date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #start_date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.start_date)" (ionChange)="formGroup.value.start_date = formatDate(start_date.value);isDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDeadlineModalOpen = true" id="open-deadline-modal" mode="md">
+        <ion-label position="floating" mode="md">{{'project_deadline' | translate}}</ion-label>
+        <ion-input type="text" formControlName="deadline" [value]="formGroup.value.deadline"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isDeadlineModalOpen" trigger="open-deadline-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #deadline presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.deadline)" (ionChange)="formGroup.value.deadline = formatDate(deadline.value);isDeadlineModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'projects'" [typeid]="project_id"></app-custom-fields>
+
+      <ion-item lines="none" class="ion-margin-vertical ion-no-padding __text-editor item-inner-padding-end" mode="md">
+        <ion-label position="floating" mode="md" class="ion-padding-horizontal">{{'project_description' | translate}}</ion-label>
+        <editor
+          [init]="editorOption"
+          formControlName="description"
+          style="width: 100%;"
+        ></editor>
+      </ion-item>
+
+      <ion-list class="show_quantity_as" lines="none" *ngIf="estimate">
+        <ion-list-header>
+          <ion-label>
+            {{'estimate_items_convert_to_tasks' | translate}}
+          </ion-label>
+        </ion-list-header>
+        <ion-row *ngFor="let estimateItem of estimateItems;let i = index">
+          <ion-col size="12">
+            <ion-item lines="none" button="false" class="checkbox" mode="md">
+              <ion-checkbox color="default" mode="md" [ngModelOptions]="{standalone: true}" [(ngModel)]="estimateItems[i].checked" labelPlacement="end" justify="start">{{estimateItem?.description}}</ion-checkbox>
+              <!-- <ion-label>{{estimateItem?.description}}</ion-label> -->
+            </ion-item>
+          </ion-col>
+          <ion-col size="12">
+            <ion-item lines="none"  mode="md">
+              <ion-label position="floating">{{'assign_members' | translate}}</ion-label>
+              <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+                [items]="staffs"
+                [shouldStoreItemValue]="true"
+                itemValueField="staffid"
+                itemTextField="full_name"
+                [canSearch]="true"
+                [ngModelOptions]="{standalone: true}" 
+                [(ngModel)]="estimateItems[i].assign"
+                #assignComponent
+                >
+                <ng-template ionicSelectableSearchFailTemplate>
+                  <div padding>
+                    <app-empty></app-empty>
+                  </div>
+                </ng-template>
+                <ng-template ionicSelectableItemIconTemplate let-member="item" let-isMemberSelected="isItemSelected">
+                  <ion-checkbox [checked]="isMemberSelected" slot="start"></ion-checkbox>
+                </ng-template>
+                <ng-template ionicSelectableHeaderTemplate>
+                  <ion-toolbar mode="ios">
+                    <ion-buttons slot="start">
+                      <ion-button (click)="assignComponent.close()">
+                        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                      </ion-button>
+                    </ion-buttons>
+                    <ion-title> {{assignComponent.label}}</ion-title>
+                  </ion-toolbar>
+                </ng-template>
+                <!-- <ng-template ionicSelectableFooterTemplate>
+                  <ion-button (click)="assignComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}} All</ion-button>
+                  <ion-button (click)="assignComponent.confirm();assignComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+                </ng-template> -->
+              </ionic-selectable>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-list>
+      <!-- <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+        <ion-checkbox (ionChange)="progressFromTasks($event)" color="default" mode="md" formControlName="progress_from_tasks" value="1"></ion-checkbox>
+        <ion-label>Calculate progress through tasks</ion-label>
+      </ion-item> -->
+
+
+      <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+        <ion-checkbox color="default" mode="md" formControlName="send_created_email" value="1" labelPlacement="end" justify="start">{{'send_project_created_email' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'send_project_created_email' | translate}}</ion-label> -->
+      </ion-item>
+    </div>
+
+    <div *ngIf="selectedTab == 'billing_shipping'">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md" *ngIf="settings?.perfex_current_version >= '290'">
+        <!-- <ion-label position="floating"><small class="text-danger">* </small>{{'projects_send_contact_notification' | translate}}</ion-label> -->
+        <ion-select label-placement="floating"  okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="contact_notification" mode="ios" interface="action-sheet">
+          <div slot="label"><ion-text color="danger">* </ion-text>{{'projects_send_contact_notification' | translate}}</div>
+          <ion-select-option value="1">{{'project_send_all_contacts_with_notifications_enabled' | translate}}</ion-select-option>
+          <ion-select-option value="2">{{'project_send_specific_contacts_with_notification' | translate}}</ion-select-option>
+          <ion-select-option value="3">{{'project_do_not_send_contacts_notifications' | translate}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div formArrayName="settings" class="settings">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'visible_tabs' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+            [items]="projectTabs"
+            [shouldStoreItemValue]="true"
+            itemValueField="slug"
+            itemTextField="name"
+            [canClear]="true"
+            mode="ios"
+            [isMultiple]="true"
+            formControlName="available_features"
+            [disabledItems]="[{
+              name: 'project_overview',
+              slug: 'project_overview'
+            }]"
+            #visibleTabsComponent
+          >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+            <ng-template ionicSelectableItemTemplate let-tab="item">{{ tab.name | translate}}</ng-template>
+            
+            <ng-template ionicSelectableItemIconTemplate let-tab="item" let-isTabSelected="isItemSelected">
+              <ion-checkbox [checked]="isTabSelected" slot="start"></ion-checkbox>
+            </ng-template>
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar mode="ios">
+                <ion-buttons slot="start">
+                  <ion-button (click)="visibleTabsComponent.close()">
+                    <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title> {{visibleTabsComponent.label}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+            <ng-template ionicSelectableFooterTemplate>
+              <ion-button (click)="visibleTabsComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+              <ion-button (click)="visibleTabsComponent.confirm();visibleTabsComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+            </ng-template>
+          </ionic-selectable>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_tasks" (ionChange)="viewTaskChange($event)" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_tasks' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_tasks' | translate}}</ion-label>  -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="create_tasks" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_create_tasks' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_create_tasks' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="edit_tasks" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_edit_tasks' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_edit_tasks' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="comment_on_tasks" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_comment' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_comment' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_task_comments" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_task_comment' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_task_comment' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_task_attachments" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_task_attachments' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_task_attachments' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_task_checklist_items" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_task_checklist_items' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_task_checklist_items' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="upload_on_tasks" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_upload_attachments_task' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_upload_attachments_task' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_task_total_logged_time" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_task_total_logged_time' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_task_total_logged_time' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_finance_overview" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_finance_overview' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_finance_overview' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="upload_files" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_upload_files' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_upload_files' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="open_discussions" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_open_discussions' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_open_discussions' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_milestones" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_milestones' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_milestones' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_gantt" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_gannt' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_gannt' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_timesheets" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_timesheets' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_timesheets' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_activity_log" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_view_activity_log' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_view_activity_log' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="view_team_members" value="1" labelPlacement="end" justify="start">{{'allow_customer_to_team_members' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'allow_customer_to_team_members' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+          <ion-checkbox color="default" mode="md" formControlName="hide_tasks_on_main_tasks_table" value="1" labelPlacement="end" justify="start">{{'hide_tasks_on_main_tasks_table' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'hide_tasks_on_main_tasks_table' | translate}}</ion-label> -->
+        </ion-item>
+      </div>
+    </div>
+    <ion-button *ngIf="!project_id" (click)="createProject()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="project_id" (click)="updateProject()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && project_id"></app-mpc-loader>
+</ion-content>

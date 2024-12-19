@@ -1,0 +1,74 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <!-- <ion-title>New MileStone</ion-title> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'milestone_name' | translate}}</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+
+
+        <ion-item *ngIf="settings?.perfex_current_version >= '294'" lines="none" class="ion-margin-vertical" button="true" (click)="isStartDateModalOpen = true" id="open-start_date-modal" mode="md">
+
+          <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'milestone_start_date' | translate}}</ion-label>
+          <ion-input type="text" formControlName="start_date" [value]="formGroup.value.start_date"></ion-input>
+          <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+          <ion-modal [isOpen]="isStartDateModalOpen" trigger="open-start_date-modal">
+            <ng-template>
+              <ion-content>
+                <ion-datetime mode="md" #start_date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.start_date)" (ionChange)="formGroup.value.start_date = formatDate(start_date.value);isStartDateModalOpen = false;" size="cover">
+                </ion-datetime>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isDueDateModalOpen = true" id="open-due_date-modal" mode="md">
+          <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'task_duedate' | translate}}</ion-label>
+          <ion-input type="text" formControlName="due_date" [value]="formGroup.value.due_date"></ion-input>
+          <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+          <ion-modal [isOpen]="isDueDateModalOpen" trigger="open-due_date-modal">
+            <ng-template>
+              <ion-content>
+                <ion-datetime mode="md" #due_date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.due_date)" (ionChange)="formGroup.value.due_date = formatDate(due_date.value);isDueDateModalOpen = false;" size="cover">
+                </ion-datetime>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'milestone_description' | translate }}</ion-label>
+          <ion-textarea rows="4" formControlName="description"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox">
+          <ion-checkbox color="default" mode="md" formControlName="description_visible_to_customer" value="1" labelPlacement="end" justify="start">{{'description_visible_to_customer' | translate}}</ion-checkbox>
+          <!-- <ion-label>{{'description_visible_to_customer' | translate}}</ion-label> -->
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'project_milestone_order' | translate}}</ion-label>
+          <ion-input formControlName="milestone_order"></ion-input>
+        </ion-item>
+    </form>
+    <ion-button *ngIf="!milestone" (click)="createMilestone()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="milestone" (click)="updateMilestone()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

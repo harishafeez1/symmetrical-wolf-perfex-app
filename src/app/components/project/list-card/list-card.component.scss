@@ -1,0 +1,127 @@
+ion-item-option._delete {
+    border-radius: 0 10px 10px 0;
+    width: 85px;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    color: #FFFFFF;
+}
+ion-item-option._action {
+    border-radius: 10px 0 0 10px;
+    width: 85px;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    color: #FFFFFF;
+}
+ion-item {
+    ion-label:last-child {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+    }
+    ion-note {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        padding: 0px 0px 4px 0px;
+    }
+    h6 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 14px;
+        /* identical to box height */
+        color: #747889;
+    }
+    .project_danger {
+        background: #FFD9D9;
+        border-radius: 3px;
+        width: 54px;
+        height: 22px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        /* identical to box height */
+        color: #000000;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .project_warning {
+        background: #ffc067;
+        border-radius: 3px;
+        width: 80px;
+        height: 22px;
+        font-family: "Roboto";
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        color: #000000;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .project_success {
+        background: #d9ffdc;
+        border-radius: 3px;
+        width: 75px;
+        height: 22px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        /* identical to box height */
+        color: #000000;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .project_info {
+        background: rgb(3 169 244 / 60%);
+        border-radius: 3px;
+        width: 65px;
+        height: 22px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        /* identical to box height */
+        color: #000000;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .project_default {
+        background: #f2f2f2;
+        border-radius: 3px;
+        width: 65px;
+        height: 22px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        /* identical to box height */
+        color: #000000;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+    }
+}

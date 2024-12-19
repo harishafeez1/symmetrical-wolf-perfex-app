@@ -1,0 +1,138 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <!-- <ion-title>New Note</ion-title> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+      <ion-item *ngIf="!isTimeDuration" lines="none" class="ion-margin-vertical" button="true" (click)="isStartTimeModalOpen = true" id="open-start_time-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'project_timesheet_start_time' | translate}}</ion-label>
+        <ion-input type="text" formControlName="start_time"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isStartTimeModalOpen" trigger="open-start_time-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #start_time presentation="date-time" showDefaultButtons 
+              [value]="parseDate(formGroup.value.start_time, 'datetime')" 
+              (ionChange)="startDateTime(start_time.value);isStartTimeModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item *ngIf="!isTimeDuration" lines="none" class="ion-margin-vertical" button="true" (click)="isEndTimeModalOpen = true" id="open-end_time-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'project_timesheet_end_time' | translate}}</ion-label>
+        <ion-input type="text" formControlName="end_time"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isEndTimeModalOpen" trigger="open-end_time-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #end_time presentation="date-time" showDefaultButtons 
+              [value]="parseDate(formGroup.value.end_time, 'datetime')" 
+              (ionChange)="endDateTime(end_time.value);isEndTimeModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item *ngIf="isTimeDuration" mode="md" lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'project_timesheet_time_spend' | translate}}</ion-label>
+        <ion-input type="text" formControlName="timesheet_duration"></ion-input>
+      </ion-item>
+
+      <ion-text *ngIf="!timesheet" (click)="changeTimeIntoDuration();" color="primary">{{'enter_time_duration_instead' | translate}}</ion-text>
+
+      <ion-item *ngIf="project_id" lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'task' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="tasks"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          formControlName="timesheet_task_id"
+          (onChange)="taskSelect($event)"
+          mode="ios"
+          #taskComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="taskComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{taskComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'project_timesheet_user' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="staffs"
+          itemValueField="assigneeid"
+          [shouldStoreItemValue]="true"
+          itemTextField="full_name"
+          [canSearch]="true"
+          formControlName="timesheet_staff_id"
+          mode="ios"
+          #staffComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="staffComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{staffComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-staff="item">
+            {{staff.firstname}} {{staff.lastname}} <sub class="sub-margin-right">{{staff.email}}</sub>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'note' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="note"></ion-textarea>
+      </ion-item>
+    </form>
+    <ion-button *ngIf="!timesheet" (click)="createTimeSheet()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="timesheet" (click)="updateTimeSheet()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

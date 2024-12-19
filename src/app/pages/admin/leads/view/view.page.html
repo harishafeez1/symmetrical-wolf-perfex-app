@@ -1,0 +1,411 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/leads/list"></ion-back-button> -->
+      <ion-button routerLink="/admin/leads/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_lead' | translate}}</ion-title>
+
+    <ion-buttons *ngIf="['tasks', 'reminders', 'proposals'].includes(selectedTab)" slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()" *ngIf="['tasks'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi"
+        *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'proposal')" [apiService]="proposalApi"
+        *ngIf="selectedTab == 'proposals'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching &&  ['tasks', 'reminders', 'proposals'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['tasks'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['proposals'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'proposal')"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['reminders'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'reminder')"
+      debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+    <ion-segment-button value="lead">
+      <ion-label>{{'lead_profile' | translate }}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="proposals">
+      <ion-label>{{'proposals' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="attachments">
+      <ion-label>{{'lead_attachments' | translate }}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'leads_reminders_tab' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="activity_logs">
+      <ion-label>{{'lead_activity_logs_tab' | translate}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'lead'">
+    <ion-grid>
+      <ion-row style="border: 0;">
+        <ion-col>
+          <span style="
+          font-family: 'Roboto';
+          font-style: normal;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 19px;
+        ">{{ lead?.name }}</span>
+        </ion-col>
+        <ion-col *ngIf="lead?.junk === '1' || lead?.lost === '1'"><span
+            [ngClass]="lead?.junk === '1' ? 'lead-junk' : (lead?.lost === '1' ? 'lead-lost' : '')">{{ (lead?.junk === '1'
+            ? 'lead_junk' : (lead?.lost === '1' ? 'lead_lost' : '') ) | translate}}</span></ion-col>
+      </ion-row>
+      <ion-row style="border: 0;">
+        <ion-col>
+          <ion-button color="primary" [routerLink]="'/admin/leads/edit/' + lead_id" expand="block" fill="outline"
+            mode="ios">{{'edit_lead' | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button *ngIf="lead?.clientid === null" (click)="convertToCustomer()" color="default" expand="block"
+            mode="ios">{{'lead_convert_to_client' | translate}}</ion-button>
+          <ion-button *ngIf="lead?.clientid !== null" [routerLink]="'/admin/customers/view/' + lead.clientid"
+            color="default" expand="block" mode="ios">{{'view_customer' | translate}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <!-- <ion-col>
+          <ion-button
+            color="medium"
+            id="popover-pdf-button"
+            expand="block"
+            fill="outline"
+            color="dark"
+            mode="ios"
+            class="action_button"
+            (click)="openPdf()"
+          >
+            <ion-icon color="dark" style="width: 100%" src="/assets/icon/pdf.svg"></ion-icon>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+          </ion-col> -->
+
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" color="dark" fill="outline" mode="ios"
+            class="action_button" (click)="openMore()">
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{'lead_info' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'leads_dt_name' | translate}}</h6>
+          <h3>{{ lead?.name }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_title' | translate}}</h6>
+          <h3>{{ lead?.title }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_add_edit_email' | translate}}</h6>
+          <h3>{{ lead?.email }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'leads_dt_phonenumber' | translate}}</h6>
+          <h3>{{ lead?.phonenumber }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_add_edit_lead_value' | translate}}</h6>
+          <h3>{{ (lead?.lead_value ?? '') | appFormatMoney: lead }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_website' | translate}}</h6>
+          <h3>{{ lead?.website }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{'lead_address_string' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_company' | translate}}</h6>
+          <h3>{{ lead?.company }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_address' | translate}}</h6>
+          <h3 [innerHTML]="lead?.address"></h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_city' | translate}}</h6>
+          <h3>{{ lead?.city }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_state' | translate}}</h6>
+          <h3>{{ lead?.state }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_country' | translate}}</h6>
+          <h3>{{ getCountryNameById(lead?.country) }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_zip' | translate}}</h6>
+          <h3>{{ lead?.zip }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{'lead_general_info' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'leads_dt_status' | translate}}</h6>
+          <h3>{{ lead?.status_name }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'lead_add_edit_source' | translate}}</h6>
+          <h3>{{ lead?.source_name }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'localization_default_language' | translate}}</h6>
+          <h3>{{ lead?.default_language }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'leads_dt_assigned' | translate}}</h6>
+          <h3>{{ staff?.full_name }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'leads_dt_datecreated' | translate}}</h6>
+          <h3>{{ getDateDuration(lead?.dateadded) }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'last_contacted' | translate}}</h6>
+          <h3>{{ getDateDuration(lead?.lastcontact) }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'lead_description' | translate}}</h6>
+          <h3 [innerHTML]="lead?.description"></h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="lead?.tags">
+      <ion-row>
+        <ion-col>
+          <h6>{{'tags' | translate}}</h6>
+          <div class="ion-margin-vertical">
+              <ion-chip *ngFor="let tag of lead?.tags?.split(',')">
+                {{ tag }}
+              </ion-chip>
+            </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="lead?.customfields?.length > 0">
+      <ion-row>
+        <ion-col>
+          <h5>{{'custom_fields' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let custom_field of lead?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'proposals'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'proposal')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-proposal-list-card [proposals]="proposals" [isModal]="true"></app-proposal-list-card>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'proposal')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('proposals', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" class="ion-margin" (click)="addProposal()">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="proposals?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'attachments'">
+    <ngx-dropzone (change)="onSelect($event)" class="ion-margin" accept='image/*, application/*'>
+      <ngx-dropzone-label>{{'drop_files_here_to_upload' | translate}}</ngx-dropzone-label>
+      <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+        <ngx-dropzone-label>{{ f.name }} ({{ f.type }})</ngx-dropzone-label>
+      </ngx-dropzone-preview>
+    </ngx-dropzone>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let attachment of lead?.attachments;let i = index;trackBy: trackByFn;"
+        class="ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('attachments', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteAttachment(attachment.id, i)">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-thumbnail slot="start" style="text-align: center;" (click)="downloadAttachment(attachment?.id, attachment?.filetype, attachment?.file_name)">
+            <img [src]="commonHelper.getMimeIcon(attachment.filetype)" style="width: 24px;height: 100%;object-fit: contain;" />
+          </ion-thumbnail>
+          <ion-label (click)="downloadAttachment(attachment?.id, attachment?.filetype, attachment?.file_name)">
+            <h6>{{ attachment.dateadded |  dateTimeFormat:'datetime' }}</h6>
+            <h3>{{ attachment.file_name }}</h3>
+            <span>{{ attachment.filetype }}</span>
+          </ion-label>
+        </ion-item>
+      </ion-item-sliding>
+    </ion-list>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders"
+        (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'reminder')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'activity_logs'">
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-activity-list-card [activities]="activities"></app-activity-list-card>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab  vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addActivity()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="activities?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

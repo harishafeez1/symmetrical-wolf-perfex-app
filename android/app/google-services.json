@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "386838702068",
+    "project_id": "myperfexcrm-f47c4",
+    "storage_bucket": "myperfexcrm-f47c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386838702068:android:fc0a3af46eca2771bdbba1",
+        "android_client_info": {
+          "package_name": "com.myperfexcrm.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "386838702068-umjmsi01t6dutbuptsgfjbd1bsi7n3sq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArPr9t3oBZAdBFZzDLzUqzGom8gkLitDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "386838702068-umjmsi01t6dutbuptsgfjbd1bsi7n3sq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "386838702068-8nitv36ucg8bkb737g4v7fg14l3bkg3b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.myperfexcrm.app",
+                "app_store_id": "1625111197"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

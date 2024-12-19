@@ -1,0 +1,55 @@
+<ion-item-sliding
+      #slidingItem
+      *ngFor="let expense of expenses;let i = index;trackBy: trackByFn;"
+      class="ion-margin-top ion-margin-bottom"
+    >
+      <ion-item-options
+        side="start"
+        *ngIf="authService.hasPermission('expenses', ['delete'])"
+      >
+        <ion-item-option
+          color="default-danger"
+          class="_delete"
+          (click)="delete(expense.expenseid, i, slidingItem)"
+          >{{'_delete' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+
+      <ion-item
+        class="ion-margin-start ion-margin-end r-m-16"
+        (click)="view(expense.expenseid, expense)"
+      >
+        <div slot="start" class="date_created">
+          <div class="date">{{ expense.date | date : "dd" }}</div>
+          <div class="month">{{ expense.date | date : "MMM" }}</div>
+        </div>
+
+        <ion-label>
+          <h6 *ngIf="expense.payment_mode_name">{{'payment_method' | translate}}: {{ expense.payment_mode_name | titlecase }}</h6>
+          <h3>{{ expense.expense_name }}</h3>
+          <span>{{ expense.category_name }}</span>
+        </ion-label>
+        <ion-note slot="end">
+          <!-- <h3>{{ expense?.totalAmountWithTax | appFormatMoney: expense }}</h3> -->
+          <h3>{{ totalAmountWithTax(expense?.amount, expense?.taxrate, expense?.taxrate2) | appFormatMoney: expense }}</h3>
+          <span *ngIf="expense.recurring == 1" class="list_status" style="background: var(--ion-color-secondary);">{{'expenses_list_recurring' | translate}}</span>
+          <p *ngIf="expense.billable == 1">
+            <ion-text *ngIf="expense.invoiceid == null" color="danger">{{'expenses_list_unbilled' | translate}}</ion-text>
+            <ion-text *ngIf="expense.invoiceid != null && expense.is_invoice_paid == false" color="success">{{'expenses_list_invoiced' | translate}}</ion-text>
+            <ion-text *ngIf="expense.invoiceid != null && expense.is_invoice_paid == true" color="success">{{'expense_billed' | translate}}</ion-text>
+          </p>
+        </ion-note>
+      </ion-item>
+
+      <ion-item-options
+        side="end"
+        *ngIf="authService.hasPermission('expenses', ['edit'])"
+      >
+        <ion-item-option
+          color="default"
+          class="_action"
+          (click)="edit(expense.expenseid)"
+          >{{'_edit' | translate}}</ion-item-option
+        >
+      </ion-item-options>
+    </ion-item-sliding>

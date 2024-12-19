@@ -1,0 +1,28 @@
+ion-list {
+    border-radius: 10px;
+
+    ion-item {
+        border-radius: 0;
+        --border-radius: 0;
+    }
+    ion-label{
+        white-space: normal;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .activated {
+        --ion-item-background: rgba(var(--ion-color-default-rgb), 0.3);
+    }
+}
+
+.rotate180 {
+    rotate: 180deg;
+}
+
+
+.flip {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+

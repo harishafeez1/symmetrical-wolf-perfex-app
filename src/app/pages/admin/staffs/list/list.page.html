@@ -1,0 +1,84 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'staff_members' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="staffApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar [placeholder]="'kb_search' | translate"  mode="ios" (ionInput)="searchStaffs($event)" debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list lines="none" *ngIf="!isLoading">
+    <ion-item-sliding #slidingItem class="ion-margin-top ion-margin-bottom" *ngFor="let staff of staffs;trackBy: trackByFn;let i = index;">
+      <ion-item-options side="start" *ngIf="authService.hasPermission('staff', ['delete']) && userData?.staffid != staff?.staffid">
+        <ion-item-option color="default-danger" class="_delete" (click)="delete(staff.staffid, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+      </ion-item-options>
+      
+      <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(staff.staffid, staff)">
+        <ion-avatar slot="start">
+          <img [src]="staff?.profile_images?.small">
+        </ion-avatar>
+        <ion-row class="ion-justify-content-between ion-align-items-center" style="width: 100%;">
+          <ion-col size="8">
+            <ion-label>
+              <h3>{{ staff?.full_name }}</h3>
+              <span>{{( staff?.email ?? staff?.phonenumber )}}</span>
+            </ion-label>
+          </ion-col>
+          <ion-col size="4">
+            <ion-label  [style]="staff?.phonenumber ? 'display: flex; flex-direction: row; align-items: center;': ''">
+              <a *ngIf="staff?.phonenumber" [href]="'tel:' + staff?.phonenumber" (click)="stopPropagation($event)">
+                <ion-icon src="/assets/icon/phone.svg" style="color: var(--phone-icon-color);width: 24px;height: 24px;margin-right: 5px;"></ion-icon>
+              </a>
+              <div class="ion-text-end" *ngIf="userData?.staffid != staff?.staffid">
+                <ion-toggle 
+                [checked]="staff?.active == 1 ? true : false" 
+                (click)="stopPropagation($event)"
+                (ionChange)="staffChangeStatus($event, staff?.staffid)"
+                mode="ios" color="default"></ion-toggle>
+              </div>
+            </ion-label>
+          </ion-col>
+        </ion-row>
+        
+        
+      </ion-item>
+
+      <ion-item-options side="end" *ngIf="authService.hasPermission('staff', ['edit'])">
+        <ion-item-option color="default" class="_action" [routerLink]="'/admin/staffs/edit/' + staff.staffid">{{'_edit' | translate}}</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <app-skeleton *ngIf="staffs?.length == 0 && isLoading" [isAvatar]="true"></app-skeleton>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreStaffs($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab *ngIf="authService.hasPermission('staff', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="default" routerLink="/admin/staffs/create" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="staffs?.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

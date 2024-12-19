@@ -1,0 +1,295 @@
+ion-grid {
+    border-radius: 10px;
+    background: var(--ion-item-background);
+    margin: 16px 0;
+
+    ion-row {
+        border-bottom: 1px solid var(--ion-item-border-color);
+        margin: 0px 16px;
+
+        ion-col:nth-child(2) {
+            text-align: right;
+        }
+
+        ion-chip {
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+    }
+
+    ion-row:last-child {
+        border-bottom: 0;
+    }
+
+    h6 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+    }
+
+    h3 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+        margin-top: 0;
+    }
+
+    .in-active {
+        color: #FF8686;
+    }
+
+    .active {
+        color: #63EDBB;
+    }
+}
+
+.ticket-status-label:last-child {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+
+    .ticket_status {
+        border-radius: 3px;
+        min-width: 70px;
+        height: 22px;
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 22px;
+        /* identical to box height */
+        color: #f2f2f2;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        margin-bottom: 15px;
+    }
+}
+
+
+.overview {
+    div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    ion-progress-bar {
+        margin-top: 5px;
+        border-radius: 10px;
+        height: 4px;
+    }
+}
+
+.heading {
+    font-family: "Poppins";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.28px;
+    color: var(--ion-text-color);
+    text-align: left;
+}
+
+ion-card {
+    border-radius: 10px;
+    background: var(--ion-item-background);
+    margin: 0;
+    box-shadow: none;
+
+    ion-icon {
+        padding: 10px;
+        background: var(--ion-color-primary);
+        border-radius: 10px;
+        font-size: 18px;
+    }
+
+    circle-progress {
+        width: 48px;
+        height: 48px;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .total_count {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 40px;
+        line-height: 47px;
+        color: var(--ion-text-color-dark);
+        margin-right: 3px;
+    }
+
+    .count_out_of {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+        opacity: 0.5;
+    }
+
+    .title {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+        margin-top: 5px;
+    }
+}
+
+
+.expense-stats {
+    swiper-container {
+        swiper-slide {
+            border: 1px solid var(--ion-item-border-color);
+            border-radius: 10px;
+            min-width: 124px;
+            width: auto !important;
+            height: 95px;
+            display: block;
+            margin-right: 16px;
+
+            .title {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 16px;
+                color: #747889;
+                border: 0 !important;
+                text-align: left;
+                white-space: nowrap;
+            }
+
+            .title.draft:before {
+                border: 3px solid #DCDCDC;
+                background: #DCDCDC;
+                content: '';
+                border-radius: 8px;
+                margin-right: 7px;
+            }
+
+            .title.info:before {
+                border: 3px solid rgb(3, 169, 244);
+                background: rgb(3, 169, 244);
+                content: '';
+                border-radius: 8px;
+                margin-right: 7px;
+            }
+
+            .title.warning:before {
+                border: 3px solid #FFBE5B;
+                background: #FFBE5B;
+                content: '';
+                border-radius: 8px;
+                margin-right: 7px;
+            }
+
+            .title.success:before {
+                border: 3px solid #8CE39A;
+                background: #8CE39A;
+                content: '';
+                border-radius: 8px;
+                margin-right: 7px;
+            }
+
+            .title.danger:before {
+                border: 3px solid #FF8686;
+                background: #FF8686;
+                content: '';
+                border-radius: 8px;
+                margin-right: 7px;
+            }
+
+            .amount {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: bold;
+                font-size: 24px;
+                line-height: 28px;
+                white-space: nowrap;
+                color: var(--ion-text-color-dark);
+                margin-top: 20px;
+                text-align: left;
+                width: 100%;
+            }
+        }
+    }
+}
+
+.basic_stats .single {
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+
+    ion-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
+
+        circle-progress {
+            width: 65px;
+            height: 65px;
+            margin-bottom: 0;
+        }
+
+        .stats {
+            margin-left: 16px;
+
+            .title {
+                margin-top: 0;
+            }
+        }
+
+    }
+}
+
+form {
+    ion-item {
+        border: 1px solid var(--ion-item-border-color);
+    }
+}
+.item-activity {
+    position: revert;
+    padding-bottom: 20px;
+    padding-left: 15px;
+    border-left: 2px solid var(--ion-color-primary);
+    border-radius: 0px !important;
+    --background: transparent;
+    ion-label{
+        margin-top: 0px;
+    }
+}
+.item-activity::after{
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #4b5158;
+}
+.last-item {
+    border-left: none !important;
+  }
+  .time-sheet-h6{
+    font-size: 12px !important;
+}

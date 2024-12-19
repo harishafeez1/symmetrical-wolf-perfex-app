@@ -1,0 +1,7 @@
+platforms:
+  android:
+    manifest:
+      - file: AndroidManifest.xml
+        target: manifest
+        inject: 
+          <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

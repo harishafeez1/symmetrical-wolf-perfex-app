@@ -1,0 +1,624 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/proposals/list"></ion-back-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ (!proposal_id ? 'new_proposal' : 'edit_proposal') | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-segment mode="ios" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+      <ion-segment-button value="customer_details">
+        <ion-label>{{'proposal_details' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="address_details">
+        <ion-label>{{'proposal_address_details' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div *ngIf="selectedTab == 'customer_details'">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_subject' | translate }}</ion-label>
+        <ion-input type="text" formControlName="subject"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_related' | translate}}</ion-label> -->
+        <ion-select label-placement="floating"  okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="rel_type" (ionChange)="relTypeChange($event)" mode="ios" style="width: 100%;">
+          <div slot="label"><ion-text color="danger">* </ion-text>{{'proposal_related' | translate}}</div>
+          <ion-select-option value="customer">{{'proposal_for_customer' | translate}}</ion-select-option>
+          <ion-select-option value="lead">{{'proposal_for_lead' | translate}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" *ngIf="rel_type.value == 'customer'" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_for_customer' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="customers"
+          [shouldStoreItemValue]="true"
+          itemValueField="userid"
+          itemTextField="company"
+          [canSearch]="true"
+          (onChange)="customerSelect($event)"
+          (onSearch)="searchCustomers($event)"
+          formControlName="rel_id"
+          mode="ios"
+          #customerComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="customerComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{customerComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+        <ng-template ionicSelectableItemIconTemplate let-customer="item" let-isCustomerSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCustomerSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" *ngIf="rel_type.value == 'lead'" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_for_lead' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="leads"
+          [shouldStoreItemValue]="true"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          (onChange)="leadSelect($event)"
+          (onSearch)="searchLeads($event)"
+          formControlName="rel_id"
+          mode="ios"
+          #leadsComponent
+        >
+
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="leadsComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{leadsComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+       
+        <ng-template ionicSelectableItemIconTemplate let-staff="item" let-isStaffSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isStaffSelected"></ion-checkbox>
+        </ng-template> 
+        
+
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" *ngIf="rel_type.value == 'customer' && projects?.length > 0 && setting.perfex_current_version >= '294'" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'projects' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="projects"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          (onSearch)="searchProjects($event)"
+          formControlName="project_id"
+          mode="ios"
+          #projectComponent
+        >
+        <!-- [shouldStoreItemValue]="true" -->
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="projectComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{projectComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        
+        <ng-template ionicSelectableItemIconTemplate let-project="item" let-isProjectSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isProjectSelected"></ion-checkbox>
+        </ng-template> 
+
+        <ng-template ionicSelectableItemTemplate let-project="item">
+          {{'#' + project.id + ' - ' + project.name}}
+        </ng-template>
+
+        <ng-template ionicSelectableValueTemplate let-project="value">
+          {{'#' + project.id + ' - ' + project.name}}
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isProposalDateModalOpen = true" id="open-proposal_date-modal" mode="md">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'proposal_date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="date" [value]="formGroup.value.date"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isProposalDateModalOpen" trigger="open-proposal_date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #proposal_date presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.date)" (ionChange)="formGroup.value.date = formatDate(proposal_date.value);isProposalDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" button="true" (click)="isOpenTillModalOpen = true" id="open-open_till-modal" mode="md">
+        <ion-label position="floating" mode="md">{{'proposal_open_till' | translate}}</ion-label>
+        <ion-input type="text" formControlName="open_till" [value]="formGroup.value.open_till"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isOpenTillModalOpen" trigger="open-open_till-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #open_till presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.open_till)" (ionChange)="formGroup.value.open_till = formatDate(open_till.value);isOpenTillModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating"><small class="text-danger">* </small>{{'currency' | translate}}</ion-label> -->
+        <ion-select label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="currency"  mode="ios" style="width: 100%;">
+          <div slot="label"><ion-text color="danger">* </ion-text>{{'currency' | translate}}</div>
+          <ion-select-option *ngFor="let currency of currencies" [value]="currency.id">{{ currency.name }} <small> {{ currency.symbol }} </small></ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'discount_type' | translate}}</ion-label> -->
+        <ion-select label="{{'discount_type' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="discount_type" (ionChange)="calculateProposal();" mode="ios">
+          <ion-select-option value="">{{'no_discount' | translate}}</ion-select-option>
+          <ion-select-option value="before_tax">{{'discount_type_before_tax' | translate}}</ion-select-option>
+          <ion-select-option value="after_tax">{{'discount_type_after_tax' | translate}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="stacked">{{'tags' | translate}}</ion-label>
+        <div class="ion-margin-vertical">
+          <ion-chip *ngFor="let tag of tags" >
+            {{ tag }}
+            <ion-icon name="close-circle-outline" (click)="removeTag(tag)"></ion-icon>
+          </ion-chip>
+          <ion-input placeholder="{{'add_to_tag' | translate}}" #myInput (ionInput)="addTag(myInput)" [debounce]="1000"></ion-input>
+        </div>
+      </ion-item>
+      
+      <ion-item lines="none" button="false" class="ion-margin-vertical checkbox" mode="md">
+        <ion-toggle color="default" mode="ios" formControlName="allow_comments"></ion-toggle>
+        <ion-label>{{'proposal_allow_comments' | translate}}</ion-label>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'proposal_status' | translate}}</ion-label> -->
+        <ion-select label="{{'proposal_status' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="status" mode="ios">
+          <ion-select-option *ngFor="let status_id of statuses" [value]="status_id">{{ proposalHelper.format_proposal_status(status_id, '', false) | translate}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_assigned' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="staffs"
+          itemValueField="staffid"
+          itemTextField="firstname"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          (onSearch)="searchStaffs($event)"
+          formControlName="assigned"
+          mode="ios"
+          #assignedComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="assignedComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{assignedComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemTemplate let-staff="item">
+          {{ staff.firstname }} {{ staff.lastname }}
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-staff="item" let-isStaffSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isStaffSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_to' | translate}}</ion-label>
+        <ion-input type="text" formControlName="proposal_to"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'proposal_email' | translate }}</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_phone' | translate}}</ion-label>
+        <ion-input label="Telephone input" type="tel" formControlName="phone"></ion-input>
+      </ion-item>
+
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'proposal'" [typeid]="proposal_id"></app-custom-fields>
+
+      <div class="page-divider"></div>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'add_item' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          item-content 
+          [items]="items"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          (onChange)="itemSelect($event)"
+          (onSearch)="searchItems($event)"
+          formControlName="select_item"
+          mode="ios"
+          #itemsComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="itemsComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{itemsComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-item="item" let-isItemSelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isItemSelected"></ion-checkbox>
+        </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-list class="show_quantity_as" lines="none">
+        <ion-radio-group formControlName="show_quantity_as">
+          <ion-list-header>
+            <ion-label>
+              {{'show_quantity_as' | translate}}
+            </ion-label>
+          </ion-list-header>
+      
+          <ion-item>
+            <ion-label>{{'quantity_as_qty' | translate}}</ion-label>
+            <ion-radio slot="start" mode="md" value="1"></ion-radio>
+          </ion-item>
+      
+          <ion-item>
+            <ion-label>{{'quantity_as_hours' | translate}}</ion-label>
+            <ion-radio slot="start" mode="md" value="2"></ion-radio>
+          </ion-item>
+      
+          <ion-item>
+            <ion-label>{{'quantity_as_qty_or_hours' | translate}}</ion-label>
+            <ion-radio slot="start" mode="md" value="3"></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+      </ion-list>
+
+      <ion-list class="ion-padding ion-margin-vertical">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'invoice_table_item_heading' | translate}}</ion-label>
+          <ion-input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedItem.description"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'invoice_item_add_edit_description' | translate}}</ion-label>
+          <ion-input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedItem.long_description"></ion-input>
+        </ion-item>
+        
+        <ion-row>
+          <ion-col class="ion-no-padding">
+            <ion-item lines="none" mode="md">
+              <ion-label position="floating">{{((formGroup.get('show_quantity_as').value == '1') ? 'quantity_as_qty' : (formGroup.get('show_quantity_as').value == '2' ? 'quantity_as_hours': (formGroup.get('show_quantity_as').value == '3' ? 'quantity_as_qty_or_hours': ''))) | translate}}</ion-label>
+              <ion-input type="number" value="1" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedItem.qty"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="4" class="ion-no-padding r-unit-col" style="padding-left: 16px;">
+            <ion-item lines="none" mode="md">
+              <ion-label position="floating">{{'unit' | translate}}</ion-label>
+              <ion-input type="text" value="" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedItem.unit"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'invoice_item_add_edit_rate' | translate}}</ion-label>
+          <ion-input type="number" [value]="selectedItem.rate" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedItem.rate"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'tax' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+            [items]="taxes"
+            itemValueField="name"
+            itemTextField="name"
+            mode="ios"
+            [isMultiple]="true"
+            [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="selectedItem.taxrate"
+            #taxRateComponent
+          >
+          <ng-template ionicSelectableItemTemplate let-tax="item">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+          <ng-template ionicSelectableValueTemplate let-taxes="value">
+            <div class="ionic-selectable-value-item" *ngFor="let tax of taxes">
+              {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="taxRateComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{taxRateComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-tax="item" let-isTaxSelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isTaxSelected"></ion-checkbox>
+          </ng-template> 
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="taxRateComponent.confirm();taxRateComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+        </ion-item>
+        
+
+        <ion-button expand="block" fill="clear" (click)="addItemToProposal()">
+          <ion-icon name="checkmark-sharp"></ion-icon>
+          <ion-label>{{'_add' | translate}}</ion-label>
+        </ion-button>
+      </ion-list>
+
+      <ion-list class="ion-padding ion-margin-vertical" *ngFor="let proposalItem of proposalItems;let i = index">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'invoice_table_item_heading' | translate}}</ion-label>
+          <ion-input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="proposalItems[i].description"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">Description</ion-label>
+          <ion-input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="proposalItems[i].long_description"></ion-input>
+        </ion-item>
+        <ion-row>
+          <ion-col class="ion-no-padding">
+            <ion-item lines="none" class="ion-margin-right" mode="md">
+              <ion-label position="floating">{{((formGroup.get('show_quantity_as').value == '1') ? 'quantity_as_qty' : (formGroup.get('show_quantity_as').value == '2' ? 'quantity_as_hours': (formGroup.get('show_quantity_as').value == '3' ? 'quantity_as_qty_or_hours': ''))) | translate}}</ion-label>
+              <ion-input type="number" (ionChange)="calculateProposal();" [ngModelOptions]="{standalone: true}" [(ngModel)]="proposalItems[i].qty"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="4" class="ion-no-padding r-unit-col" style="padding-left: 16px;">
+            <ion-item lines="none" mode="md">
+              <ion-label position="floating">{{'unit' | translate}}</ion-label>
+              <ion-input type="text" (ionChange)="calculateProposal();" [ngModelOptions]="{standalone: true}" [(ngModel)]="proposalItems[i].unit"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'invoice_item_add_edit_rate' | translate}}</ion-label>
+          <ion-input type="number" (ionChange)="calculateProposal();" [ngModelOptions]="{standalone: true}" [(ngModel)]="proposalItems[i].rate"></ion-input>
+        </ion-item>
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'tax' | translate}}</ion-label>
+          <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+            [items]="taxes"
+            itemValueField="name"
+            itemTextField="name"
+            [canClear]="true"
+            mode="ios"
+            [isMultiple]="true"
+            [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="proposalItems[i].taxrate"
+            (onChange)="calculateProposal()"
+            #taxSelectComponent
+          >
+          <ng-template ionicSelectableItemTemplate let-tax="item">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+          <ng-template ionicSelectableValueTemplate let-taxes="value">
+            <div class="ionic-selectable-value-item" *ngFor="let tax of taxes">
+              {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+            </div>
+           
+          </ng-template>
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="taxSelectComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{taxSelectComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-tax="item" let-isTaxSelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isTaxSelected"></ion-checkbox>
+          </ng-template> 
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="taxSelectComponent.confirm();taxSelectComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+        </ion-item>
+
+        <ion-button expand="block" fill="clear" (click)="removeItemToProposal(i)" class="remove-btn">
+          <ion-icon name="close-sharp"></ion-icon>
+          <ion-label>{{'remove' | translate}}</ion-label>
+        </ion-button>
+      </ion-list>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col>{{'invoice_subtotal' | translate}}:</ion-col>
+          <ion-col style="text-align: right;">{{ subTotal | appFormatMoney: selectedCurrency }}</ion-col>
+        </ion-row>
+       
+        <ion-row>
+          <ion-col>
+            <ion-item lines="none" mode="md">
+              <ion-label position="floating">{{'invoice_discount' | translate}}</ion-label>
+              <ion-input type="number" (ionChange)="addDiscount();" [ngModelOptions]="{standalone: true}" [(ngModel)]="discount"></ion-input>
+              <ion-text slot="end" id="trigger-button" style="padding-top: 10px;">{{ selected_dicount_type == 'discount-type-percent' ? '%' : '='}}</ion-text>
+            </ion-item>
+          </ion-col>
+          <ion-col style="text-align: right;">-{{ total_discount | appFormatMoney: selectedCurrency }}</ion-col>
+        </ion-row>
+
+        <ion-popover trigger="trigger-button" [dismissOnSelect]="true" mode="ios">
+          <ng-template>
+              <ion-list lines="none">
+                <ion-item button (click)="changeDiscountType('discount-type-percent');">%</ion-item>
+                <ion-item button (click)="changeDiscountType('discount-type-fixed');">{{'discount_fixed_amount' | translate}}</ion-item>
+              </ion-list>
+          </ng-template>
+        </ion-popover>
+
+        <ion-row *ngFor="let tax of totalTaxes | keyvalue">
+          <ion-col>{{ tax?.value?.name }}({{ tax?.value?.taxrate }}%)</ion-col>
+          <ion-col style="text-align: right;">{{ tax?.value?.subTotal | appFormatMoney: selectedCurrency }}</ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <ion-item lines="none" mode="md">
+              <ion-label position="floating">{{'invoice_adjustment' | translate}}</ion-label>
+              <ion-input type="number" min="0" (ionChange)="calculateProposal();" formControlName="adjustment"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col style="text-align: right;">{{ adjustment?.value | appFormatMoney: selectedCurrency }}</ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>{{'invoice_total' | translate}}:</ion-col>
+          <ion-col style="text-align: right;">{{ total | appFormatMoney: selectedCurrency }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <div *ngIf="selectedTab == 'address_details'">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_address' | translate }}</ion-label>
+        <ion-textarea rows="4" formControlName="address"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_city' | translate }}</ion-label>
+        <ion-input type="text" formControlName="city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_state' | translate}}</ion-label>
+        <ion-input type="text" formControlName="state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_zip' | translate}}</ion-label>
+        <ion-input type="text" formControlName="zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'proposal_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="country"
+          mode="ios"
+          #countryComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="countryComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{countryComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+          <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+        </ng-template> 
+        
+        </ionic-selectable>
+      </ion-item>
+     
+    </div>
+
+    <ion-input type="hidden" placeholder="Items to be removed" formControlName="removed_items"></ion-input>
+    
+    <ion-button *ngIf="!proposal_id" (click)="createProposal('save_as_draft')" fill="outline" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || drafting || submitting">
+      <ion-spinner [hidden]="!drafting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save_as_draft' | translate}}</ion-text>
+    </ion-button>
+    
+    <ion-button (click)="!proposal_id ? createProposal() : updateProposal()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || drafting || submitting" class="ion-margin-vertical">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{(!proposal_id ? 'save' : 'update') | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && proposal_id !== null"></app-mpc-loader>
+</ion-content>

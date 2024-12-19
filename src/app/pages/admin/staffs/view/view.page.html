@@ -1,0 +1,190 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/staffs/list" text="" icon="/assets/icon/left.svg">
+      </ion-back-button> -->
+      <ion-button (click)="goToPage()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_staff' | translate}}  {{ staff_id }}</ion-title>
+    <ion-buttons *ngIf="['projects'].includes(selectedTab)" slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <!-- <ion-button (click)="openFilters()" *ngIf="['tasks'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button> -->
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'project')" [apiService]="projectApi" *ngIf="selectedTab == 'projects'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching && ['projects'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="isSearching" mode="ios" (ionInput)="doSearch($event, 'project')" debounce="500"></ion-searchbar>
+      <!-- <ion-searchbar *ngIf="isSearching" mode="ios" (ionInput)="searchTasks($event)" debounce="500"></ion-searchbar> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+    <ion-segment-button value="profile">
+      <ion-label>{{'staff_profile_string' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="projects">
+      <ion-label>{{'projects' | translate}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'profile'">
+    <ion-segment mode="ios" (ionChange)="segmentChanged2($event)" [(ngModel)]="selectedTab2">
+      <ion-segment-button value="profile">
+        <ion-label>{{'staff_profile_string' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="permissions" disabled>
+        <ion-label>{{'permissions' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <div *ngIf="selectedTab2 == 'profile'">
+      <ion-grid>
+        <ion-row style="border: 0">
+          <ion-col>
+            <span style="
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 500;
+                font-size: 16px;
+                line-height: 19px;
+              ">{{'status' | translate}}</span>
+          </ion-col>
+          <ion-col><span [class]="staff?.active ? 'active': 'in-active'">{{ (staff?.active ? 'staff_dt_active' : 'inactive') | translate
+              }}</span></ion-col>
+        </ion-row>
+        <ion-row style="border: 0">
+          <ion-col>
+            <ion-avatar style="
+                margin: 0 auto;
+                height: 160px;
+                width: 160px;
+                object-fit: cover;
+                position: relative;
+              ">
+              <div class="camera-icon" type="button" (click)="chooseProfileImage()">
+                <ion-icon name="camera-outline" color="primary"></ion-icon>
+              </div>
+              <img [src]="photoDataUrl ? photoDataUrl : staff?.profile_images?.thumb" />
+            </ion-avatar>
+            
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-button color="primary" [routerLink]="'/admin/staffs/edit/' + staff_id" expand="block" fill="outline"
+              mode="ios">{{'edit_staff' | translate}}</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <h6>{{'name' | translate}}</h6>
+            <h3>{{ staff?.full_name }}</h3>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <h6>{{'staff_dt_email' | translate}}</h6>
+            <h3>{{ staff?.email }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'staff_add_edit_phonenumber' | translate}}</h6>
+            <h3>{{ staff?.phonenumber }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'staff_add_edit_facebook' | translate}}</h6>
+            <h3>{{ staff?.facebook }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'staff_add_edit_linkedin' | translate}}</h6>
+            <h3>{{ staff?.linkedin }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'staff_add_edit_skype' | translate}}</h6>
+            <h3>{{ staff?.skype }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'staff_hourly_rate' | translate}}</h6>
+            <h3>{{ staff?.hourly_rate | appFormatMoney: staff }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'localization_default_language' | translate}}</h6>
+            <h3>
+              {{ (staff?.default_language == '' ? 'System Default' :
+              staff?.default_language) | titlecase }}
+            </h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid *ngIf="staff?.customfields?.length > 0">
+        <ion-row *ngFor="let custom_field of staff?.customfields">
+          <ion-col>
+            <h6>{{ custom_field?.label }}</h6>
+            <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+    <div *ngIf="selectedTab2 == 'permissions'"></div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+
+    <div class="fixed-perfex-fab">
+    <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'projects'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'project')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-project-list-card [projects]="projects" [isModal]="true"></app-project-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'project')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="projects?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

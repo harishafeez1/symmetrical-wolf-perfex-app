@@ -1,0 +1,249 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!--  <ion-back-button class="btn-rotate"
+        *ngIf=" type !== 'modal'"
+        color="dark"
+        defaultHref="/admin/expenses/list"
+      ></ion-back-button> -->
+      <ion-button *ngIf=" type !== 'modal'" routerLink="/admin/expenses/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf=" type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_expense' | translate}}</ion-title>
+    <ion-buttons *ngIf="['tasks', 'reminders'].includes(selectedTab)" slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()" *ngIf="['tasks'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi" *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf=" isSearching && ['tasks', 'reminders'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['tasks'].includes(selectedTab)" mode="ios" (ionInput)="searchTasks($event)"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['reminders'].includes(selectedTab)" mode="ios" (ionInput)="searchReminders($event)"
+      debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab"
+    mode="md">
+    <ion-segment-button value="expense">
+      <ion-label>{{'expense' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button *ngIf="expense?.repeat_every != '0'" value="child_expense">
+      <ion-label>{{'child_expenses' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'reminders' | translate}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'expense'">
+    <ion-refresher slot="fixed" (ionRefresh)="doExpenseRefresh($event, 'expense')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-row *ngIf="expense?.recurring > 0 || expense?.recurring_from">
+      <ion-col size="6" style="padding-left: 0;">
+        <div class="ion-padding"
+          style="font-size: 14px;margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);">
+          {{'cycles_remaining' | translate}}: <br> {{expense?.cycles == '0' ? 'Infinity' : expense?.cycles}}
+        </div>
+      </ion-col>
+      <ion-col size="6" *ngIf="expense?.next_date" style="padding-right: 0;">
+        <div class="ion-padding"
+          style="font-size: 14px;margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);">
+          {{'next_expense_date' | translate}} <br> {{ expense.next_date | dateTimeFormat }}
+        </div>
+      </ion-col>
+    </ion-row>
+
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <!-- [routerLink]="'/admin/expenses/edit/' + expense_id" -->
+          <ion-button color="primary" (click)="editExpense(expense_id)" expand="block" fill="outline" mode="ios">{{'expense_edit' | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button color="default" expand="block" (click)="copyExpense()" mode="ios">{{'expense_copy' | translate}}</ion-button>
+        </ion-col>
+        <ion-col *ngIf="expense?.billable == '1' && expense?.invoiceid === null">
+          <ion-button color="default" expand="block" (click)="convertToInvoice()" mode="ios">{{'expense_convert_to_invoice' | translate}}</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ expense?.category_name }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'expense_name' | translate}}</h6>
+          <h3>{{ expense?.expense_name }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'expense_dt_table_heading_date' | translate}}</h6>
+          <h3>{{ expense?.date | dateTimeFormat}}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'expense_dt_table_heading_amount' | translate}}</h6>
+          <h3>{{ expense?.amount | appFormatMoney: expense }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'expense_dt_table_heading_payment_mode' | translate}}</h6>
+          <h3>{{ expense?.payment_mode_name }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'tax_1' | translate}}</h6>
+          <h3>{{ expense?.taxrate ? expense?.taxrate +'%'+ '('+expense?.tax_name+')' : '-' }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'tax_2' | translate}}</h6>
+          <h3>{{ expense?.taxrate2 ? (expense?.taxrate2 +'%'+ '('+expense?.tax_name2+')') : '-'}}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="expense?.taxrate || expense?.taxrate2">
+        <ion-col>
+          <h6>{{'total_with_tax' | translate}}</h6>
+          <h3>{{ totalAmountTaxes | appFormatMoney: expense }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'expense_ref_noe' | translate}}</h6>
+          <h3>{{ expense?.reference_no ? expense?.reference_no : '-' }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'expense_dt_table_heading_customer' | translate}}</h6>
+          <h3>{{ expense?.company ? expense?.company : '-' }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="expense?.project_data?.name || expense?.project_name">
+        <ion-col>
+          <h6>{{'project' | translate}}</h6>
+          <h3>{{ expense?.project_name ? expense?.project_name : (expense?.project_data?.name ? expense?.project_data?.name : '-') }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="expense?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of expense?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="expense?.note">
+      <ion-row>
+        <ion-col>
+          <h6>{{'note' | translate}}</h6>
+          <h3 [innerHTML]="expense?.note"></h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="expense?.attachment">
+      <ion-row>
+        <ion-col>
+          <h5>{{'expense_receipt' | translate}}</h5>
+        </ion-col>
+        <ion-col (click)="downloadAttachment(expense?.expenseid, expense?.filetype, expense?.attachment)">
+          <ion-icon color="primary" name="share-outline" size="large" style="margin-top: 6px"></ion-icon>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col class="ion-margin-top" (click)="downloadAttachment(expense?.expenseid, expense?.filetype, expense?.attachment)">
+          <h3>
+            <img
+              [src]="'assets/icon/mime/' + (['png', 'jpg', 'jpeg', 'gif'].includes(expense.filetype.split('/')[1]) ? 'image' : expense.filetype.split('/')[1]) + '.png'"
+              style="margin-bottom: -2px" />
+            {{ expense?.attachment }}
+          </h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'child_expense'">
+    <div class="ion-padding">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreTasks($event)">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders"
+        (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreReminders($event)">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

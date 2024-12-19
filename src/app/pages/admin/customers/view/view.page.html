@@ -1,0 +1,574 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+        <ion-button  routerLink="/admin/customers/list" routerDirection="back">
+          <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+        </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_customer_id' | translate }} {{ customer_id }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        *ngIf="['contacts','notes','invoices','payments','proposals','estimates','projects','tasks','credit_notes'].includes(selectedTab)"
+        (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()" *ngIf="['tasks'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'invoice')" [apiService]="invoiceApi" *ngIf="selectedTab == 'invoices'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'payment')" [apiService]="paymentApi" *ngIf="selectedTab == 'payments'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'proposal')" [apiService]="proposalApi" *ngIf="selectedTab == 'proposals'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'estimate')" [apiService]="estimateApi" *ngIf="selectedTab == 'estimates'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'project')" [apiService]="projectApi" *ngIf="selectedTab == 'projects'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi" *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'contact')" [apiService]="contactApi" *ngIf="selectedTab == 'contacts'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'credit_note')" [apiService]="creditNoteApi"
+        *ngIf="selectedTab == 'credit_notes'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar
+    *ngIf="isSearching && ['contacts','notes','invoices','payments','proposals','estimates','projects','tasks', 'credit_notes'].includes(selectedTab)">
+    <ion-searchbar *ngIf="isSearching && ['contacts'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'contact')" debounce="500"></ion-searchbar>
+    <ion-searchbar *ngIf="isSearching && ['notes'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'note')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['invoices'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'invoice')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['payments'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'payment')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['proposals'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'proposal')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['estimates'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'estimate')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['projects'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'project')"
+      debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="isSearching && ['tasks'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')" debounce="500"></ion-searchbar>
+      <ion-searchbar *ngIf="['credit_notes'].includes(selectedTab)" mode="ios"
+      (ionInput)="doSearch($event, 'credit_note')" debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+    <ion-segment-button value="profile">
+      <ion-label>{{'clients_profile_heading' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="contacts">
+      <ion-label>{{'customer_contacts' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="invoices">
+      <ion-label>{{'client_invoices_tab' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="payments">
+      <ion-label>{{'client_payments_tab' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="credit_notes">
+      <ion-label>{{'credit_notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="proposals">
+      <ion-label>{{'clients_nav_proposals' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="estimates">
+      <ion-label>{{'clients_nav_estimates' | translate}}</ion-label>
+    </ion-segment-button>
+
+    <ion-segment-button value="projects">
+      <ion-label>{{'clients_nav_projects' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tickets">
+      <ion-label>{{'tickets' | translate}}</ion-label>
+    </ion-segment-button>
+    <!--
+    <ion-segment-button value="statement">
+      <ion-label>Statements</ion-label>
+    </ion-segment-button>
+  
+    
+    
+    <ion-segment-button value="subscriptions">
+      <ion-label>Subscriptions</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="expenses">
+      <ion-label>Expenses</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="contracts">
+      <ion-label>Contracts</ion-label>
+    </ion-segment-button>
+    
+
+   
+    
+    <ion-segment-button value="files">
+      <ion-label>Files</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="vault">
+      <ion-label>Vault</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>Reminders</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="map">
+      <ion-label>Map</ion-label>
+    </ion-segment-button> -->
+  </ion-segment>
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'profile'">
+    <ion-refresher slot="fixed" (ionRefresh)="doCustomerRefresh($event, 'profile')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-segment mode="ios" (ionChange)="segmentChanged2($event)" [(ngModel)]="selectedTab2">
+      <ion-segment-button value="customer_details">
+        <ion-label>{{'customer_profile_details' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="billing_shipping">
+        <ion-label>{{'billing_shipping' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <div *ngIf="selectedTab2 == 'customer_details'">
+      <ion-grid>
+        <ion-row style="border: 0">
+          <ion-col><span style="
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 500;
+                font-size: 16px;
+                line-height: 19px;
+              ">{{'status' | translate}}</span></ion-col>
+          <ion-col><span [class]="customer?.active == '1' ? 'active': 'in-active'">{{ (customer?.active == '1' ? 'active'  :
+              'inactive') | translate}}</span></ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-button color="primary" [routerLink]="'/admin/customers/edit/' + customer_id" expand="block"
+              fill="outline" mode="ios">{{'edit_customer' | translate}}</ion-button>
+          </ion-col>
+          <ion-col>
+            <ion-button color="default" expand="block" mode="ios"
+              (click)="selectedTab = 'contacts'">{{'customer_contacts' | translate}}</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <h6>{{'client_company' | translate}}</h6>
+            <h3>{{ customer?.company }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'client_vat_number' | translate}}</h6>
+            <h3>{{ customer?.vat }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'clients_phone' | translate}}</h6>
+            <h3>{{ customer?.phonenumber }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'client_website' | translate}}</h6>
+            <h3>{{ customer?.website }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'currency' | translate}}</h6>
+            <h3 [innerHTML]="getCurrencyNameById(customer?.default_currency)"></h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'localization_default_language' | translate}}</h6>
+            <h3>{{ customer?.default_language | titlecase }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <h6>{{'client_address' | translate}}</h6>
+            <h3 [innerHTML]="customer?.address"></h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'client_city' | translate}}</h6>
+            <h3>{{ customer?.city }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'client_state' | translate}}</h6>
+            <h3>{{ customer?.state }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'client_postal_code' | translate}}</h6>
+            <h3>{{ customer?.zip }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'clients_country' | translate}}</h6>
+            <h3>{{ getCountryNameById(customer?.country) }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid *ngIf="customer?.customfields?.length > 0">
+        <ion-row>
+          <ion-col>
+            <h5>{{'custom_fields' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngFor="let custom_field of customer?.customfields">
+          <ion-col>
+            <h6>{{ custom_field?.label }}</h6>
+            <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+    <div *ngIf="selectedTab2 == 'billing_shipping'">
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <h6>{{'billing_address' | translate}}</h6>
+            <h3 [innerHTML]="customer?.billing_street"></h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'billing_city' | translate}}</h6>
+            <h3>{{ customer?.billing_city }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'billing_state' | translate}}</h6>
+            <h3>{{ customer?.billing_state }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'billing_zip' | translate}}</h6>
+            <h3>{{ customer?.billing_zip }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'billing_country' | translate}}</h6>
+            <h3>{{ getCountryNameById(customer?.billing_country) }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <h6>{{'shipping_address' | translate}}</h6>
+            <h3 [innerHTML]="customer?.shipping_street"></h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'shipping_city' | translate}}</h6>
+            <h3>{{ customer?.shipping_city }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'shipping_state' | translate}}</h6>
+            <h3>{{ customer?.shipping_state }}</h3>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col>
+            <h6>{{'shipping_zip' | translate}}</h6>
+            <h3>{{ customer?.shipping_zip }}</h3>
+          </ion-col>
+          <ion-col>
+            <h6>{{'shipping_country' | translate}}</h6>
+            <h3>{{ getCountryNameById(customer?.shipping_country) }}</h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'contacts'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'contact')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let contact of contacts;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('contacts', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="delete(contact.id, i, 'contact')">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="addEditContact(contact)">
+          <ion-avatar slot="start">
+            <img [src]="contact.profile_url" />
+          </ion-avatar>
+          <ion-row class="ion-justify-content-between ion-align-items-center" style="width: 100%;">
+            <ion-col size="8">
+              <ion-label>
+                <span *ngIf="contact?.title">{{contact?.title}}</span>
+                <h3>{{ contact.firstname }} {{ contact.lastname }}</h3>
+                <span>{{contact?.email}}</span>
+              </ion-label>
+            </ion-col>
+            <ion-col size="4">
+              <ion-label class="ion-no-margin" style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;margin-left: 0px;">
+                <a *ngIf="contact?.phonenumber" [href]="'tel:' + contact?.phonenumber" (click)="stopPropagation($event)">
+                  <ion-icon src="/assets/icon/phone.svg" style="color: var(--phone-icon-color);width: 24px;height: 24px;margin-right: 5px;"></ion-icon>
+                </a>
+                <div class="ion-text-center">
+                  <!-- <span style="display: block;direction: ltr;" *ngIf="contact?.title">{{ contact?.title.length > 11 ? contact?.title.slice(0, 10) + '..' : contact?.title}}</span> -->
+                  <ion-toggle class="ion-no-padding"  [checked]="contact.active == '1' ? true : false" (click)="stopPropagation($event);contactChangeStatus(i, contact);" mode="ios" color="default" ></ion-toggle>
+                  <span style="display: block;" *ngIf="contact?.last_login">{{ getDateDuration(contact?.last_login) }}</span>
+                </div>
+              </ion-label>
+            </ion-col>
+            </ion-row>
+          
+          
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('contacts', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditContact(contact)">{{'_edit' | translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'contact')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('contacts', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditContact()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="contacts?.length == 0">
+      <app-empty></app-empty>
+    </div>
+
+      <app-mpc-loader  [isLoading]="isMpcLoading"></app-mpc-loader>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'invoices'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'invoice')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <invoice-list-card [invoices]="invoices" [isModal]="true" [type]="'customer'"></invoice-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'invoice')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="fixed-perfex-fab">
+
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addInvoice()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="invoices?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'payments'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'payment')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-payment-list-card [payments]="payments" [isModal]="true"></app-payment-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'payment')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="payments?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'proposals'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'proposal')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-proposal-list-card [proposals]="proposals" [isModal]="true"></app-proposal-list-card>
+     </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'proposal')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('proposals', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addProposal()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="proposals?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'estimates'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'estimate')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading" >
+      <app-estimate-list-card [estimates]="estimates" [isModal]="true" [type]="'customer'"></app-estimate-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'estimate')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="estimates?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('estimates', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEstimate()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'projects'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'project')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-project-list-card [projects]="projects" [isModal]="true"></app-project-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'project')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="projects?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('projects', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addProject()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tickets'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'ticket')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-ticket-list-card [tickets]="tickets" [isModal]="true"></app-ticket-list-card>
+    </ion-list>
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'ticket')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="tickets?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'credit_notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'creditNote')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-credit-note-list-card [credit_notes]="credit_notes" [isModal]="true"></app-credit-note-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'credit_note')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="ion-padding" *ngIf="credit_notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('credit_note', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addCreditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

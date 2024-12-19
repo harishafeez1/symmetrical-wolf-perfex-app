@@ -1,0 +1,26 @@
+ion-popover {
+    --box-shadow: unset;
+    --background: rgb(115 115 115 / 95%);
+}
+
+ion-popover::part(content) {
+    border: unset;
+    text-align: center;
+    color: #fff;
+    padding: 5px;
+    width: auto;
+}
+
+ion-item {
+    ion-label {
+        h4 {
+            margin-bottom: 16px;
+            font-weight: 500;
+
+        }
+    }
+    ion-avatar{
+        height: 26px;
+        width: 26px;
+    }
+}

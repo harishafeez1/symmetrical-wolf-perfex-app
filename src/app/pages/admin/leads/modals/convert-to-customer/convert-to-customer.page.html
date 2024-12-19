@@ -1,0 +1,156 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon
+          color="dark"
+          slot="icon-only"
+          src="/assets/icon/left.svg" class="btn-rotate"
+        ></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'lead_convert_to_client' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formGroup">
+    <div>
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_convert_to_client_firstname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="firstname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_convert_to_client_lastname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="lastname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'lead_title' | translate}}</ion-label>
+        <ion-input type="text" formControlName="title"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_convert_to_email' | translate}}</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'lead_company' | translate}}</ion-label>
+        <ion-input type="text" formControlName="company"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'lead_convert_to_client_phone' | translate}}</ion-label>
+        <ion-input type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'lead_website' | translate}}</ion-label>
+        <ion-input type="text" formControlName="website"></ion-input>
+      </ion-item>
+      
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_address' | translate }}</ion-label>
+        <ion-textarea rows="4" formControlName="address"></ion-textarea>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_city' | translate}}</ion-label>
+        <ion-input type="text" formControlName="city"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_state' | translate }}</ion-label>
+        <ion-input type="text" formControlName="state"></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_zip' | translate}}</ion-label>
+        <ion-input type="text" formControlName="zip"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'lead_country' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="countries"
+          itemValueField="country_id"
+          itemTextField="short_name"
+          [canSearch]="true"
+          [shouldStoreItemValue]="true"
+          formControlName="country"
+          mode="ios"
+          #countryComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="countryComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{countryComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-country="item" let-isCountrySelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isCountrySelected"></ion-checkbox>
+          </ng-template> 
+        </ionic-selectable>
+      </ion-item>
+      <!-- custom fields -->
+      <!-- <app-custom-fields [form]="formGroup" [type]="'leads'" [typeid]="contact.id"></app-custom-fields> -->
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'client_password' | translate}}</ion-label>
+        <ion-input
+          [type]="!showPassword ? 'password' : 'text'"
+          formControlName="password"
+        ></ion-input>
+        <ion-icon
+          (click)="showPassword = !showPassword"
+          slot="end"
+          [name]="showPassword ? 'eye-off-outline':'eye-outline'"
+          style="margin-top: 15px;"
+        ></ion-icon>
+      </ion-item>
+
+      <div style="border-top: 1px solid var(--ion-item-border-color)">
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="send_set_password_email"
+            labelPlacement="end" justify="start"
+          >
+          {{'client_send_set_password_email' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'client_send_set_password_email' | translate}}</ion-label> -->
+        </ion-item>
+        
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="donotsendwelcomeemail"
+            labelPlacement="end" justify="start"
+          >
+          {{'client_do_not_send_welcome_email' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'client_do_not_send_welcome_email' | translate}}</ion-label> -->
+        </ion-item>
+      </div>
+    </div>
+  </form>
+  
+  <ion-button (click)="convertToCustomer()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+    <ion-spinner [hidden]="!submitting"></ion-spinner>
+    <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+  </ion-button>
+</ion-content>

@@ -1,0 +1,75 @@
+
+ion-content {
+    
+    ion-list {
+        background: transparent;
+        ion-item-option._delete {
+            border-radius: 0 10px 10px 0;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+        ion-item-option._action {
+            border-radius: 10px 0 0 10px;
+            width: 85px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 16px;
+            color: #FFFFFF;
+        }
+        ion-item {
+            ion-label:last-child {
+                display: flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: flex-end;
+            }
+            
+            
+            h3 {
+                margin-top: 10px;
+                margin-bottom: 5px;
+            }
+            h6 {
+                font-family: 'Roboto';
+                font-style: normal;
+                font-weight: 400;
+                font-size: 13px !important;
+                line-height: 16px !important;
+                /* identical to box height */
+                color: #747889;
+            }
+        }
+        // ion-badge {
+        //     font-family: 'Roboto';
+            
+        // }
+        .ticket-status-name {
+            margin-top: 0px !important;
+        }
+        .ticket_status {
+            border-radius: 3px;
+            min-width: 70px;
+            height: 22px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 22px;
+            /* identical to box height */
+            color: #f2f2f2;
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            margin-bottom: 15px;
+        }
+    }
+}

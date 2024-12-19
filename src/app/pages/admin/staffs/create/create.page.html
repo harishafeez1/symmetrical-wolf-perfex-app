@@ -1,0 +1,184 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/customers/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title *ngIf="staff_id !== null">{{'edit_staff' | translate}}</ion-title>
+    <ion-title *ngIf="staff_id === null">{{'new_staff' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="formGroup" class="ion-margin">
+    <ion-segment mode="ios" (ionChange)="segmentChanged($event)" [value]="selectedTab">
+      <ion-segment-button value="profile">
+        <ion-label>{{'staff_profile_string' | translate}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="permissions" disabled>
+        <ion-label>{{'permissions' | translate}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div *ngIf="selectedTab == 'profile'">
+      <ion-item lines="none" button="false" class="checkbox">
+        <ion-checkbox color="default" mode="md" formControlName="is_not_staff" labelPlacement="end" justify="start">{{'is_not_staff_member' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'is_not_staff_member' | translate}}</ion-label> -->
+      </ion-item>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'staff_add_edit_firstname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="firstname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_add_edit_lastname' | translate}}</ion-label>
+        <ion-input type="text" formControlName="lastname"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'staff_add_edit_email' | translate}}</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_hourly_rate' | translate}}</ion-label>
+        <ion-input type="number" formControlName="hourly_rate"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_add_edit_phonenumber' | translate}}</ion-label>
+        <ion-input type="text" formControlName="phonenumber"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_add_edit_facebook' | translate}}</ion-label>
+        <ion-input type="text" formControlName="facebook"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_add_edit_linkedin' | translate}}</ion-label>
+        <ion-input type="text" formControlName="linkedin"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'staff_add_edit_skype' | translate}}</ion-label>
+        <ion-input type="text" formControlName="skype"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <!-- <ion-label position="floating">{{'localization_default_language' | translate}}</ion-label> -->
+        <ion-select label="{{'localization_default_language' | translate}}" label-placement="floating" okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="default_language" mode="ios">
+          <ion-select-option value="">{{'system_default_string' | translate}}</ion-select-option>
+          <ion-select-option *ngFor="let language of languages" [value]="language">{{ language | titlecase }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'settings_email_signature' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="email_signature"></ion-textarea>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <!-- <ion-label position="floating">{{'document_direction' | translate}}</ion-label> -->
+        <ion-select label="{{'document_direction' | translate}}" label-placement="floating"  okText="{{'ok' | translate}}" cancelText="{{'cancel' | translate}}" formControlName="direction" mode="ios">
+          <ion-select-option value=""></ion-select-option>
+          <ion-select-option value="ltr">LTR</ion-select-option>
+          <ion-select-option value="rtl">RTL</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'staff'" [typeid]="staff_id"></app-custom-fields>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'staff_edit_profile_your_departments' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate" 
+            [items]="departments" 
+            [shouldStoreItemValue]="true" 
+            itemValueField="departmentid"
+            itemTextField="name" 
+            [canSearch]="true" 
+            [isMultiple]="true"
+            [shouldFocusSearchbar]="true" 
+            [shouldStoreItemValue]="true"
+            formControlName="departments" 
+            mode="ios"
+            #departmentComponent
+            >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="departmentComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{departmentComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-group="item" let-isGroupsSelected="isItemSelected">
+            <ion-checkbox slot="start" [checked]="isGroupsSelected"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="departmentComponent.confirm();departmentComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <div style="border-top: 1px solid var(--ion-item-border-color)">
+        <ion-item lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="administrator"
+            labelPlacement="end" justify="start"
+          >
+          {{'staff_add_edit_administrator' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'staff_add_edit_administrator' | translate}}</ion-label> -->
+        </ion-item>
+        
+        <ion-item *ngIf="staff_id === null" lines="none" button="false" class="checkbox">
+          <ion-checkbox
+            color="default"
+            mode="md"
+            formControlName="send_welcome_email"
+            labelPlacement="end" justify="start"
+          >
+          {{'staff_send_welcome_email' | translate}}
+        </ion-checkbox>
+          <!-- <ion-label>{{'staff_send_welcome_email' | translate}}</ion-label> -->
+        </ion-item>
+      </div>
+
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'staff_add_edit_password' | translate}}</ion-label>
+        <ion-input [type]="!showPassword ? 'password' : 'text'" formControlName="password"></ion-input>
+        <ion-icon (click)="showPassword = !showPassword" slot="end"
+          [name]="showPassword ? 'eye-off-outline':'eye-outline'" style="margin-top: 15px;"></ion-icon>
+      </ion-item>
+    </div>
+
+    <div *ngIf="selectedTab == 'permissions'">
+      
+    </div>
+
+    <ion-button *ngIf="staff_id === null" (click)="createStaff()" color="default" mode="ios" type="submit"
+      expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+
+    <ion-button *ngIf="staff_id !== null" (click)="updateStaff()" color="default" mode="ios" type="submit"
+      expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && staff_id !== null"></app-mpc-loader>
+</ion-content>

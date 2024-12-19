@@ -1,0 +1,396 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate"
+      *ngIf=" type !== 'modal'"
+        color="dark"
+        defaultHref="/admin/credit_notes/list"
+      ></ion-back-button> -->
+      <ion-button *ngIf=" type !== 'modal'" routerLink="/admin/credit_notes/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf=" type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_credit_note' | translate}}</ion-title>
+    <ion-buttons *ngIf="['reminders'].includes(selectedTab)" slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching && ['reminders'].includes(selectedTab)">
+    <!-- <ion-searchbar *ngIf="['payments'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'payment')" debounce="500"></ion-searchbar>
+    <ion-searchbar *ngIf="['refunds'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')" debounce="500"></ion-searchbar> -->
+    <ion-searchbar
+    [placeholder]="'kb_search' | translate"
+    *ngIf="['reminders'].includes(selectedTab)"
+    mode="ios"
+    (ionInput)="searchReminders($event)"
+    debounce="500"
+  ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment
+    scrollable
+    class="ion-margin-bottom"
+    (ionChange)="segmentChanged($event)"
+    [value]="selectedTab"
+    mode="md"
+  >
+    <ion-segment-button value="credit_note">
+      <ion-label>{{'credit_note' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="payments">
+      <ion-label>{{'invoices_credited' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="refunds">
+      <ion-label>{{'refunds' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'reminders' | translate}}</ion-label>
+    </ion-segment-button>
+    <!-- <ion-segment-button value="emails_tracking">
+        <ion-label>Emails Tracking</ion-label>
+      </ion-segment-button> -->
+  </ion-segment>
+
+  <div
+    class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16"
+    *ngIf="selectedTab == 'credit_note'"
+  >
+  <ion-refresher slot="fixed" (ionRefresh)="doCreditNoteRefresh($event, 'credit_note')">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col
+          ><span
+            style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 500;
+              font-size: 16px;
+              line-height: 19px;
+            "
+            >{{'credit_note_status' | translate}}</span
+          ></ion-col
+        >
+        <ion-col
+          ><span [style.color]="getStatusColorByStatusId(credit_note?.status)"
+            >{{ getStatusNameByStatusId(credit_note?.status) | translate}}</span
+          ></ion-col
+        >
+      </ion-row>
+      <ion-row style="border: 0">
+        <ion-col>
+          <!-- [routerLink]="'/admin/credit_notes/edit/' + credit_note_id" -->
+          <ion-button color="primary"  expand="block" fill="outline" mode="ios" (click)="editCreditNote(credit_note_id)">{{'edit_credit_note' | translate}}</ion-button>
+        </ion-col>
+        <ion-col *ngIf="credit_note?.status == '1'">
+          <ion-button (click)="applyToInvoice()" color="default" expand="block" mode="ios">{{'apply_to_invoice' | translate}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-button
+            color="medium"
+            id="popover-pdf-button"
+            expand="block"
+            fill="outline"
+            color="dark"
+            mode="ios"
+            class="action_button"
+            (click)="openPdf()"
+          >
+            <ion-icon color="dark" style="width: 100%" src="/assets/icon/pdf.svg"></ion-icon>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+          </ion-col>
+          
+         <ion-col>
+          <ion-button
+            id="popover-more"
+            color="medium"
+            expand="block"
+            color="dark"
+            fill="outline"
+            mode="ios"
+            class="action_button"
+            (click)="openMore()"
+          >
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ credit_note?.credit_note_number }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'credit_note_bill_to' | translate}}</h6>
+          <h3>{{ credit_note?.client?.company }}</h3>
+        </ion-col>
+
+        <ion-col>
+          <h6>{{'credit_note_date' | translate}}</h6>
+          <h3>{{ credit_note?.date | dateTimeFormat }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'company_vat_number' | translate}}</h6>
+          <h3>{{ credit_note?.client?.vat }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'reference_no' | translate}}</h6>
+          <h3>{{ credit_note?.reference_no }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="credit_note?.project_name">
+        <ion-col >
+          <h6>{{'project' | translate}}</h6>
+          <h3>{{ credit_note?.project_name }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="credit_note?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of credit_note?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="table-responsive">
+      <table class="items">
+        <tr>
+          <th>#</th>
+          <th>{{'credit_note_table_item_heading' | translate}}</th>
+          <th>{{'credit_note_table_quantity_heading' | translate}}</th>
+          <th>{{'credit_note_table_rate_heading' | translate}}</th>
+          <th>{{'credit_note_table_tax_heading' | translate}}</th>
+          <th>{{'credit_note_table_amount_heading' | translate}}</th>
+        </tr>
+        <tr *ngFor="let item of credit_note?.items; let i = index">
+          <!-- <td>{{ item.item_order }}</td> -->
+          <td>{{ i+1 }}</td>
+          <td>
+            {{ item.description }}<br />
+            <span>{{ item.long_description }}</span>
+          </td>
+          <td>{{ item.qty }}</td>
+          <td>{{ item.rate }}</td>
+          <td>
+            <div *ngFor="let tax of item?.taxrate">
+              {{ tax.name }} {{ tax.taxrate }}%
+            </div>
+          </td>
+          <td>{{ (item.rate * item.qty).toFixed(2) }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'credit_note_subtotal' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.subtotal | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngIf="credit_note?.discount_total != 0">
+      <ion-col>{{'credit_note_discount' | translate}}{{ showDiscount(credit_note) }}:</ion-col>
+      <ion-col>-{{ credit_note?.discount_total | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngFor="let tax of credit_note?.taxes;">
+      <ion-col>{{ tax.taxname }} ({{ tax.formatted_taxrate }}%)</ion-col>
+      <ion-col>{{ tax.total_tax | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngIf="credit_note?.adjustment != 0">
+      <ion-col>{{'credit_note_adjustment' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.adjustment | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'credit_note_total' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.total | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <ion-row style="margin: 16px 0" *ngIf="credit_note?.credits_used">
+      <ion-col>{{'credits_used' | translate}}:</ion-col>
+      <ion-col>-{{ credit_note?.credits_used | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+    <ion-row style="margin: 16px 0" *ngIf="credit_note?.total_refunds">
+      <ion-col>{{'refund' | translate}}:</ion-col>
+      <ion-col>-{{ credit_note?.total_refunds | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+    <ion-row style="margin: 16px 0">
+      <ion-col>{{'credit_note_remaining_credits' | translate}}:</ion-col>
+      <ion-col>{{ credit_note?.remaining_credits | appFormatMoney: credit_note }}</ion-col>
+    </ion-row>
+
+    <!-- <ion-row style="margin: 16px 0;">
+        <ion-col>Amount Due:</ion-col>
+        <ion-col>$0.00</ion-col>
+      </ion-row> -->
+
+      <ion-grid>
+        <ion-row *ngIf="credit_note?.clientnote">
+          <ion-col>
+            <h6>{{'note'}}</h6>
+            <h3 [innerHTML]="credit_note?.clientnote"></h3>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row *ngIf="credit_note?.terms">
+          <ion-col>
+            <h6>{{'terms_and_conditions' | translate}}</h6>
+            <h3 [innerHTML]="credit_note?.terms"></h3>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-list lines="none" *ngIf="credit_note?.attachments?.length">
+        <ion-row>
+          <ion-col>
+            <h5 style="margin-bottom: 0;">{{'credit_note_files' | translate}}</h5>
+          </ion-col>
+        </ion-row>
+        <span *ngFor="let file of credit_note?.attachments;let i = index;trackBy: trackByFn;">
+          <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+            <ion-item-options side="start" >
+              <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id)">{{'_delete' | translate}}
+              </ion-item-option>
+            </ion-item-options>
+            <ion-item class="ion-no-padding">
+              <ion-thumbnail slot="start" style="text-align: center;" (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+                <img [src]="commonHelper.getMimeIcon(file.filetype)" style="width: 24px;height: 100%;object-fit: contain;"/>
+              </ion-thumbnail>
+              <ion-label (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+                <h6>{{ file.dateadded | dateTimeFormat:'datetime' }}</h6>
+                <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+                <span> {{ file.filetype }} </span>
+              </ion-label>
+            </ion-item>
+          </ion-item-sliding>
+        </span>
+      </ion-list>
+  </div>
+
+<div class="ion-padding-bottom" *ngIf="selectedTab == 'payments'">
+  <ion-refresher slot="fixed" (ionRefresh)="doCreditNoteRefresh($event, 'credit_note')">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list lines="none" *ngIf="!isLoading">
+    <span *ngFor="let applied_credit of credit_note?.applied_credits;let i = index;trackBy: trackByFn;">
+      <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('payments', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete" (click)="deleteCreditedInvoice(applied_credit.id,credit_note?.id,applied_credit?.invoice_id, i)">{{'_delete' | translate}}
+          </ion-item-option>
+        </ion-item-options>
+<!-- [routerLink]="'/admin/invoices/view/' + applied_credit.invoice_id" -->
+        <ion-item detail="false" class="ion-margin-start ion-margin-end r-m-16" (click)="viewCreditedInvoice(applied_credit.invoice_id, applied_credit)">
+          <ion-label *ngIf="applied_credit?.invoice_id != null">
+            <span>{{ applied_credit.date | dateTimeFormat }}</span>
+            <h3>{{ applied_credit?.invoice_number }}</h3>
+          </ion-label>
+          <ion-label slot="end" style="text-align:right;">
+            <h3>{{ applied_credit.amount | appFormatMoney: credit_note }}</h3>
+          </ion-label>
+        </ion-item>
+      </ion-item-sliding>
+    </span>
+  </ion-list>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'reminder')">
+    <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <div class="ion-padding" *ngIf="credit_note?.applied_credits?.length == 0">
+    <app-empty></app-empty>
+  </div>
+</div>
+
+<div class="ion-padding-bottom" *ngIf="selectedTab == 'refunds'">
+  <ion-refresher slot="fixed" (ionRefresh)="doCreditNoteRefresh($event, 'credit_note')">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list lines="none" *ngIf="!isLoading">
+    <span *ngFor="let refund of credit_note?.refunds;let i = index;trackBy: trackByFn;">
+      <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+      <ion-item-options side="start" *ngIf="authService.hasPermission('credit_notes', ['delete'])">
+        <ion-item-option color="default-danger" class="_delete" (click)="deleteRefund(refund.id,credit_note?.id,i)">{{'_delete' | translate}}
+        </ion-item-option>
+      </ion-item-options>
+
+      <ion-item class="ion-margin-start ion-margin-end r-m-16">
+        <ion-label *ngIf="refund?.id != null">
+          <span>{{'payment_method' | translate}} {{ refund.payment_mode_name | titlecase }}</span>
+          <h3>#{{ refund?.id }}</h3>
+          <span>{{'refunded_on' | translate}} {{ refund.refunded_on | dateTimeFormat }}
+          </span>
+        </ion-label>
+        <ion-label slot="end" style="text-align:right;">
+          <h3>{{credit_note.symbol}}{{ refund.amount }}</h3>
+        </ion-label>
+      </ion-item>
+      <ion-item-options side="end" *ngIf="authService.hasPermission('credit_notes', ['edit'])">
+        <ion-item-option color="default" class="_action" (click)="addEditRefund(refund,credit_note)">{{'_edit' | translate}}</ion-item-option>
+      </ion-item-options>
+      </ion-item-sliding>
+    </span>
+  </ion-list>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+    <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <div class="ion-padding" *ngIf="credit_note?.refunds?.length == 0">
+    <app-empty></app-empty>
+  </div>
+  
+</div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders" (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+    <ion-fab
+      *ngIf="authService.hasPermission('reminders', ['create'])"
+      vertical="bottom"
+      horizontal="end"
+      slot="fixed"
+    >
+      <ion-fab-button
+        color="default"
+        (click)="addEditReminder()"
+        class="ion-margin"
+      >
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+  </div>
+
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

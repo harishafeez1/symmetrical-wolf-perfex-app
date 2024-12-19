@@ -1,0 +1,129 @@
+
+<ion-grid>
+  <ion-row *ngIf="invoice?.invoice_number">
+    <ion-col>
+      <h5 style="user-select: text;">{{ invoice?.invoice_number }}</h5>
+      <!-- <p *ngIf="invoice?.get_total_days_overdue">
+        <ion-text color="danger">This invoice is overdue by {{ invoice?.get_total_days_overdue }} days</ion-text>
+      </p> -->
+    </ion-col>
+  </ion-row>
+
+  <ion-row *ngIf="invoice?.bill_to || invoice?.ship_to">
+    <ion-col *ngIf="invoice?.bill_to">
+      <h6>{{'invoice_bill_to' | translate}}</h6>
+      <div [innerHTML]="invoice?.bill_to"></div>
+    </ion-col>
+
+    <ion-col *ngIf="invoice?.ship_to">
+      <h6>{{'invoice_ship_to' | translate}}</h6>
+      <div [innerHTML]="invoice?.ship_to"></div>
+    </ion-col>
+  </ion-row>
+
+  <ion-row>
+    <ion-col>
+      <h6>{{'invoice_add_edit_date' | translate}}</h6>
+      <h3>{{ invoice?.date | dateTimeFormat}}</h3>
+    </ion-col>
+    <ion-col>
+      <h6>{{'invoice_add_edit_duedate' | translate}}</h6>
+      <h3>{{ invoice?.duedate | dateTimeFormat }}</h3>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+<ion-grid *ngIf="invoice?.tags">
+  <ion-row>
+    <ion-col>
+      <h6>{{'tags' | translate}}</h6>
+      <div class="ion-margin-vertical">
+          <ion-chip *ngFor="let tag of invoice?.tags?.split(',')">
+            {{ tag }}
+          </ion-chip>
+        </div>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+<ion-grid *ngIf="invoice?.customfields && invoice?.customfields.length > 0">
+  <ion-row *ngFor="let custom_field of invoice?.customfields">
+    <ion-col>
+      <h6>{{ custom_field?.label }}</h6>
+      <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value ) }}</h3>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+<div class="table-responsive">
+  <table class="items">
+    <tr>
+      <th>#</th>
+      <th>{{'invoice_table_item_heading' | translate}}</th>
+      <th>{{'invoice_table_quantity_heading' | translate}}</th>
+      <th>{{'invoice_table_rate_heading' | translate}}</th>
+      <th>{{'invoice_table_tax_heading' | translate}}</th>
+      <th>{{'invoice_table_amount_heading' | translate}}</th>
+    </tr>
+    <tr *ngFor="let item of invoice?.items; let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>
+        {{ item?.description }}<br />
+        <span [innerHTML]="item?.long_description"></span>
+      </td>
+      <td>{{ item.qty }}</td>
+      <td>{{ item.rate }}</td>
+      <td>
+        <div *ngFor="let tax of item?.taxrate">
+          {{ tax.name }} {{ tax.taxrate }}%
+        </div>
+      </td>
+      <td>{{ (item.rate * item.qty).toFixed(2) }}</td>
+    </tr>
+  </table>
+</div>
+
+<ion-row style="margin: 16px 0">
+  <ion-col>{{'invoice_subtotal' | translate}}:</ion-col>
+  <ion-col>{{ invoice?.subtotal | appFormatMoney: invoice }}</ion-col>
+</ion-row>
+
+<ion-row style="margin: 16px 0" *ngIf="invoice?.discount_total != 0">
+  <ion-col>{{'invoice_discount' | translate}}{{ showDiscount(invoice) }}:</ion-col>
+  <ion-col>-{{ invoice?.discount_total | appFormatMoney: invoice }}</ion-col>
+</ion-row>
+
+<ion-row style="margin: 16px 0" *ngFor="let tax of invoice?.taxes;">
+  <ion-col>{{ tax.taxname }} ({{ tax.taxrate | appFormatNumber }}%)</ion-col>
+  <ion-col>{{ tax.total_tax | appFormatMoney: invoice }}</ion-col>
+</ion-row>
+
+
+<ion-row style="margin: 16px 0" *ngIf="invoice?.adjustment != 0">
+  <ion-col>{{'invoice_adjustment' | translate}}:</ion-col>
+  <ion-col>{{ invoice?.adjustment | appFormatMoney: invoice }}</ion-col>
+</ion-row>
+
+<ion-row style="margin: 16px 0">
+  <ion-col>{{'invoice_total' | translate}}:</ion-col>
+  <ion-col>{{ invoice?.total | appFormatMoney: invoice }}</ion-col>
+</ion-row>
+
+<!-- <ion-row style="margin: 16px 0;" *ngIf="invoice?.total_left_to_pay > 0 && getTotalPaid(invoice?.total, invoice?.total_left_to_pay) > 0">
+    <ion-col>Total Paid:</ion-col>
+    <ion-col>-{{ getTotalPaid(invoice?.total, invoice?.total_left_to_pay) | appFormatMoney: invoice }}</ion-col>
+  </ion-row> -->
+  <ion-row style="margin: 16px 0;" *ngIf="(invoice?.total - invoice?.total_left_to_pay) > 0">
+    <ion-col>{{'invoice_total_paid' | translate}}:</ion-col>
+    <ion-col>-{{ (invoice?.total - invoice?.total_left_to_pay) | appFormatMoney: invoice }}</ion-col>
+  </ion-row>
+
+<ion-row style="margin: 16px 0;" *ngIf="settings?.sales?.invoices?.show_credits_applied_on_invoice && invoice?.credits_applied">
+    <ion-col>{{'applied_credits' | translate}}:</ion-col>
+    <ion-col> - {{ invoice?.credits_applied | appFormatMoney: invoice}}</ion-col>
+  </ion-row>
+
+<ion-row style="margin: 16px 0">
+  <ion-col>{{'invoice_amount_due' | translate}}:</ion-col>
+  <ion-col>{{ invoice?.total_left_to_pay | appFormatMoney: invoice }}</ion-col>
+</ion-row>

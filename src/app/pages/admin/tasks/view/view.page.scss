@@ -1,0 +1,95 @@
+ion-grid {
+    border-radius: 10px;
+    background: var(--ion-item-background);
+    margin: 16px 0;
+    overflow: hidden;
+    ion-row {
+        border-bottom: 1px solid var(--ion-item-border-color);
+        margin: 0px 16px;
+        
+        ion-col:nth-child(2) {
+            text-align: right;
+        }
+    }
+
+    ion-row:last-child {
+        border-bottom: 0;
+    }
+
+    h6 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #747889;
+    }
+    
+    h3 {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 19px;
+        margin-top: 0;
+    }
+
+    .in-active {
+        color: #FF8686;
+    }
+    .active {
+        color: #63EDBB;
+    }
+}
+
+.add-task-follower-select ionic-selectable {
+    display: none;
+}
+
+.ion-checkbox {
+    --border-color: #C6C6C6;
+    --border-color-checked: var(--ion-color-primary);
+    --border-radius: 5px;
+    --size: 26px;
+    margin-right: 10px;
+}
+
+ion-item.checkbox {
+    height: 45px;
+    padding: 0px 0px 45px 0px;
+    --ion-padding-top: 0;
+    --ion-padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: 0;
+}
+
+.progress-outer {
+    width: 96%;
+    text-align: center;
+    background-color: #F3F3F3;
+    color: #fff;
+    border-radius: 19px;
+}
+
+.progress-inner {
+    min-width: 15%;
+    width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 4px;
+    border-radius: 19px;
+    // background: var(--ion-color-default);
+    font-size: 12px;
+    transition: width .3s;
+}
+.bg-progress-bar {
+    background: var(--ion-color-default) !important;
+    
+}
+.progress-inner-color{
+    color: var(--ion-text-color) !important;
+}
+.time-sheet-h6{
+    font-size: 12px !important;
+}

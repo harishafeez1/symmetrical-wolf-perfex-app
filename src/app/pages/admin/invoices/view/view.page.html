@@ -1,0 +1,383 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/invoices/list"></ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/invoices/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_invoice' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="['payments','tasks','reminders'].includes(selectedTab)" (click)="openSearch()">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="selectedTab == 'tasks'" (click)="openFilters()">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'payment')" [apiService]="paymentApi"
+        *ngIf="selectedTab == 'payments'"></mpc-sorting>
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi"
+        *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching && ['payments','tasks','reminders'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['payments'].includes(selectedTab)" mode="ios" (ionInput)="searchPayments($event)"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['tasks'].includes(selectedTab)" mode="ios" (ionInput)="searchTasks($event)"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['reminders'].includes(selectedTab)" mode="ios" (ionInput)="searchReminders($event)"
+      debounce="500"></ion-searchbar>
+    <!-- <ion-searchbar *ngIf="isSearching" mode="ios" (ionInput)="searchTasks($event)" debounce="500"></ion-searchbar> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" mode="md" (ionChange)="segmentChanged($event)"
+    [value]="selectedTab">
+    <ion-segment-button value="invoice">
+      <ion-label>{{'invoice' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button *ngIf="invoice?.status != STATUS_CANCELLED && payments?.length != 0" value="payments">
+      <ion-label>{{'payments' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="applied_credit_notes">
+      <ion-label>{{'applied_credits' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="child_invoice">
+      <ion-label>{{'child_invoices' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="activity_log">
+      <ion-label>{{'invoice_view_activity_tooltip' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'reminders' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <!-- <ion-segment-button value="emails_tracking">
+        <ion-label>Emails Tracking</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="views_tracking">
+        <ion-label>Views Tracking</ion-label>
+      </ion-segment-button> -->
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'invoice'">
+    <ion-refresher slot="fixed" (ionRefresh)="doInvoiceRefresh($event, 'invoice')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <div *ngIf="invoice?.get_total_days_overdue" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);">
+      {{'invoice_is_overdue' | translate: {total_day: invoice?.get_total_days_overdue} }}
+      <!-- This invoice is overdue by {{ invoice?.get_total_days_overdue }} days -->
+    </div>
+    <div *ngIf="invoice?.status == STATUS_DRAFT" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-secondary-rgb), 10%);">
+      {{'invoice_draft_status_info' | translate}}
+    </div>
+
+    <div *ngIf="invoice?.status == STATUS_CANCELLED && invoice?.recurring > 0" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-secondary-rgb), 10%);"
+      [innerHTML]="'invoice_status_cancelled_recurring_greater_than_zero' | translate">
+    </div>
+    <ion-row *ngIf="invoice?.recurring_invoice">
+      <ion-col size="6" style="padding-left: 0;">
+        <div *ngIf="invoice?.is_recurring_from === null &&
+        invoice?.recurring_invoice?.cycles > 0 &&
+        invoice?.recurring_invoice?.cycles === invoice?.recurring_invoice?.total_cycles else elseifBlock"
+          class="ion-padding"
+          style="font-size: 14px;margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);">
+          {{'recurring_has_ended' | translate: {module: 'invoice'} }}
+        </div>
+
+        <ng-template #elseifBlock>
+          <div class="ion-padding" *ngIf="invoice?.show_recurring_invoice_info == true"
+            style="font-size: 14px;margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);">
+            {{'cycles_remaining' | translate}} <br> {{ invoice?.recurring_invoice?.cycles == 0 ? ('cycles_infinity' | translate) :
+            invoice?.recurring_invoice?.cycles - invoice?.recurring_invoice.total_cycles }}
+          </div>
+        </ng-template>
+      </ion-col>
+
+      <ion-col size="6" style="padding-right: 0;">
+        <div class="ion-padding"
+          style="font-size: 14px;margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);"
+          *ngIf="invoice?.recurring_invoice?.cycles == 0 || invoice?.recurring_invoice?.cycles != invoice?.recurring_invoice.total_cycles">
+          {{'next_invoice_date_list' | translate}} <br> {{nextInvoiceDate | dateTimeFormat}}
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <div *ngIf="invoice?.project_id && invoice?.project_data?.name">
+      <ion-text>{{'invoice_related_project' | translate}}: </ion-text>
+      <ion-text color="primary">{{ invoice?.project_data?.name }}</ion-text>
+    </div>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col><span style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 500;
+              font-size: 16px;
+              line-height: 19px;
+            ">{{'status' | translate}}</span></ion-col>
+        <ion-col><span [class]="invoiceHelper.get_invoice_status_label(invoice?.status)">{{
+            invoiceHelper.format_invoice_status(invoice?.status, '', false) | translate
+            }}</span></ion-col>
+      </ion-row>
+      <ion-row style="border: 0;">
+        <ion-col>
+          <ion-button color="primary" (click)="editInvoice(invoice_id)" expand="block" fill="outline" mode="ios">{{'edit_invoice_tooltip' | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button expand="block" fill="outline" mode="ios" color="dark" class="action_button" (click)="openPdf()">
+            <ion-icon style="width: 100%" src="/assets/icon/pdf.svg"></ion-icon>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="3">
+          <ion-button expand="block" fill="outline" mode="ios" color="dark" class="action_button"
+            (click)="invoiceSendToClient()">
+            <ion-icon slot="icon-only" name="mail-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <!-- <ion-col>
+          <ion-button *ngIf="proposal?.estimate_id" color="default" expand="block"
+            [routerLink]="'/admin/estimates/view/' + proposal?.estimate_id" mode="ios">{{ proposal?.formated_estimate_id
+            }}</ion-button>
+          <ion-button *ngIf="proposal?.invoice_id" color="default" expand="block"
+            [routerLink]="'/admin/invoices/view/' + proposal?.invoice_id" mode="ios">{{ proposal?.formated_invoice_id
+            }}</ion-button>
+          <ion-button
+            *ngIf="!proposal?.estimate_id && !proposal?.invoice_id && (authService.hasPermission('estimates', ['create']) || authService.hasPermission('invoices', ['create']))"
+            id="popover-button" color="default" expand="block" mode="ios" class="action_button"
+            (click)="openConvertTo()">
+            <ion-label style="width: 100%">{{'_create' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col> -->
+
+        <ion-col [size]="authService.hasPermission('payments', ['create']) ? '5' : '12'">
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" mode="ios" color="dark"
+            class="action_button" (click)="openMore()">
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="7" *ngIf="authService.hasPermission('payments', ['create'])">
+          <ion-button id="create-payment" color="default" expand="block" mode="ios" class="action_button"
+            (click)="createPayment()" [disabled]="!invoice || invoice?.status == STATUS_PAID ? 'true' : 'false'">
+            <ion-label>{{'payment' | translate}}</ion-label>
+            <ion-icon slot="start" name="add-circle"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <!-- <ion-row *ngIf="authService.hasPermission('payments', ['create'])">
+        <ion-col>
+          <ion-button id="create-payment" color="default" expand="block" mode="ios" class="action_button"
+            (click)="createPayment()" [disabled]="invoice?.status == STATUS_PAID ? 'true' : 'false'">
+            <ion-label style="width: 30%">{{'payment' | translate}}</ion-label>
+            <ion-icon slot="start" name="add-circle"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row> -->
+    </ion-grid>
+
+    <app-invoice-preview [invoice]="invoice"></app-invoice-preview>
+    <ion-grid>
+      <ion-row *ngIf="invoice?.clientnote && invoice?.clientnote != 'null'">
+        <ion-col>
+          <h6>{{'note' | translate}}</h6>
+          <h3 [innerHTML]="invoice?.clientnote"></h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row *ngIf="invoice?.terms && invoice?.terms != 'null'">
+        <ion-col>
+          <h6>{{'terms_and_conditions' | translate}}</h6>
+          <h3 [innerHTML]="invoice?.terms"></h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-list lines="none" *ngIf="invoice?.attachments?.length">
+      <ion-row>
+        <ion-col>
+          <h5 style="margin-bottom: 0;">{{'invoice_files' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <span *ngFor="let file of invoice?.attachments;let i = index;trackBy: trackByFn;">
+        <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+          <ion-item-options side="start">
+            <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id)">{{'_delete' | translate}}
+            </ion-item-option>
+          </ion-item-options>
+          <ion-item class="ion-no-padding">
+            <ion-thumbnail slot="start" style="text-align: center;"
+              (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+              <img [src]="commonHelper.getMimeIcon(file.filetype)"
+                style="width: 24px;height: 100%;object-fit: contain;" />
+            </ion-thumbnail>
+            <ion-label (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+              <h6>{{ file.dateadded | dateTimeFormat:'datetime' }}</h6>
+              <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+              <span> {{ file.filetype }} </span>
+            </ion-label>
+            <ion-note slot="end" style="display: flex; flex-direction: row; align-items: center;margin: 0;">
+              <div class="ion-text-right">
+                <span style="display: block;font-size: 10px;">{{ (file.visible_to_customer == '1' ? 'hide_from_customer' :
+                  'show_to_customer') | translate }}</span>
+                <ion-toggle class="m-t-2" [checked]="file.visible_to_customer == '1' ? true : false"
+                  (click)="visibleToCustomer($event, i, file);" mode="ios" color="default"></ion-toggle>
+              </div>
+            </ion-note>
+          </ion-item>
+        </ion-item-sliding>
+      </span>
+    </ion-list>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'payments'">
+    <ion-refresher slot="fixed" (ionRefresh)="doInvoiceRefresh($event, 'invoice')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-payment-list-card [payments]="payments" [isModal]="true"></app-payment-list-card>
+    </ion-list>
+    <div class="ion-padding" *ngIf="payments?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'applied_credit_notes'">
+   <!--  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'creditNote')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher> -->
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-credit-note-list-card [credit_notes]="invoice?.applied_credits" [isModal]="true" [page]="'invoice'"></app-credit-note-list-card>
+    </ion-list>
+
+    <!-- <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'credit_note')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll> -->
+    <div class="ion-padding" *ngIf="invoice?.applied_credits?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'child_invoice'">
+    <!-- <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'invoice')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher> -->
+    <ion-list lines="none" *ngIf="!isLoading">
+      <invoice-list-card [invoices]="invoice?.invoice_recurring_invoices" [isModal]="true" [page]="'invoice'"></invoice-list-card>
+    </ion-list>
+
+    <!-- <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'invoice')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll> -->
+
+    <div class="ion-padding" *ngIf="invoice?.invoice_recurring_invoices?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreTasks($event)">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'activity_log'">
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-activity-list-card [activities]="activities" [isType]="'invoice'"></app-activity-list-card>
+    </ion-list>
+
+    <div class="ion-padding" *ngIf="activities?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders"
+        (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreReminders($event)">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

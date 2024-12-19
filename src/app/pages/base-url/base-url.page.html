@@ -1,0 +1,33 @@
+<ion-content>
+  <div class="login-section">
+    <div>
+      <!-- src="https://assets10.lottiefiles.com/packages/lf20_ztbkglhq.json" -->
+      <lottie-player
+        src="/assets/base_url_loader_img.json"
+        background="transparent"
+        speed="1"
+        style="width: 100%;height: auto;margin: -80px auto -30px auto;" loop autoplay></lottie-player>
+      <h1>Base URL</h1>
+      <form (ngSubmit)="start()" [formGroup]="credentials">
+        <div class="input-group">
+          <ion-item>
+            <ion-input type="text" placeholder="Base Url" formControlName="base_url"></ion-input>
+          </ion-item>
+          <div *ngIf="(base_url.dirty || base_url.touched) && base_url.errors" class="errors">
+            <span *ngIf="base_url.errors?.required">Base URL is required</span>
+          </div>
+        </div>
+    
+        <ion-button type="submit" expand="block" color="default" [disabled]="!credentials.valid || isLoading">
+          <ion-spinner [hidden]="!isLoading"></ion-spinner>
+          <ion-text style="width: 100%;">Setup</ion-text>
+      </ion-button>
+      </form>
+      <hr>
+      <div class="ion-text-center">OR</div>
+      <hr>
+      <ion-button (click)="exploreDemo()" expand="block" color="default" [disabled]="isLoading">{{'take_me_in' | translate}}</ion-button>
+
+    </div>
+  </div>
+</ion-content>

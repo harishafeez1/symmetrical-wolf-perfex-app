@@ -1,0 +1,423 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" *ngIf="type !== 'modal'" color="dark" defaultHref="/admin/proposals/list"></ion-back-button> -->
+      <ion-button *ngIf="type !== 'modal'" routerLink="/admin/proposals/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'proposal_view' | translate}}</ion-title>
+
+    <ion-buttons *ngIf="['reminders','tasks'].includes(selectedTab)" slot="end">
+      <ion-button (click)="isSearching = !isSearching;">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()" *ngIf="['tasks'].includes(selectedTab)">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event, 'task')" [apiService]="taskApi"
+        *ngIf="selectedTab == 'tasks'"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching && ['reminders','tasks'].includes(selectedTab)">
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf=" ['reminders'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'reminder')"
+      debounce="500"></ion-searchbar>
+    <ion-searchbar [placeholder]="'kb_search' | translate" *ngIf="['tasks'].includes(selectedTab)" mode="ios" (ionInput)="doSearch($event, 'task')"
+      debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment scrollable class="ion-margin-bottom" (ionChange)="segmentChanged($event)" [value]="selectedTab"
+    mode="md">
+    <ion-segment-button value="proposal">
+      <ion-label>{{'proposal' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="comments">
+      <ion-label>{{'proposal_comments' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="reminders">
+      <ion-label>{{'reminders' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="tasks">
+      <ion-label>{{'tasks' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="notes">
+      <ion-label>{{'notes' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="templates">
+      <ion-label>{{'templates' | translate}}</ion-label>
+    </ion-segment-button>
+    <!-- <ion-segment-button value="emails_tracking">
+        <ion-label>Emails Tracking</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="views_tracking">
+        <ion-label>Views Tracking</ion-label>
+      </ion-segment-button> -->
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'proposal'">
+
+    <ion-refresher slot="fixed" (ionRefresh)="doProposalRefresh($event, 'proposal')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <div *ngIf="proposal?.rel_type === 'customer' && proposal?.rel_id && proposal?.project_data?.name">
+      <ion-text>{{'proposal_related_project' | translate}}: </ion-text>
+      <ion-text color="primary">{{ proposal?.project_data?.name }}</ion-text>
+      <!-- <p style="
+    color: #747889;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+  ">
+        Created at {{ task?.dateadded | dateTimeFormat:'datetime' }}
+      </p> -->
+    </div>
+    <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col><span style="
+              font-family: 'Roboto';
+              font-style: normal;
+              font-weight: 500;
+              font-size: 16px;
+              line-height: 19px;
+            ">{{'status' | translate}}</span></ion-col>
+        <ion-col><span [class]="proposalHelper.format_proposal_status(proposal?.status)">{{
+            proposalHelper.format_proposal_status(proposal?.status, '',
+            false) | translate}}</span></ion-col>
+      </ion-row>
+
+      <ion-row style="border: 0">
+        <ion-col>
+          <!-- [routerLink]="'/admin/proposals/edit/' + proposal_id" -->
+          <ion-button color="primary" (click)="editProposal(proposal_id)" expand="block" fill="outline" mode="ios"
+            class="action_button">{{'edit_proposal' | translate}}</ion-button>
+        </ion-col>
+
+        <ion-col>
+          <ion-button color="medium" id="popover-pdf-button" expand="block" fill="outline" mode="ios" color="dark"
+            class="action_button" (click)="openPdf()">
+            <ion-icon color="dark" style="width: 100%" src="/assets/icon/pdf.svg"></ion-icon>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+          <ion-popover trigger="popover-pdf-button" [dismissOnSelect]="true" mode="ios">
+          </ion-popover>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-button *ngIf="proposal?.estimate_id" color="default" expand="block"
+            [routerLink]="'/admin/estimates/view/' + proposal?.estimate_id" mode="ios">{{ proposal?.formated_estimate_id
+            }}</ion-button>
+          <ion-button *ngIf="proposal?.invoice_id" color="default" expand="block"
+            [routerLink]="'/admin/invoices/view/' + proposal?.invoice_id" mode="ios">{{ proposal?.formated_invoice_id
+            }}</ion-button>
+          <ion-button
+            *ngIf="!proposal?.estimate_id && !proposal?.invoice_id && (authService.hasPermission('estimates', ['create']) || authService.hasPermission('invoices', ['create']))"
+            id="popover-button" color="default" expand="block" mode="ios" class="action_button"
+            (click)="openConvertTo()">
+            <ion-label style="width: 100%">{{'proposal_convert' | translate }}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+
+        <ion-col>
+          <ion-button id="popover-more" color="medium" expand="block" fill="outline" mode="ios" color="dark"
+            class="action_button" (click)="openMore()">
+            <ion-label style="width: 100%">{{'more' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ proposal?.proposal_number }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'proposal_subject' | translate}}</h6>
+          <h3>{{ proposal?.subject }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col size="6">
+          <h6>{{'proposal_to' | translate}}</h6>
+          <h3>{{ proposal?.proposal_to }}</h3>
+        </ion-col>
+        <ion-col size="6">
+          <h6>{{'proposal_email' | translate}}</h6>
+          <h3>{{ proposal?.email }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">
+          <h6>{{'proposal_date' | translate}}</h6>
+          <h3>{{ proposal?.date | dateTimeFormat }}</h3>
+        </ion-col>
+        <ion-col size="6">
+          <h6>{{'proposal_open_till' | translate}}</h6>
+          <h3>{{ proposal?.open_till | dateTimeFormat }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="proposal?.address !== ''">
+      <ion-row>
+        <ion-col>
+          <h6>{{'proposal_address' | translate }}</h6>
+          <h3 [innerHTML]="proposal?.address"></h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'proposal_city' | translate }}</h6>
+          <h3>{{ proposal?.city }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'proposal_state' | translate}}</h6>
+          <h3>{{ proposal?.state }}</h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <h6>{{'proposal_zip' | translate}}</h6>
+          <h3>{{ proposal?.zip }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'proposal_country' | translate}}</h6>
+          <h3>{{ getCountryNameById(proposal?.country) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="proposal?.tags">
+      <ion-row>
+        <ion-col>
+          <h6>{{'tags' | translate}}</h6>
+          <div class="ion-margin-vertical">
+              <ion-chip *ngFor="let tag of proposal?.tags?.split(',')">
+                {{ tag }}
+              </ion-chip>
+            </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="proposal?.customfields?.length > 0">
+      <ion-row *ngFor="let custom_field of proposal?.customfields">
+        <ion-col>
+          <h6>{{ custom_field?.label }}</h6>
+          <h3>{{ (custom_field?.value == '' ? '-' : custom_field?.value) }}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-list lines="none" *ngIf="proposal?.attachments?.length">
+      <ion-row>
+        <ion-col>
+          <h5 style="margin-bottom: 0;">{{'proposal_files' | translate}}</h5>
+        </ion-col>
+      </ion-row>
+      <span *ngFor="let file of proposal?.attachments;let i = index;trackBy: trackByFn;">
+        <ion-item-sliding class="ion-margin-top ion-margin-bottom">
+          <!-- *ngIf="authService.hasPermission('tasks', ['delete'])" -->
+          <ion-item-options side="start">
+            <ion-item-option color="default-danger" class="_delete" (click)="deleteFile(file.id)">{{'_delete' | translate}}
+            </ion-item-option>
+          </ion-item-options>
+
+          <!-- (click)="viewTask(file.id, file)" -->
+          <ion-item class="ion-no-padding">
+            <ion-thumbnail slot="start" style="text-align: center;" (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+              <img [src]="commonHelper.getMimeIcon(file.filetype)" style="width: 24px;height: 100%;object-fit: contain;"/>
+            </ion-thumbnail>
+
+            <ion-label (click)="downloadAttachment(file?.attachment_key, file?.filetype, file?.file_name)">
+              <h6>{{ file.dateadded | dateTimeFormat:'datetime' }}</h6>
+              <h3 style="white-space: break-spaces">{{ file.file_name }}</h3>
+              <span> {{ file.filetype }} </span>
+            </ion-label>
+            <ion-note slot="end" style="display: flex; flex-direction: row; align-items: center;margin: 0;">
+              <div class="ion-text-right">
+                <span style="display: block;font-size: 10px;">{{ file.visible_to_customer == '1' ? 'Hide to customer' :
+                  'Show to customer' }}</span>
+                <ion-toggle class="m-t-2" [checked]="file.visible_to_customer == '1' ? true : false"
+                  (click)="visibleToCustomer($event, i, file);" mode="ios" color="default"></ion-toggle>
+              </div>
+            </ion-note>
+
+            <!-- <ion-label slot="end">
+              <span>Last Activity:</span>
+              <h3 class="ion-text-end">
+                <ion-text color="primary">{{ file.last_activity == null ? 'No Activity' :
+                  file.last_activity }}</ion-text>
+              </h3>
+            </ion-label> -->
+          </ion-item>
+        </ion-item-sliding>
+      </span>
+    </ion-list>
+
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'comments'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'comment')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let comment of comments;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('comments', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteComment(comment.id, i)">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-item">
+          <ion-avatar slot="start">
+            <img [src]="comment.profile_url" />
+          </ion-avatar>
+          <ion-label>
+            <h6>{{ comment.time_ago }}</h6>
+            <h3>{{ comment.full_name }} {{ comment.lastname }}</h3>
+            <span [innerHTML]="comment?.content"></span>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('comments', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditComment(comment)">{{'_edit' | translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('comments', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditComment()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="comments?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-reminder-list-card [reminders]="reminders"
+        (reminderUpdateResponse)="reminderRefresh($event)"></app-reminder-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'reminder')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders?.length == 0">
+      <app-empty></app-empty>
+    </div>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('reminders', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditReminder()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'tasks'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'task')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-list lines="none" *ngIf="!isLoading">
+      <task-list-card [tasks]="tasks" [isModal]="true"></task-list-card>
+    </ion-list>
+
+    <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMore($event, 'task')">
+      <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('tasks', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addTask()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="tasks?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'notes'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'note')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <app-note-list-card [notes]="notes" (noteUpdateResponse)="notesRefresh($event)"></app-note-list-card>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('notes', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button color="default" (click)="addEditNote()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="notes?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'templates'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'template')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding *ngFor="let template of templates;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" *ngIf="authService.hasPermission('templates', ['delete'])">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteTemplate(template.id, i)">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-label>
+            <h3>{{ template.name }}</h3>
+            <span [innerHTML]="template?.content"></span>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end" *ngIf="authService.hasPermission('templates', ['edit'])">
+          <ion-item-option color="default" class="_action" (click)="addEditTemplate(template)">{{'_edit' | translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    <div class="fixed-perfex-fab">
+      <ion-fab *ngIf="authService.hasPermission('templates', ['create'])" vertical="bottom" horizontal="end"
+        slot="fixed">
+        <ion-fab-button color="default" (click)="addEditTemplate()" class="ion-margin">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </div>
+    <div class="ion-padding" *ngIf="templates?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

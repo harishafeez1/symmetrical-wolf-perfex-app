@@ -1,0 +1,255 @@
+<ion-header mode="ios" class="dashboard_header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button>
+        <ion-icon color="dark" src="/assets/icon/menu.svg"></ion-icon>
+      </ion-menu-button>
+    </ion-buttons>
+
+    <ion-buttons *ngIf="authUser?.firstname" slot="end">
+      <ion-button (click)="openNotifications()">
+        <ion-icon color="dark" src="/assets/icon/bell.svg"></ion-icon>
+      </ion-button>
+      <span (click)="openNotifications()" *ngIf="authUser?.total_unread_notifications > 0" style="
+          position: absolute;
+          background: var(--ion-color-default);
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          font-size: 8px;
+          padding: 0;
+          left: 22px;
+          top: 4px;
+          text-align: center;
+          line-height: 18px;
+          color: var(--ion-color-primary-contrast);
+        ">{{ authUser?.total_unread_notifications }}</span>
+    </ion-buttons>
+    <ion-avatar slot="end" (click)="openStaff()" class="ion-margin-horizontal">
+      <img *ngIf="authUser?.firstname" [src]="authUser?.profile_image" />
+      <ion-icon *ngIf="!authUser?.firstname" name="person-outline"></ion-icon>
+    </ion-avatar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding dashboard">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <h3 *ngIf="authUser?.firstname" class="greetings">{{'hello' | translate}}, {{ authUser?.firstname }} {{
+    authUser?.lastname }}</h3>
+  <h1 class="page-name">{{'als_dashboard' | translate}}</h1>
+  <ion-row class="basic_stats">
+    <ion-col size="6" style="padding-right: 10px;padding-left: 0;padding-bottom: 16px;">
+      <ion-card mode="ios" class="ion-padding">
+        <circle-progress [percent]="invoice_progress" [backgroundColor]="primaryColor" [backgroundOpacity]="0.2"
+          [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0" [backgroundPadding]="0" [radius]="54"
+          [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor" [outerStrokeLinecap]="'butt'"
+          innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+          [imageSrc]="'/assets/icon/invoice-2' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48" [imageWidth]="48"
+          [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+          [animationDuration]="800"></circle-progress>
+
+        <ion-text class="total_count">{{ total_invoices_awaiting_payment }}</ion-text>
+        <ion-text class="count_out_of"> of {{ total_invoices }}</ion-text>
+        <div class="title">
+          {{'invoices_awaiting_payment' | translate}}
+          <!-- Invoices Awaiting<br />
+          Payment -->
+        </div>
+      </ion-card>
+    </ion-col>
+
+    <ion-col size="6" style="padding-left: 10px;padding-right: 0;padding-bottom: 16px;">
+      <ion-card mode="ios" class="ion-padding">
+        <circle-progress [percent]="lead_progress" [backgroundColor]="primaryColor" [backgroundOpacity]="0.2"
+          [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0" [backgroundPadding]="0" [radius]="54"
+          [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor" [outerStrokeLinecap]="'butt'"
+          innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+          [imageSrc]="'/assets/icon/flag' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48" [imageWidth]="48"
+          [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+          [animationDuration]="800"></circle-progress>
+
+        <ion-text class="total_count">{{ total_leads_converted }}</ion-text>
+        <ion-text class="count_out_of"> of {{ total_leads }}</ion-text>
+
+        <div class="title">
+          {{'leads_converted_to_client' | translate}}
+          <!-- Converted<br />
+          Leads -->
+        </div>
+      </ion-card>
+    </ion-col>
+
+    <ion-col size="6" style="padding-right: 10px;padding-left: 0;padding-bottom: 16px;">
+      <ion-card mode="ios" class="ion-padding">
+        <circle-progress [percent]="percent_not_finished_tasks" [backgroundColor]="primaryColor"
+          [backgroundOpacity]="0.2" [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0"
+          [backgroundPadding]="0" [radius]="54" [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor"
+          [outerStrokeLinecap]="'butt'" innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+          [imageSrc]="'/assets/icon/stickynote' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48" [imageWidth]="48"
+          [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+          [animationDuration]="800"></circle-progress>
+
+        <ion-text class="total_count">{{ total_not_finished_tasks }}</ion-text>
+        <ion-text class="count_out_of"> of {{ total_tasks }}</ion-text>
+
+        <div class="title">{{'task_not_finished' | translate}}</div>
+      </ion-card>
+    </ion-col>
+
+    <ion-col size="6" style="padding-left: 10px;padding-right: 0;padding-bottom: 16px;">
+      <ion-card mode="ios" class="ion-padding">
+        <circle-progress [percent]="project_progress" [backgroundColor]="primaryColor" [backgroundOpacity]="0.2"
+          [backgroundStroke]="primaryColor" [backgroundStrokeWidth]="0" [backgroundPadding]="0" [radius]="54"
+          [space]="0" [outerStrokeWidth]="5" [outerStrokeColor]="primaryColor" [outerStrokeLinecap]="'butt'"
+          innerStrokeColor="#ff0000" [innerStrokeWidth]="0"
+          [imageSrc]="'/assets/icon/chart-success' + (isDark ? '-dark' : '') + '.svg'" [imageHeight]="48"
+          [imageWidth]="48" [showImage]="true" [showInnerStroke]="false" [responsive]="true" [animation]="true"
+          [animationDuration]="800"></circle-progress>
+
+        <ion-text class="total_count">{{ total_projects_in_progress }}</ion-text>
+        <ion-text class="count_out_of"> of {{ total_projects }}</ion-text>
+
+        <div class="title">{{'projects_in_progress' | translate}}</div>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+
+  <ion-grid mode="ios" class="ion-margin-top ion-padding invoice-stats">
+    <ion-row style="border: 0;margin: 0;">
+      <ion-col class="heading">{{'invoices' | translate}}</ion-col>
+      <ion-col *ngIf="filters?.invoices_total_currencies" (click)="changeCurrency()">
+        {{ selectedCurrency }} <ion-icon name="chevron-down-outline"
+          style="float: right;margin-top: 2px;margin-left: 2px;"></ion-icon></ion-col>
+    </ion-row>
+    <swiper-container class="ion-padding-vertical">
+      <swiper-slide class="ion-padding">
+        <div class="title warning">{{'outstanding' | translate}}</div>
+        <div class="amount" [innerHTML]="invoice_stats?.formatted_due"></div>
+      </swiper-slide>
+      <swiper-slide class="ion-padding">
+        <div class="title success">{{'invoice_status_paid' | translate}}</div>
+        <div class="amount" [innerHTML]="invoice_stats?.formatted_paid"></div>
+      </swiper-slide>
+      <swiper-slide class="ion-padding">
+        <div class="title danger">{{'past_due' | translate}}</div>
+        <div class="amount" [innerHTML]="invoice_stats?.formatted_overdue"></div>
+      </swiper-slide>
+    </swiper-container>
+    <div echarts [options]="invoiceStatusChartOptions" [merge]="invoiceChartMergeOptions"
+      [theme]="isDark ? 'macarons' : 'light'" class="invoice_chart"></div>
+  </ion-grid>
+
+  <swiper-container [pagination]="{
+    el: '.swiper-pagination',
+    type: 'bullets',
+  }" class="ion-padding r-swiper">
+    <swiper-slide>
+      <ion-card mode="ios" class="ion-padding">
+        <ion-row style="border: 0;margin: 0;">
+          <ion-col class="heading">{{'estimates' | translate}}</ion-col>
+        </ion-row>
+        <div *ngFor="let estimate of finance_overview?.estimates" class="overview ion-margin-vertical">
+          <div>
+            <div>{{ estimate.total }} {{ estimate.status }}</div>
+            <div>{{ estimate.percent }}%</div>
+          </div>
+          <ion-progress-bar [color]="estimate.color" [value]="estimate.percent_decimal"></ion-progress-bar>
+        </div>
+      </ion-card>
+    </swiper-slide>
+    <swiper-slide>
+      <ion-card mode="ios" class="ion-padding">
+        <ion-row style="border: 0;margin: 0;">
+          <ion-col class="heading">{{'proposals' | translate}}</ion-col>
+        </ion-row>
+        <div *ngFor="let proposal of finance_overview?.proposals" class="overview ion-margin-vertical">
+          <div>
+            <div>{{ proposal.total }} {{ proposal.status }}</div>
+            <div>{{ proposal.percent }}%</div>
+          </div>
+          <ion-progress-bar [color]="proposal.color" [value]="proposal.percent_decimal"></ion-progress-bar>
+        </div>
+      </ion-card>
+    </swiper-slide>
+  </swiper-container>
+
+  <ion-grid class="ion-margin-top ion-padding todo_box">
+    <ion-row>
+      <ion-col class="heading">{{'to_do' | translate}}</ion-col>
+      <ion-col (click)="addEditTodo();">
+        <ion-icon name="add-outline"></ion-icon>
+        <ion-text>{{'add' | translate}}</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-list>
+      <ion-item-sliding *ngFor="let t of todo;let i = index;" class="ion-margin-top ion-margin-bottom">
+        <ion-item-options side="start" style="padding-right: 10px;">
+          <ion-item-option color="default-danger" class="_delete" (click)="deleteTodo(t.todoid, i, 0)">{{'_delete' |
+            translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item button="false" [lines]="(i + 1) !== todo?.length ? 'full' : 'none'"
+          style="--border-radius: 0;border-radius: 0;">
+          <ion-checkbox (ionChange)="changeTodoStatus(t.todoid, 1)" color="default"
+            mode="ios" labelPlacement="end" justify="start">
+            <div class="ion-text-wrap">{{t.description}}</div>
+          </ion-checkbox>
+          <!-- <ion-label style="color: var(--ion-text-color-dark);white-space: break-spaces;">{{ t.description
+            }}</ion-label> -->
+        </ion-item>
+
+        <ion-item-options side="end" style="padding-left: 10px;">
+          <ion-item-option color="default" class="_action" (click)="addEditTodo(t)">{{'_edit' |
+            translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+
+      <h6 class="decorated">
+        <span>{{'completed' | translate}}</span>
+      </h6>
+      <ion-item-sliding *ngFor="let todo_finished of todos_finished;let i = index;"
+        [class.ion-margin-bottom]="(i + 1) !== todos_finished?.length" class="ion-margin-top">
+        <ion-item-options side="start" style="padding-right: 10px;">
+          <ion-item-option color="default-danger" class="_delete"
+            (click)="deleteTodo(todo_finished.todoid, i,1)">{{'_delete' | translate}}</ion-item-option>
+        </ion-item-options>
+
+        <ion-item button="false" [lines]="(i + 1) !== todos_finished?.length ? 'full' : 'none'"
+          style="--border-radius: 0;border-radius: 0;">
+          <ion-checkbox (ionChange)="changeTodoStatus(todo_finished.todoid, 0)" color="default" mode="ios"
+            checked labelPlacement="end" justify="start">
+            <div  style="color: var(--ion-text-color-dark);text-decoration: line-through;opacity: 0.4;" class="ion-text-wrap">{{todo_finished.description}}</div>
+          </ion-checkbox>
+          <!-- <ion-label
+            style="color: var(--ion-text-color-dark);white-space: break-spaces;text-decoration: line-through;opacity: 0.4;">{{
+            todo_finished.description }}</ion-label> -->
+        </ion-item>
+
+        <ion-item-options side="end" style="padding-left: 10px;">
+          <ion-item-option color="default" class="_action" (click)="addEditTodo(todo_finished)">{{'_edit' |
+            translate}}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    <app-mpc-loader [isLoading]="isTodoLoading"></app-mpc-loader>
+  </ion-grid>
+
+  <ion-grid class="ion-margin-top ion-padding">
+    <ion-row style="border: 0;margin: 0;">
+      <ion-col class="heading">{{'home_weekly_payment_records' | translate}}</ion-col>
+    </ion-row>
+
+    <div id="chart1" echarts [options]="chartOptions" [merge]="chartMergeOptions"
+      [theme]="isDark ? 'macarons' : 'light'" class="demo-chart ion-margin-top">
+    </div>
+  </ion-grid>
+
+  <ion-fab  vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="default" class="ion-margin" (click)="openChat()">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

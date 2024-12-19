@@ -1,0 +1,16 @@
+ion-item {
+    border: 1px solid var(--ion-item-border-color);
+}
+ion-modal {
+    --width: 290px;
+    --height: 395px;
+    --border-radius: 8px;
+}
+ion-list{
+    background: transparent;
+    .item-no-border{
+        border: none !important;
+        --background: transparent !important;
+    }
+}
+

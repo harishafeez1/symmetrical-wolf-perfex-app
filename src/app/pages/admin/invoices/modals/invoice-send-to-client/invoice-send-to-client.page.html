@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'invoice_send_to_client_modal_heading' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formGroup">
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'invoice_estimate_sent_to_email' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="contacts"
+          [shouldStoreItemValue]="true"
+          [isMultiple]="true"
+          itemValueField="id"
+          itemTextField="email"
+          [canSearch]="true"
+          formControlName="sent_to"
+          #contactComponent
+        >
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="contactComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{contactComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-contact="item">
+            {{contact.email}} <sub class="sub-margin-right">{{contact.firstname}} {{contact.lastname}}</sub>
+          </ng-template>
+
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="contactComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear_all' | translate}}</ion-button>
+            <ion-button (click)="contactComponent.confirm();contactComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating">{{'cc' | translate}}</ion-label>
+        <ion-input type="text" formControlName="cc"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" button="false" class="checkbox">
+        <ion-checkbox color="default" mode="md" formControlName="attach_pdf" labelPlacement="end" justify="start">{{'invoice_send_to_client_attach_pdf' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'invoice_send_to_client_attach_pdf' | translate}}</ion-label> -->
+      </ion-item>
+
+      <ion-item lines="none" button="false" class="checkbox">
+        <ion-checkbox color="default" mode="md" formControlName="attach_statement" labelPlacement="end" justify="start">{{'attach_statement' | translate}}</ion-checkbox>
+        <!-- <ion-label>{{'attach_statement' | translate}}</ion-label> -->
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical ion-no-padding __text-editor item-inner-padding-end">
+        <ion-label position="floating" mode="md" class="ion-padding-horizontal">{{'invoice_send_to_client_preview_template' | translate}}</ion-label>
+        <editor
+          [init]="editorOption"
+          formControlName="email_template_custom"
+          style="width: 100%;"
+        ></editor>
+      </ion-item>
+      <ion-input type="hidden" formControlName="template_name"></ion-input>
+  </form>
+  <ion-button (click)="sendToEmail()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+    <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'send' | translate}}</ion-text>
+  </ion-button>
+</ion-content>

@@ -1,0 +1,274 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'filters' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetFilters()">
+        <ion-label color="dark">{{'reset' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- style="display: flex;height: 100%;flex-direction: column;justify-content: space-between;" -->
+  <div >
+    <form [formGroup]="filters">
+
+     
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'status' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="status"
+          itemValueField="value"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          formControlName="active"
+          mode="ios"
+          #statusComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="statusComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{statusComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+       <!--  <ng-template ionicSelectableItemTemplate let-staff="item">
+          {{staff.firstname}} {{staff.lastname}} <sub class="sub-margin-right">{{staff.email}}</sub>
+        </ng-template> -->
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="statusComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="statusComponent.confirm();statusComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'item_groups' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="groups"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="groups_in"
+          [searchPlaceholder]="'kb_search' | translate"
+          mode="ios"
+          #groupComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="groupComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{groupComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+
+       <!--  <ng-template ionicSelectableItemTemplate let-staff="item">
+          {{staff.firstname}} {{staff.lastname}} <sub class="sub-margin-right">{{staff.email}}</sub>
+        </ng-template> -->
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="groupComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="groupComponent.confirm();groupComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'invoices' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="invoiceStatuesList"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="invoice_statuses"
+          mode="ios"
+          #invoiceComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="invoiceComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{invoiceComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="invoiceComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="invoiceComponent.confirm();invoiceComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'estimates' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="estimateStatuesList"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="estimate_statuses"
+          mode="ios"
+          #estimateComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="estimateComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{estimateComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="estimateComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="estimateComponent.confirm();estimateComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'projects' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="projectStatuesList"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="project_statuses"
+          mode="ios"
+          #projectComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="projectComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{projectComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="projectComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="projectComponent.confirm();projectComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+  
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'proposals' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="proposalStatuesList"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [isMultiple]="true"
+          [canClear]="true"
+          formControlName="proposal_statuses"
+          mode="ios"
+          #proposalComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+        <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+          <ion-checkbox [checked]="isPortSelected" slot="end"></ion-checkbox>
+        </ng-template>
+        <ng-template ionicSelectableHeaderTemplate>
+          <ion-toolbar mode="ios">
+            <ion-buttons slot="start">
+              <ion-button (click)="proposalComponent.close()">
+                <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+            <ion-title> {{proposalComponent.label}}</ion-title>
+          </ion-toolbar>
+        </ng-template>
+        
+        <ng-template ionicSelectableFooterTemplate>
+          <ion-button (click)="proposalComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+          <ion-button (click)="proposalComponent.confirm();proposalComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'apply' | translate}}</ion-button>
+        </ng-template>
+        </ionic-selectable>
+      </ion-item>
+  
+    </form>
+    <ion-button (click)="applyFilters()" color="default" mode="ios" type="submit" expand="block">{{'show_results' | translate}}</ion-button>
+  
+  </div>
+</ion-content>

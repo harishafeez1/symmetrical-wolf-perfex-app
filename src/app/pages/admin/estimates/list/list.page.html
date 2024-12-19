@@ -1,0 +1,96 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'estimates' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon
+          [color]="isSearching ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/search.svg"
+        ></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()">
+        <ion-icon
+          [color]="isFiltered ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/funnel.svg"
+        ></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="estimateApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar [hidden]="summary.length ? '' : 'none'">
+    <div style="border-top: 1px solid var(--ion-item-border-color);margin-left: 16px;margin-right: 16px;"></div>
+    <ion-accordion-group (ionChange)="onAccordionChange()">
+      <ion-accordion value="first" style="background: transparent;">
+        <ion-item slot="header" style="--background-hover: transparent;font-family: Poppins;font-size: 14px;font-style: normal;font-weight: 400;line-height: normal;letter-spacing: -0.28px;--min-height: 25px;padding: 0;margin: 0;">
+          <ion-label>{{'summary' | translate}}</ion-label>
+        </ion-item>
+        <div slot="content" class="summary ion-padding" style="padding-top: 6px;">
+          <swiper-container class="ion-padding-vertical" #slides>
+            <swiper-slide *ngFor="let status of summary" class="ion-padding">
+                <div [class]="'title ' + status.status_class">
+
+                  {{
+                    estimateHelper.format_estimate_status(status?.status, '',
+                    false) | translate}}
+                </div>
+                <div class="amount" [innerHTML]="status.formatted_total"></div>
+            </swiper-slide>
+          </swiper-container>
+          <div echarts [options]="statusChartOptions" [merge]="chartMergeOptions" [theme]="isDark ? 'macarons' : 'light'" class="invoice_chart"></div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </ion-toolbar>
+
+  <ion-toolbar  *ngIf="isSearching">
+    <ion-searchbar
+    [placeholder]="'kb_search' | translate"
+    mode="ios"
+    (ionInput)="searchEstimates($event)"
+    debounce="500"
+  ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list lines="none" *ngIf="!isLoading">
+    <app-estimate-list-card [estimates]="estimates"></app-estimate-list-card>
+  </ion-list>
+  <app-skeleton *ngIf="estimates.length == 0 && isLoading" ></app-skeleton>
+
+  <ion-infinite-scroll
+   *ngIf="!isLoading"
+    threshold="100px"
+    (ionInfinite)="loadMoreEstimates($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab
+    *ngIf="authService.hasPermission('estimates', ['create'])"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
+    <ion-fab-button color="default" (click)="addEstimate()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="estimates.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

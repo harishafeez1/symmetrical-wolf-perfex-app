@@ -1,0 +1,30 @@
+<ion-item-sliding #slidingItem *ngFor="let subscription of subscriptions;let i = index;trackBy: trackByFn;" class="ion-margin-top ion-margin-bottom">
+  <ion-item-options side="start" 
+    *ngIf="(subscription?.stripe_subscription_id == '' || subscription?.in_test_environment == 1) && authService.hasPermission('subscriptions', ['delete'])">
+    <ion-item-option color="default-danger" class="_delete" (click)="delete(subscription.id, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+  </ion-item-options>
+
+  <ion-item class="ion-margin-start ion-margin-end r-m-16" (click)="view(subscription.id, subscription)">
+    <div slot="start" class="date_created">
+      <div class="date">{{ subscription.date | date : "dd" }}</div>
+      <div class="month">{{ subscription.date | date : "MMM" }}</div>
+    </div>
+
+    <ion-label>
+      <h6 *ngIf="subscription?.date_subscribed">{{'subscribed_on' | translate}} {{ subscription?.date_subscribed | dateTimeFormat}}</h6>
+      <h3>{{ '#' + subscription?.id + ' - ' +subscription?.name }}</h3>
+      <span>{{ subscription.company }}</span>
+    </ion-label>
+    <ion-note slot="end">
+      <h3 *ngIf="subscription?.next_billing_cycle">{{ subscription.next_billing_cycle | dateTimeFormat }}</h3>
+      <span class="list_status" style="background: #f2f2f2;">
+        {{subscriptionHelper.get_subscription_status_by_id(subscription.status).name | translate}}
+        <!-- {{ subscription.status_name }} -->
+      </span>
+    </ion-note>
+  </ion-item>
+
+  <ion-item-options side="end" *ngIf="authService.hasPermission('subscriptions', ['edit'])">
+    <ion-item-option color="default" class="_action" (click)="edit(subscription.id)">{{'_edit' | translate}}</ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>

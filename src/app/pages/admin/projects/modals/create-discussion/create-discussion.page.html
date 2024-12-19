@@ -1,0 +1,39 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <!-- <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon> -->
+        <ion-label>{{'close' | translate}}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <!-- <ion-title>New MileStone</ion-title> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <form [formGroup]="formGroup">
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating"><small class="text-danger">* </small>{{'project_discussion_subject' | translate}}</ion-label>
+          <ion-input formControlName="subject"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="ion-margin-vertical" mode="md">
+          <ion-label position="floating">{{'project_discussion_description' | translate}}</ion-label>
+          <ion-textarea rows="4" formControlName="description"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" button="false" class="ion-margin-vertical checkbox">
+          <ion-checkbox color="default" mode="md" formControlName="show_to_customer" value="1" labelPlacement="end" justify="start">{{'project_discussion_show_to_customer' | translate}}</ion-checkbox>
+          <ion-label>{{'project_discussion_show_to_customer' | translate}}</ion-label>
+        </ion-item>
+    </form>
+    <ion-button *ngIf="!discussion" (click)="createDiscussion()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="discussion" (click)="updateDiscussion()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+
+</ion-content>

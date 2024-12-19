@@ -1,0 +1,73 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'items' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="itemApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar [placeholder]="'kb_search' | translate" mode="ios" (ionInput)="searchInvoiceItems($event)" debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list lines="none" *ngIf="!isLoading">
+    
+    <ion-item-sliding #slidingItem *ngFor="let invoice_item of invoice_items;let i = index;trackBy: trackByFn;" class="ion-margin-top ion-margin-bottom">
+      <ion-item-options side="start" *ngIf="authService.hasPermission('items', ['delete'])">
+        <ion-item-option color="default-danger" class="_delete" (click)="delete(invoice_item.id, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+      </ion-item-options>
+      
+      <ion-item class="ion-margin-start ion-margin-end r-m-16">
+        <ion-label>
+          <span><small>{{'tax_1' | translate}}:</small> {{ invoice_item.formated_taxrate_1 }}% , <small>{{'tax_2' | translate}}:</small> {{ invoice_item.formated_taxrate_2 }}%</span>
+          <h3>{{ invoice_item.description }}</h3>
+          <h6 *ngIf="invoice_item?.unit"><strong>{{'unit' | translate}}:</strong> {{invoice_item?.unit}}</h6>
+          <h6 *ngIf="invoice_item?.group_name"><strong>{{'item_group_name' | translate}}:</strong> {{invoice_item?.group_name}}</h6>
+          <!-- <span>{{ invoice_item.subtext }}</span> -->
+        </ion-label>
+        <ion-note slot="end">
+          <h3>{{ invoice_item.rate | appFormatMoney: invoice_item }}</h3>
+        </ion-note>
+
+        <!-- <ion-label slot="end">
+          <h3>{{ invoice_item.rate | appFormatMoney: invoice_item }}</h3>
+        </ion-label> -->
+      </ion-item>
+
+      <ion-item-options side="end" *ngIf="authService.hasPermission('items', ['edit'])">
+        <ion-item-option color="secondary" class="_action" (click)="copy(invoice_item.id)">{{'copy' | translate}}</ion-item-option>
+        <ion-item-option color="default" class="_action" (click)="edit(invoice_item.id)" style="border-radius: 0;">{{'_edit' | translate}}</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <app-skeleton *ngIf="invoice_items?.length == 0 && isLoading" ></app-skeleton>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreInvoiceItems($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab *ngIf="authService.hasPermission('invoice_items', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="default" (click)="addInvoiceItem()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="invoice_items?.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

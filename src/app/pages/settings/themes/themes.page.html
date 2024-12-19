@@ -1,0 +1,156 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate"
+        color="dark"
+        defaultHref="/settings/list"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{'themes' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-top">
+  <ion-row class="ion-padding">
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == ''" class="color-selector color-default" (click)="toggleTheme('')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'default' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'orange'" class="color-selector color-orange" (click)="toggleTheme('orange')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'orange' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'purple'" class="color-selector color-purple" (click)="toggleTheme('purple')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'purple' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'red'" class="color-selector color-red" (click)="toggleTheme('red')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'red' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'midnight_serenity'" class="color-selector color-midnight_serenity" (click)="toggleTheme('midnight_serenity')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'midnight_serenity' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+       
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+     
+    </ion-col>
+
+  </ion-row>
+</ion-content>

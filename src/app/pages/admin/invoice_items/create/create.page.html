@@ -1,0 +1,149 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button class="btn-rotate" color="dark" defaultHref="/admin/invoice_items/list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ (item_id === null ? 'new_invoice_item' : 'invoice_item_edit_heading') | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <form [formGroup]="formGroup" class="ion-margin">
+    <div *ngIf="item_id" class="ion-margin-vertical ion-padding"
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);">
+      {{'changing_items_affect_warning' | translate}}
+    </div>
+    <div>
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'item_description_placeholder' | translate}}</ion-label>
+        <ion-input type="text" formControlName="description"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'item_long_description_placeholder' | translate}}</ion-label>
+        <ion-textarea rows="4" formControlName="long_description"></ion-textarea>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'item_rate_placeholder' | translate}} - {{ base_currency?.name }} <small>({{'base_currency_string' | translate}})</small></ion-label>
+        <ion-input type="number" formControlName="rate"></ion-input>
+      </ion-item>
+
+      <div *ngFor="let currency of currencies">
+        <ion-item lines="none" class="ion-margin-vertical" *ngIf="currency.isdefault == 0">
+          <ion-label position="floating">{{'item_rate_placeholder' | translate}} - {{ currency?.name }}</ion-label>
+          <ion-input type="number" [formControlName]="'rate_currency_' + currency.id"></ion-input>
+        </ion-item>
+      </div>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'tax' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="taxes" itemValueField="id" itemTextField="name" formControlName="tax" #taxComponent>
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="taxComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{taxComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-tax="item">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+          <ng-template ionicSelectableValueTemplate let-tax="value">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'tax_2' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="taxes" itemValueField="id" itemTextField="name" formControlName="tax2"
+          #tax2Component>
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="tax2Component.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{tax2Component.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableItemTemplate let-tax="item">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+          <ng-template ionicSelectableValueTemplate let-tax="value">
+            {{tax.taxrate}}% <sub class="sub-margin-right">{{tax.name}}</sub>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'unit' | translate}}</ion-label>
+        <ion-input type="text" formControlName="unit"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="ion-margin-vertical">
+        <ion-label position="floating">{{'item_group' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate" [items]="item_groups" [shouldStoreItemValue]="true" itemValueField="id" itemTextField="name"
+          formControlName="group_id" #itemGroupComponent>
+          <ng-template ionicSelectableSearchFailTemplate>
+            <div padding>
+              <app-empty></app-empty>
+            </div>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="itemGroupComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{itemGroupComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+
+      <!-- custom fields -->
+      <app-custom-fields [form]="formGroup" [type]="'items'" [typeid]="item_id"></app-custom-fields>
+
+    </div>
+    <ion-button *ngIf="item_id === null" (click)="createItem()" color="default" mode="ios" type="submit" expand="block"
+      [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'save' | translate}}</ion-text>
+    </ion-button>
+    <ion-button *ngIf="item_id !== null" (click)="updateItem()" color="default" mode="ios" type="submit" expand="block"
+      [disabled]="!formGroup.valid || submitting">
+      <ion-spinner [hidden]="!submitting"></ion-spinner>
+      <ion-text style="width: 100%;">{{'update' | translate}}</ion-text>
+    </ion-button>
+  </form>
+
+  <app-mpc-loader [isLoading]="isLoading && item_id !== null"></app-mpc-loader>
+</ion-content>

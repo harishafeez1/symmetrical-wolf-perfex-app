@@ -1,0 +1,127 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{'customers' | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon [color]="isSearching ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/search.svg"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()">
+        <ion-icon [color]="isFiltered ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/funnel.svg"></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="customerApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar [hidden]="!summary ? 'none' : ''">
+    <div style="border-top: 1px solid var(--ion-item-border-color);margin-left: 16px;margin-right: 16px;"></div>
+    <ion-accordion-group (ionChange)="onAccordionChange()">
+      <ion-accordion value="first" style="background: transparent;">
+        <ion-item slot="header"
+          style="--background-hover: transparent;font-family: Poppins;font-size: 14px;font-style: normal;font-weight: 400;line-height: normal;letter-spacing: -0.28px;--min-height: 25px;padding: 0;margin: 0;">
+          <ion-label>{{'summary' | translate}}</ion-label>
+        </ion-item>
+        <div class="summary ion-padding" slot="content" style="padding-top: 6px;">
+          <swiper-container #slides>
+            <swiper-slide class="ion-padding">
+              <div class="title draft">{{'total' | translate}}</div>
+              <div class="amount">{{ summary?.total }}</div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title success">{{'active' | translate}}</div>
+              <div class="amount">{{ summary?.active }}</div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title danger">{{'inactive' | translate}}</div>
+              <div class="amount">{{ summary?.inactive }}</div>
+            </swiper-slide>
+
+            <swiper-slide class="ion-padding">
+              <div class="title info">{{'customers_summary_active' | translate}}</div>
+              <div class="amount">{{ summary?.contacts_active }}</div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title danger">{{'customers_summary_inactive' | translate}}</div>
+              <div class="amount">{{ summary?.contacts_inactive }}</div>
+            </swiper-slide>
+            <swiper-slide class="ion-padding">
+              <div class="title draft">{{'customers_summary_logged_in_today' | translate}}</div>
+              <div class="amount">{{ summary?.contacts_last_login }}</div>
+            </swiper-slide>
+          </swiper-container>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar [placeholder]="'kb_search' | translate" mode="ios" (ionInput)="searchCustomers($event)"
+      debounce="500"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-list lines="none" *ngIf="!isLoading" [inset]="true">
+    <ion-item-sliding #slidingItem class="ion-margin-top ion-margin-bottom"
+      *ngFor="let customer of customers;trackBy: trackByFn;let i = index;">
+      <ion-item-options side="start" *ngIf="authService.hasPermission('customers', ['delete'])">
+        <ion-item-option color="default-danger" class="_delete"
+          (click)="delete(customer.userid, i, slidingItem)">{{'_delete' | translate}}</ion-item-option>
+      </ion-item-options>
+
+      <ion-item class="r-m-16" (click)="view(customer.userid, customer)">
+        <ion-avatar slot="start">
+          {{ (customer?.company.trimStart().substring(0, 1) == '' ? customer?.email.trimStart().substring(0, 1) :
+          customer?.company.trimStart().substring(0, 1)) | titlecase }}
+        </ion-avatar>
+        <ion-row class="ion-justify-content-between ion-align-items-center" style="width: 100%;">
+          <ion-col size="8">
+            <ion-label>
+              <h6>{{'created_on' | translate}} {{ customer?.datecreated | dateTimeFormat }}</h6>
+              <h3>{{ customer?.company }}</h3>
+              <span>{{( customer?.email ?? customer?.phonenumber )}}</span>
+            </ion-label>
+          </ion-col>
+          <ion-col size="4">
+            <ion-label  [style]="customer?.phonenumber ? 'display: flex; flex-direction: row; align-items: center;justify-content: space-between;margin-left: 0px;' : ''">
+              <a *ngIf="customer?.phonenumber" [href]="'tel:' + customer?.phonenumber" (click)="stopPropagation($event)">
+                <ion-icon src="/assets/icon/phone.svg" style="color: var(--phone-icon-color);width: 24px;height: 24px;margin-right: 5px;"></ion-icon>
+              </a>
+              <div class="ion-text-end p-r-4">
+                <ion-toggle   [checked]="customer.active == '1' ? true : false" (click)="stopPropagation($event);customerChangeStatus($event, i, customer);" mode="ios" color="default"></ion-toggle>
+              </div>
+            </ion-label>
+          </ion-col>
+        </ion-row>
+      </ion-item>
+
+      <ion-item-options side="end" *ngIf="authService.hasPermission('customers', ['edit'])">
+        <ion-item-option color="default" class="_action" (click)="edit(customer.userid)">{{'_edit' |
+          translate}}</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  <app-skeleton *ngIf="customers?.length == 0 && isLoading" [isAvatar]="true"></app-skeleton>
+
+  <ion-infinite-scroll *ngIf="!isLoading" threshold="100px" (ionInfinite)="loadMoreCustomers($event)">
+    <ion-infinite-scroll-content loadingSpinner="circular" loadingText="Loading...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab *ngIf="authService.hasPermission('customers', ['create'])" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="default" (click)="addCustomer()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <app-mpc-loader [isLoading]="isMpcLoading"></app-mpc-loader>
+
+  <div class="ion-padding" *ngIf="customers?.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

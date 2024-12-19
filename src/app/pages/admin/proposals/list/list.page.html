@@ -1,0 +1,70 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="dark"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{"proposals" | translate}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon
+          [color]="isSearching ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/search.svg"
+        ></ion-icon>
+      </ion-button>
+      <ion-button (click)="openFilters()">
+        <ion-icon
+          [color]="isFiltered ? 'default' : 'dark'"
+          slot="icon-only"
+          src="/assets/icon/funnel.svg"
+        ></ion-icon>
+      </ion-button>
+
+      <mpc-sorting (ionChange)="onSortingChange($event)" [apiService]="proposalApi"></mpc-sorting>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="isSearching">
+    <ion-searchbar
+    [placeholder]="'kb_search' | translate"
+    mode="ios"
+    (ionInput)="searchProposals($event)"
+    debounce="500"
+  ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list lines="none" *ngIf="!isLoading">
+   <app-proposal-list-card [proposals]="proposals"></app-proposal-list-card>
+  </ion-list>
+  <app-skeleton *ngIf="proposals.length == 0 && isLoading"></app-skeleton>
+
+  <ion-infinite-scroll
+   *ngIf="!isLoading"
+    threshold="100px"
+    (ionInfinite)="loadMoreProposals($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="circular"
+      loadingText="Loading..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab
+    *ngIf="authService.hasPermission('proposals', ['create'])"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
+    <ion-fab-button color="default" (click)="addProposal()" class="ion-margin">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <div class="ion-padding" *ngIf="proposals.length == 0 && !isLoading">
+    <app-empty></app-empty>
+  </div>
+</ion-content>

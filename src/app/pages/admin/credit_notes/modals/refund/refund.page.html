@@ -1,0 +1,82 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()">
+        <ion-icon
+          color="dark"
+          slot="icon-only"
+          src="/assets/icon/left.svg" class="btn-rotate"
+        ></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'refund_number' | translate:{number: credit_note.credit_note_number} }} </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formGroup">
+    <div>
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'refund_amount' | translate}}</ion-label>
+        <ion-input type="number" formControlName="amount"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" mode="md" class="ion-margin-vertical" button="true" (click)="isEstimateDateModalOpen = true" id="open-estimate_date-modal">
+        <ion-label position="floating" mode="md"><small class="text-danger">* </small>{{'date' | translate}}</ion-label>
+        <ion-input type="text" formControlName="refunded_on" [value]="formGroup.value.refunded_on"></ion-input>
+        <ion-icon slot="end" src="/assets/icon/calendar_new.svg" style="font-size: 13px;margin-top: 19px;"></ion-icon>
+        <ion-modal [isOpen]="isEstimateDateModalOpen" trigger="open-estimate_date-modal">
+          <ng-template>
+            <ion-content>
+              <ion-datetime mode="md" #refund_on presentation="date" showDefaultButtons [value]="parseDate(formGroup.value.refunded_on)" (ionChange)="formGroup.value.refunded_on = formatDate(refund_on.value);isEstimateDateModalOpen = false;" size="cover">
+              </ion-datetime>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+     
+      <ion-item lines="none" class="ion-margin-vertical" mode="md">
+        <ion-label position="floating"><small class="text-danger">* </small>{{'payment_modes' | translate}}</ion-label>
+        <ionic-selectable [searchPlaceholder]="'kb_search' | translate"
+          [items]="payment_modes"
+          itemValueField="id"
+          [shouldStoreItemValue]="true"
+          itemTextField="name"
+          [canSearch]="true"
+          [canClear]="true"
+          formControlName="payment_mode"
+          mode="ios"
+          #paymentModeComponent
+        >
+        <ng-template ionicSelectableSearchFailTemplate>
+          <div padding>
+            <app-empty></app-empty>
+          </div>
+        </ng-template>
+          <ng-template ionicSelectableItemIconTemplate let-port="item" let-isPortSelected="isItemSelected">
+            <ion-checkbox [checked]="isPortSelected" slot="start"></ion-checkbox>
+          </ng-template>
+          <ng-template ionicSelectableHeaderTemplate>
+            <ion-toolbar mode="ios">
+              <ion-buttons slot="start">
+                <ion-button (click)="paymentModeComponent.close()">
+                  <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+              <ion-title> {{paymentModeComponent.label}}</ion-title>
+            </ion-toolbar>
+          </ng-template>
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-button (click)="paymentModeComponent.toggleItems(false)" mode="ios" expand="block" class="ion-margin" fill="outline">{{'clear' | translate}}</ion-button>
+            <ion-button (click)="paymentModeComponent.confirm();paymentModeComponent.close();" mode="ios" expand="block" class="ion-margin" color="default">{{'select' | translate}}</ion-button>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+    </div>
+  </form>
+  
+  <ion-button (click)="refund ? editRefund() : createRefund()" color="default" mode="ios" type="submit" expand="block" [disabled]="!formGroup.valid || submitting">
+    <ion-spinner [hidden]="!submitting"></ion-spinner>
+    <ion-text style="width: 100%;">{{(refund? 'update' : 'save') | translate}}</ion-text>
+  </ion-button>
+</ion-content>

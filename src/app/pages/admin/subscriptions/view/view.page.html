@@ -1,0 +1,254 @@
+<ion-header mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- <ion-back-button class="btn-rotate" *ngIf=" type !== 'modal'" color="dark" defaultHref="/admin/subscriptions/list"
+      ></ion-back-button> -->
+      <ion-button *ngIf=" type !== 'modal'" routerLink="/admin/subscriptions/list" routerDirection="back">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf=" type === 'modal'" (click)="close()">
+        <ion-icon color="dark" slot="icon-only" src="/assets/icon/left.svg" class="btn-rotate"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{'view_subscription' | translate}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment
+    scrollable
+    class="ion-margin-bottom"
+    (ionChange)="segmentChanged($event)"
+    [value]="selectedTab"
+    mode="md"
+  >
+    <ion-segment-button value="subscription">
+      <ion-label>{{'subscription' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="upcoming_invoice">
+      <ion-label>{{'upcoming_invoice' | translate}}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="child_invoices">
+      <ion-label>{{'child_invoices' | translate}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'subscription'">
+    <div
+      *ngIf="subscription?.subscription_error"
+      [innerHTML]="subscription?.subscription_error" 
+      class="ion-margin-vertical ion-padding" 
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-warning-rgb), 10%);"></div>
+
+    <div
+      *ngIf="subscription?.stripe_subscription_id && subscription?.status != 'canceled' && subscription?.status != 'incomplete_expired' && subscription?.status != 'incomplete'"
+      class="ion-margin-vertical ion-padding" 
+      style="margin-left: 0;margin-right: 0;border-radius: 10px;box-shadow: unset;border: 1px solid var(--ion-item-border-color);background: rgb(var(--ion-color-success-rgb), 10%);">
+      {{'customer_is_subscribed_to_subscription_info' | translate}}<br />
+      {{'subscription_id' | translate}}: {{ subscription?.stripe_subscription_id }}
+    </div>
+      
+      <ion-grid>
+      <ion-row style="border: 0">
+        <ion-col>
+          <span style="
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 19px;
+          ">{{'status' | translate}}</span>
+        </ion-col>
+        <ion-col>
+          <span>
+            {{subscriptionHelper.get_subscription_status_by_id(subscription?.status).name | translate}}
+            <!-- {{ subscription?.status_name }} -->
+          </span>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <!-- [routerLink]="'/admin/subscriptions/edit/' + subscription_id" -->
+          <ion-button color="primary"  expand="block" fill="outline" mode="ios" (click)="editSubscription(subscription_id)">{{'edit_subscription' | translate}}</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button color="default" (click)="viewSubscription()" expand="block" mode="ios">{{'view_subscription' | translate}}</ion-button>
+        </ion-col>
+        <ion-col *ngIf="subscription?.stripe_subscription_id && subscription?.status != 'canceled' && subscription?.status != 'incomplete_expired' && !subscription?.ends_at">
+          <ion-button id="popover-cancel" color="medium" expand="block" fill="outline" mode="ios" color="dark"
+            class="action_button" (click)="openCancel()">
+            <ion-label style="width: 100%">{{'cancel' | translate}}</ion-label>
+            <ion-icon slot="end" name="chevron-down"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>{{ subscription?.name }}</h5>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'billing_plan' | translate}}</h6>
+          <h3 [innerHTML]="getBillingPlanById(subscription?.stripe_plan_id)"></h3>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+         <ion-col>
+          <h6>{{'item_quantity_placeholder' | translate}}</h6>
+          <h3>{{ subscription?.quantity }}</h3>
+        </ion-col>
+        <ion-col>
+          <h6>{{'first_billing_date' | translate}}</h6>
+          <h3>{{ subscription?.date | dateTimeFormat}}</h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h6>{{'client' | translate}}</h6>
+          <h3>{{ subscription?.company }}</h3>
+        </ion-col>
+        <ion-col *ngIf="subscription?.project_name">
+          <h6>{{'project' | translate}}</h6>
+          <h3>{{ subscription?.project_name }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'currency' | translate}}</h6>
+          <h3>{{ subscription?.currency_name + ' ' + subscription?.symbol }}</h3>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <h6>{{'subscriptions_description' | translate}}</h6>
+          <h3 [innerHTML]="subscription?.description"></h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+  </div>
+
+  <div class="ion-padding-start ion-padding-end ion-padding-bottom r-p-16" *ngIf="selectedTab == 'upcoming_invoice'">
+    <div *ngIf="subscription?.upcoming_invoice && subscription?.upcoming_invoice?.project_id && subscription?.upcoming_invoice?.project_data?.name">
+      <ion-text>{{'invoice_related_project' | translate}}: </ion-text>
+      <ion-text color="primary">{{ subscription?.upcoming_invoice?.project_data?.name }}</ion-text>
+    </div>
+    <app-invoice-preview *ngIf="subscription?.upcoming_invoice" [invoice]="subscription?.upcoming_invoice"></app-invoice-preview>
+
+
+    <div class="ion-padding" *ngIf="!subscription?.upcoming_invoice">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+  <div class="ion-padding-bottom" *ngIf="selectedTab == 'child_invoices'">
+    <ion-list lines="none">
+      <invoice-list-card *ngIf="subscription?.child_invoices" [invoices]="subscription?.child_invoices" [isModal]="true" [page]="'child_invoices'"></invoice-list-card>
+    </ion-list>
+    
+    <div class="ion-padding" *ngIf="subscription?.child_invoices?.length == 0">
+      <app-empty></app-empty>
+    </div>
+  </div>
+
+ <!--  <div class="ion-padding-bottom" *ngIf="selectedTab == 'reminders'">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event, 'reminder')">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <ion-searchbar
+      *ngIf="isSearching"
+      mode="ios"
+      (ionInput)="searchReminders($event)"
+      debounce="500"
+    ></ion-searchbar>
+    <ion-list lines="none" *ngIf="!isLoading">
+      <ion-item-sliding
+        *ngFor="let reminder of reminders;let i = index;trackBy: trackByFn;"
+        class="ion-margin-top ion-margin-bottom"
+      >
+        <ion-item-options
+          side="start"
+          *ngIf="authService.hasPermission('reminders', ['delete'])"
+        >
+          <ion-item-option
+            color="default-danger"
+            class="_delete"
+            (click)="deleteReminder(reminder.id, i)"
+            >{{'_delete' | translate}}</ion-item-option
+          >
+        </ion-item-options>
+
+        <ion-item class="ion-margin-start ion-margin-end r-m-16">
+          <ion-avatar slot="start">
+            <img [src]="reminder.profile_url" />
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ reminder.firstname }} {{ reminder.lastname }}</h3>
+            <span>{{ reminder.description }}</span>
+            <h6>
+              <ion-icon
+                [color]="reminder.isnotified == 1 ? 'primary' : 'danger'"
+                src="assets/icon/ellipse.svg"
+                style="width: 10px; margin-bottom: -2px"
+              ></ion-icon>
+              {{ reminder.date }}
+            </h6>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options
+          side="end"
+          *ngIf="authService.hasPermission('reminders', ['edit'])"
+        >
+          <ion-item-option
+            color="default"
+            class="_action"
+            (click)="addEditReminder(reminder)"
+            >{{'_edit' | translate}}</ion-item-option
+          >
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <ion-infinite-scroll
+      threshold="100px"
+      (ionInfinite)="loadMoreReminders($event)"
+    >
+      <ion-infinite-scroll-content
+        loadingSpinner="circular"
+        loadingText="Loading..."
+      >
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div class="ion-padding" *ngIf="reminders.length == 0">
+      <app-empty></app-empty>
+    </div>
+
+    <ion-fab
+      *ngIf="authService.hasPermission('reminders', ['create'])"
+      vertical="bottom"
+      horizontal="end"
+      slot="fixed"
+    >
+      <ion-fab-button
+        color="default"
+        (click)="addEditReminder()"
+        class="ion-margin"
+      >
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div> -->
+
+  <app-mpc-loader [isLoading]="isLoading"></app-mpc-loader>
+</ion-content>

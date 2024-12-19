@@ -1,0 +1,9 @@
+<div class="crm-loader" [hidden]="!isLoading">
+    <!-- <h2>{{loaderPath}}</h2> -->
+    <lottie-player *ngIf="theme === 'default'" src="/assets/default-loader.json" background="transparent" speed="1" loop autoplay></lottie-player>
+    <lottie-player *ngIf="theme === 'orange'" src="/assets/orange-loader.json" background="transparent" speed="1" loop autoplay></lottie-player>
+    <lottie-player *ngIf="theme === 'purple'" src="/assets/purple-loader.json" background="transparent" speed="1" loop autoplay></lottie-player>
+    <lottie-player *ngIf="theme === 'red'" src="/assets/red-loader.json" background="transparent" speed="1" loop autoplay></lottie-player>
+    <lottie-player *ngIf="theme === 'midnight_serenity'" src="/assets/midnight_serenity-loader.json" background="transparent" speed="1" loop autoplay></lottie-player>
+    <!-- <lottie-player [src]="loaderPath" background="transparent" speed="1" loop autoplay></lottie-player> -->
+</div>

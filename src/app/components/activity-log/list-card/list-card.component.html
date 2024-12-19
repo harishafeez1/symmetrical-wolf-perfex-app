@@ -1,0 +1,21 @@
+<ion-item-sliding *ngFor="let activity of activities;let i = index;trackBy: trackByFn;let last = last">
+        <ion-item class="item ion-margin-start ion-margin-end r-item"  [class.last-item]="last">
+          <ion-label>
+            <h6 >
+              {{ activity.time_ago | uppercase }}
+            </h6>
+            <ion-avatar *ngIf="activity?.profile_url" style="
+                float: left;
+                height: 30px;
+                width: 30px;
+                object-fit: cover;
+                margin-right: 5px;
+              ">
+              <img [src]="activity.profile_url" />
+            </ion-avatar>
+            <h3>{{ activity.full_name }}</h3>
+            <span [innerHTML]="activity.description" style="white-space: initial"></span>
+          </ion-label>
+          <ion-icon name="close" slot="end" color="default-danger"  *ngIf="authService.hasPermission('invoices', ['delete'])" (click)="deleteActivity(activity.id, i)"></ion-icon>
+        </ion-item>
+      </ion-item-sliding>

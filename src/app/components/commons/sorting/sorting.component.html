@@ -1,0 +1,41 @@
+<ion-button (click)="setOpen(true)">
+  <ion-icon [color]="isSorted ? 'default' : 'dark'" slot="icon-only" src="/assets/icon/sort.svg"></ion-icon>
+</ion-button>
+<ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.75, 1]" handleBehavior="cycle" (willDismiss)="setOpen(false)">
+  <ng-template>
+    <ion-header mode="ios">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="setOpen(false)">
+            <ion-label>{{'close' | translate}}</ion-label>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list *ngFor="let sort of apiService.sorts;trackBy: trackByFn;let i = index;" class="ion-no-padding ion-margin-horizontal ion-margin-top">
+        <ion-item
+          detail="false"
+          button
+          [class.activated]="apiService.sort?.sort_by == sort.key && apiService.sort?.order == 'asc'"
+          (click)="applySorting(sort.key, 'asc')"
+          lines="full"
+        >
+          <ion-icon color="dark" slot="start" src="/assets/icon/sort.svg"></ion-icon>
+          <ion-label class="s-label">{{'ascending_by' | translate}} {{ sort.name | translate}}</ion-label>
+        </ion-item>
+
+        <ion-item
+          detail="false"
+          button
+          [class.activated]="apiService.sort?.sort_by == sort.key && apiService.sort?.order == 'desc'"
+          (click)="applySorting(sort.key, 'desc')"
+          lines="none"
+        >
+          <ion-icon class="rotate180 flip" color="dark" slot="start" src="/assets/icon/sort.svg"></ion-icon>
+          <ion-label>{{'descending_by' | translate}} {{ sort.name | translate}}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -115,9 +115,9 @@ export class BaseUrlPage implements OnInit {
   exploreDemo() {
     this.isLoading = true;
     this.credentials.patchValue({
-      base_url: 'https://demo.myperfexcrm.com'
+      base_url: 'https://sw-portal.com/portal'
     });
-    this.start(true);
+    this.start(false);
   }
 
   async toastPresent(message) {

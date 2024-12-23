@@ -86,29 +86,29 @@ export class AppComponent {
   }
 
   async ngOnInit() {
-    
+
     Network.addListener('networkStatusChange', status => {
       console.log('Network status changed', status);
-      if(status.connected == true){
+      if (status.connected == true) {
         this.mpcToast.showConnection('Your internet connection was restored', true)
-      }else if(status.connected == false){
+      } else if (status.connected == false) {
         this.mpcToast.showConnection('You are currently offline');
       }
     });
-  
-      const status = await Network.getStatus();
-    
-      console.log('Network status:', status);
-      if(status.connected == false){
-        this.mpcToast.showConnection('You are currently offline');
-      }
+
+    const status = await Network.getStatus();
+
+    console.log('Network status:', status);
+    if (status.connected == false) {
+      this.mpcToast.showConnection('You are currently offline');
+    }
     this.platform.ready().then(async () => {
       this.initDatabase();
       setTimeout(() => {
         SplashScreen.hide();
       }, 10000);
 
-      this.updateService.checkForUpdate();
+      // this.updateService.checkForUpdate();
     });
 
     Badge.isSupported().then(result => {
@@ -311,9 +311,9 @@ export class AppComponent {
     });
     // console.log(this.accounts);
   }
-  async initDatabase(){
+  async initDatabase() {
     await this.databaseService.initializePlugin();
-   }
+  }
 
   async switchAccount(account) {
     for (let _account in this.accounts) {
@@ -401,7 +401,7 @@ export class AppComponent {
 
     Preferences.get({ key: "app-theme" }).then((storage: GetResult) => {
       // document.body.setAttribute('app-theme', storage.value ? storage.value : '');
-      this.renderer.setAttribute(document.body, 'app-theme', storage.value ? storage.value : '');
+      this.renderer.setAttribute(document.body, 'app-theme', (storage.value || 'charcoal_burgundy'));
 
     });
   }

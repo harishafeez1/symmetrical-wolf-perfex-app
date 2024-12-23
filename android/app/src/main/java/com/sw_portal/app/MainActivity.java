@@ -1,4 +1,4 @@
-package com.myperfexcrm.app;
+package com.sw_portal.app;
 
 import com.getcapacitor.BridgeActivity;
 

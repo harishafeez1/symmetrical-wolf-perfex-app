@@ -194,6 +194,25 @@
 	--ion-color-primary-tint: #353e4f;
 }
 
+:root body[app-theme="charcoal_burgundy"] {
+
+  /** default **/
+  --ion-color-default: linear-gradient(91.96deg, #1f1818 3.16%, #201919 91.72%);
+	--ion-color-default-rgb: 31,24,24;
+	--ion-color-default-contrast: #ffffff;
+	--ion-color-default-contrast-rgb: 255,255,255;
+	--ion-color-default-shade: #1b1515;
+	--ion-color-default-tint: #352f2f;
+
+  /** primary **/
+  --ion-color-primary: #1f1818;
+	--ion-color-primary-rgb: 31,24,24;
+	--ion-color-primary-contrast: #ffffff;
+	--ion-color-primary-contrast-rgb: 255,255,255;
+	--ion-color-primary-shade: #1b1515;
+	--ion-color-primary-tint: #352f2f;
+}
+
   /*
    * Dark Colors
    * -------------------------------------------
@@ -382,7 +401,7 @@
     --ion-card-background: #1e1e1e;
   }
 
-  body.dark[app-theme="midnight_serenity"] {
+  body.dark[app-theme="midnight_serenity"], body.dark[app-theme="charcoal_burgundy"] {
 
     /** default **/
     /* --ion-color-default: linear-gradient(91.96deg, #f0f0f0 3.16%, #dddddd 91.72%);

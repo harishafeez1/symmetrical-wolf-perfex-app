@@ -150,3 +150,24 @@
         }
     }
 }
+
+.color-charcoal_burgundy {
+    ion-list {
+        ion-item {
+
+            ion-avatar,
+            .avatar {
+                background: linear-gradient(91.96deg, #1f1818 3.16%, #201919 91.72%);
+            }
+        }
+    }
+    ion-fab {
+        ion-fab-button {
+            --background: linear-gradient(91.96deg, #1f1818 3.16%, #201919 91.72%);
+        }
+
+        ion-fab-button::part(native) {
+            box-shadow: 0px 11px 28px rgba(31,24,24, 0.5);
+        }
+    }
+}

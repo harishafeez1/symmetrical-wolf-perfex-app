@@ -76,7 +76,7 @@
 
       <ion-item class="r-m-16" (click)="view(customer.userid, customer)">
         <ion-avatar slot="start">
-          {{ (customer?.company.trimStart().substring(0, 1) == '' ? customer?.email.trimStart().substring(0, 1) :
+          {{ (customer?.company?.trimStart().substring(0, 1) == '' ? (customer?.email?.trimStart().substring(0, 1) == '' ? 'A' : customer?.email?.trimStart().substring(0, 1)) :
           customer?.company.trimStart().substring(0, 1)) | titlecase }}
         </ion-avatar>
         <ion-row class="ion-justify-content-between ion-align-items-center" style="width: 100%;">

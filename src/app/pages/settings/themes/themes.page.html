@@ -152,5 +152,32 @@
      
     </ion-col>
 
+    <ion-col size="6">
+      <div [class.selected]="defaultValue == 'charcoal_burgundy'" class="color-selector color-charcoal_burgundy" (click)="toggleTheme('charcoal_burgundy')">
+        <ion-header mode="ios">
+          <ion-toolbar>
+            <ion-title class="r-m-16">{{'charcoal_burgundy' | translate}}</ion-title>
+          </ion-toolbar>
+        </ion-header>
+
+          <ion-list lines="none">
+            <ion-item *ngFor="let i of [1,2,3,4]" style="margin: 7px;" detail="false">
+              <ion-avatar slot="start">A</ion-avatar>
+  
+              <ion-label>
+                <h3><ion-skeleton-text style="width: 75%;height: 10px;"></ion-skeleton-text></h3>
+                <span><ion-skeleton-text style="width: 60%;height: 7px;"></ion-skeleton-text></span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" class="ion-margin">
+              <ion-icon name="add"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+      </div>
+    </ion-col>
+
   </ion-row>
 </ion-content>

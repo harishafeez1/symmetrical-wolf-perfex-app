@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.myperfexcrm.app',
-  appName: 'Perfex CRM',
+  appId: 'com.sw_portal.app',
+  appName: 'SW Pro',
   webDir: 'www',
   bundledWebRuntime: false,
   // backgroundColor: '#ff0000',

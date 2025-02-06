@@ -15,8 +15,7 @@ const routes: Routes = [
   {
     path: 'login',
     loadChildren: () => import('./pages/login/login.module').then(m => m.LoginPageModule),
-    canLoad: [IntroGuard, BaseUrlGuard, AutoLoginGuard],
-    // canActivate: [SubscriptionGuard]
+    canLoad: [BaseUrlGuard, AutoLoginGuard]
   },
   {
     path: 'register',
@@ -25,13 +24,11 @@ const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./pages/admin/admin-routing.module').then(m => m.AdminRoutingModule),
-    canLoad: [AuthGuard],
-    // canActivate: [SubscriptionGuard]
+    canLoad: [AuthGuard]
   },
   {
     path: 'base-url',
-    loadChildren: () => import('./pages/base-url/base-url.module').then(m => m.BaseUrlPageModule),
-    canLoad: [IntroGuard]
+    loadChildren: () => import('./pages/base-url/base-url.module').then(m => m.BaseUrlPageModule)
   },
   {
     path: 'settings',
@@ -39,8 +36,7 @@ const routes: Routes = [
   },
   {
     path: 'app-subscription',
-    loadChildren: () => import('./pages/app-subscription/app-subscription.module').then(m => m.AppSubscriptionPageModule),
-    canLoad: [IntroGuard]
+    loadChildren: () => import('./pages/app-subscription/app-subscription.module').then(m => m.AppSubscriptionPageModule)
   },
   {
     path: 'intro',
@@ -49,16 +45,7 @@ const routes: Routes = [
   {
     path: 'forgot-password',
     loadChildren: () => import('./pages/forgot-password/forgot-password.module').then( m => m.ForgotPasswordPageModule)
-  },
-  {
-    path: 'order-app',
-    loadChildren: () => import('./pages/order-app/order-app.module').then( m => m.OrderAppPageModule)
-  },
-  {
-    path: 'chat',
-    loadChildren: () => import('./pages/chat/chat.module').then( m => m.ChatPageModule)
   }
-
 ];
 
 @NgModule({

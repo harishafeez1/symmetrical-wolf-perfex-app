@@ -350,11 +350,11 @@ ngx-dropzone {
     }
 }
 
-ion-toggle {
-    height: 24px;
-    width: 42px;
-    --handle-width: 20px;
-}
+// ion-toggle {
+//     height: 24px;
+//     width: 42px;
+//     --handle-width: 20px;
+// }
 
 ion-checkbox {
     --size: 32px;
@@ -784,7 +784,7 @@ ion-modal.datetime {
     background: rgb(27 36 44 / 53%);
     z-index: 1000;
 
-    lottie-player {
+    lottie-player, canvas {
         width: 150px;
         height: 150px;
         position: fixed;

@@ -10,76 +10,70 @@
 <ion-content class="ion-padding-top">
   <form [formGroup]="formGroup">
     <ion-list>
-      <ion-item button="false">
+      <ion-item>
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="ticket_notification"
-        ></ion-toggle>
-        <ion-label>{{'ticket_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'ticket_notifications' | translate}}</ion-toggle>
       </ion-item>
   
       <ion-item button="false">
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="invoice_notification"
-        ></ion-toggle>
-        <ion-label>{{'invoice_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'invoice_notifications' | translate}}</ion-toggle>
       </ion-item>
   
       <ion-item button="false">
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="task_notification"
-        ></ion-toggle>
-        <ion-label>{{'task_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'task_notifications' | translate}}</ion-toggle>
       </ion-item>
   
       <ion-item button="false">
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="lead_notification"
-        ></ion-toggle>
-        <ion-label>{{'lead_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'lead_notifications' | translate}}</ion-toggle>
       </ion-item>
   
       <ion-item button="false">
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="proposal_notification"
-        ></ion-toggle>
-        <ion-label>{{'proposal_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'proposal_notifications' | translate}}</ion-toggle>
       </ion-item>
   
       <ion-item button="false">
         <ion-toggle
-          (ionBlur)="updateSetting()"
-          (ionFocus)="updateSetting()"
-          slot="end"
+          (ionChange)="updateSetting()"
           color="default"
           mode="ios"
           formControlName="project_notification"
-        ></ion-toggle>
-        <ion-label>{{'project_notifications' | translate}}</ion-label>
+          labelPlacement="start"
+          justify="space-between"
+        >{{'project_notifications' | translate}}</ion-toggle>
       </ion-item>
     </ion-list>
     

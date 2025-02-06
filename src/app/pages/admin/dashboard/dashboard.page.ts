@@ -12,7 +12,6 @@ import { CreatePage } from '../todos/create/create.page';
 import { GetResult, Preferences } from '@capacitor/preferences';
 import { InvoiceApiService } from 'src/app/services/invoice-api.service';
 import { TranslateService } from '@ngx-translate/core';
-import { ChatPage } from 'src/app/pages/chat/chat.page';
 import { StorageService } from 'src/app/services/storage.service';
 
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -361,17 +360,5 @@ export class DashboardPage implements OnInit {
       state: this.authUser
     };
     this.router.navigate(['admin/staffs/view/', this.authUser?.staffid], extras);
-  }
-  async openChat() {
-    const modal = await this.modalCtrl.create({
-      component: ChatPage,
-      mode: 'ios',
-    });
-    modal.onDidDismiss().then((modalFilters) => {
-      if (modalFilters.data) {
-
-      }
-    });
-    return await modal.present();
-  }
+  } 
 }

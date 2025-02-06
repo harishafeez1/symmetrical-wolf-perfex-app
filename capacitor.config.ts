@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.sw_portal.app',
+  appId: 'com.swolfpro.app',
   appName: 'SW Pro',
   webDir: 'www',
   bundledWebRuntime: false,

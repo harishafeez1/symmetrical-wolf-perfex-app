@@ -1,5 +1,6 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import { GetResult, Preferences } from '@capacitor/preferences';
+import { DotLottie } from '@dotlottie/dotlottie-js/node'
 
 @Component({
   selector: 'app-themes',
@@ -11,11 +12,13 @@ export class ThemesPage implements OnInit {
   constructor(private renderer: Renderer2) {
   }
 
-  toggleTheme(_value) {
+  async toggleTheme(_value) {
+    
     // document.body.setAttribute('app-theme', _value);
     this.renderer.setAttribute(document.body, 'app-theme', _value);
     Preferences.set({key: 'app-theme', value: _value});
     this.defaultValue = _value;
+
     window.dispatchEvent(new CustomEvent('app:theme_changed'));
   }
 

@@ -93,7 +93,7 @@
                 <ion-icon src="/assets/icon/phone.svg" style="color: var(--phone-icon-color);width: 24px;height: 24px;margin-right: 5px;"></ion-icon>
               </a>
               <div class="ion-text-end p-r-4">
-                <ion-toggle   [checked]="customer.active == '1' ? true : false" (click)="stopPropagation($event);customerChangeStatus($event, i, customer);" mode="ios" color="default"></ion-toggle>
+                <ion-toggle [checked]="customer.active == '1' ? true : false" (click)="stopPropagation($event);customerChangeStatus($event, i, customer);" aria-label="Customer Status" justify="end" mode="ios" color="default"></ion-toggle>
               </div>
             </ion-label>
           </ion-col>

@@ -16,7 +16,6 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, BackgroundColorOptions } from '@capacitor/status-bar';
 import { Network } from '@capacitor/network';
 import { MpcToastService } from './services/mpc-toast.service';
-import { OrderAppPage } from './pages/order-app/order-app.page';
 import { LanguageService } from './services/language.service';
 import { TranslateService } from '@ngx-translate/core';
 import { register } from 'swiper/element/bundle';
@@ -332,18 +331,6 @@ export class AppComponent {
     await this.authService.loadAuthData();
     window.dispatchEvent(new CustomEvent('admin:account_switched'));
   }
-  async orderApp() {
-    const modal = await this.modalCtrl.create({
-      component: OrderAppPage,
-      mode: 'ios',
-    });
-    modal.onDidDismiss().then((modalFilters) => {
-      if (modalFilters.data) {
-
-      }
-    });
-    return await modal.present();
-  }
 
   baseUrl() {
     this.menu.close();
@@ -370,7 +357,7 @@ export class AppComponent {
 
   async logout() {
     const alert = await this.alertController.create({
-      header: 'Perfex CRM',
+      header: 'SW Pro',
       subHeader: this.translate.instant('logout_sub_header_text'),
       mode: 'ios',
       buttons: [
